@@ -1,0 +1,39 @@
+.sidebar {
+  background-color: #1f2a40;
+}
+
+.menu-button {
+  color: #ffffff;
+  text-align: left;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.menu-button:hover {
+  color: #00bfff;
+  background-color: transparent;
+}
+
+.menu-group {
+  border: 1px solid #2d3035;
+}
+.submenu {
+  padding: 0.2rem 0rem 0rem;
+  background-color: #263045;
+}
+
+.submenu-link {
+  display: block;
+  color: #dddddd;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #42495a;
+}
+
+.submenu-link:hover {
+  color: #00bfff;
+}

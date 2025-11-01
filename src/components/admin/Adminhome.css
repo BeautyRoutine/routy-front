@@ -1,0 +1,5 @@
+.admin-content {
+  height: 100vh;
+  padding: 3rem 1.5rem;
+  overflow: auto;
+}

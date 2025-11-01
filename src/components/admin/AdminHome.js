@@ -1,0 +1,27 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+
+import Sidebar from './layouts/SideBar';
+import './Adminhome.css';
+
+const AdminHome = () => {
+  return (
+    <div className="d-flex">
+      <Sidebar />
+      <div className="admin-content flex-grow-1">
+        <Routes>
+          {/* 상품 관리 */}
+          <Route path="productList" />
+          {/* 주문 관리 */}
+          <Route path="orders" />
+          {/* 회원 관리 */}
+          <Route path="members" />
+          {/* 게시글 관리ㄷ */}
+          <Route path="posts" />
+        </Routes>
+      </div>
+    </div>
+  );
+};
+
+export default AdminHome;
