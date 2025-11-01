@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import Home from './components/pages/Home';
 import AdminHome from './components/admin/AdminHome';
@@ -7,8 +7,7 @@ import './App.css';
 
 function App() {
   return (
-    <div style={{ textAlign: 'center', marginTop: '100px' }} className="App">
-      <h1>Routy Front Ready 🚀</h1>
+    <div className="App">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/admin/*" element={<AdminHome />} />
