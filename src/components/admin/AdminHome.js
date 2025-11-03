@@ -16,7 +16,7 @@ const AdminHome = () => {
           <Route path="orders" />
           {/* 회원 관리 */}
           <Route path="members" />
-          {/* 게시글 관리ㄷ */}
+          {/* 게시글 관리 */}
           <Route path="posts" />
         </Routes>
       </div>
