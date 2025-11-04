@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# 📁 절대 경로 설정 (Absolute Path Imports)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## ✅ 개요
 
-## Available Scripts
+React 프로젝트에서 파일을 import할 때 `../../../` 같은 복잡한 상대경로 대신,  
+`src` 디렉토리를 기준으로 한 **절대경로**를 사용할 수 있습니다.
 
-In the project directory, you can run:
+예시:
 
-### `npm start`
+```js
+// ❌ 기존
+import Home from '../../../components/user/pages/Home';
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+// ✅ 절대 경로 적용 후
+import Home from 'components/user/pages/Home';
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 💡 사용 규칙
 
-### `npm test`
+| 구분                 | 예시                                             | 설명                     |
+| -------------------- | ------------------------------------------------ | ------------------------ |
+| 외부 라이브러리      | `import 'bootstrap/dist/css/bootstrap.min.css';` | 그대로 유지              |
+| 같은 폴더 내 파일    | `import './Sidebar.css';`                        | 상대경로 그대로 사용     |
+| `src` 하위 폴더 파일 | `import 'components/admin/layouts/Sidebar';`     | 절대경로 사용 가능       |
+| 전역 스타일          | `import 'styles/global.css';`                    | 절대경로로 불러오기 권장 |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🚀 장점
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+-   복잡한 `../` 경로 제거
+-   폴더 구조 변경 시 유지보수 용이
+-   import 경로 일관성 확보
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+이 설정 이후에는 모든 import가 `src` 폴더를 기준으로 인식됩니다.  
+즉, `src/components/...`, `src/styles/...` 같은 경로는  
+그냥 `components/...`, `styles/...` 로 접근할 수 있습니다 ✅
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🗂️ 디렉터리 구조
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+routy-front/
+├── public/
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   └── robots.txt
+├── src/
+│   ├── App.css
+│   ├── App.js
+│   ├── App.test.js
+│   ├── components/
+│   │   ├── admin/
+│   │   │   ├── index.js
+│   │   │   ├── layouts/
+│   │   │   │   ├── SideBar.js
+│   │   │   │   └── Sidebar.css
+│   │   │   └── pages/
+│   │   │       ├── AdminHome.js
+│   │   │       └── Adminhome.css
+│   │   ├── common/
+│   │   └── user/
+│   │       ├── index.js
+│   │       ├── layouts/
+│   │       │   └── Header.js
+│   │       └── pages/
+│   │           └── Home.js
+│   ├── index.css
+│   ├── index.js
+│   ├── logo.svg
+│   ├── reportWebVitals.js
+│   └── setupTests.js
+├── jsconfig.json
+├── package-lock.json
+├── package.json
+└── README.md
+```
