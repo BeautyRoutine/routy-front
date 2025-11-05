@@ -1,12 +1,11 @@
 import React from 'react';
 import logo from 'logo.svg';
-
+import BannerCarousel from '../layouts/BannerCarousel';
 const Home = () => {
   return (
     <div className="container mt-5">
       <div className="text-center">
-        <h1>Routy Front Ready 🚀</h1>
-        <img src={logo} className="App-logo" alt="logo" style={{ width: '200px', marginTop: '2rem' }} />
+        <BannerCarousel />
       </div>
     </div>
   );
