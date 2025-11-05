@@ -1,17 +1,43 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Menu, ChevronRight, X, Search, LogIn, UserPlus, User, LogOut } from 'lucide-react';
+import {
+  Menu,
+  ChevronRight,
+  X,
+  Search,
+  LogIn,
+  UserPlus,
+  User,
+  LogOut,
+  Bell,
+  ShoppingCart,
+  ChevronDown,
+} from 'lucide-react';
 import './Header.css';
 import logoImage from '../../../logo.svg';
 
 // CRA 환경 변수로 덮어쓸 수 있도록 기본 Spring Boot API 루트를 지정
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
+const FALLBACK_COUNTS = {
+  // API 연동 전까지 UI에서 장바구니, 알림 배지 확인용으로 사용 (필요 시 0으로 조정)
+  notifications: 3,
+  cart: 2,
+};
+
 // 나중에 Spring Boot REST 엔드포인트를 쉽게 교체할 수 있도록 중앙 집중화
-const ENDPOINTS = {
-  // GET /api/categories/top  -> ["오늘", "랭킹", ...] 형태 (문자열 배열)
+export const ENDPOINTS = {
+  // 카테고리 관련 (상단 네비, 드롭다운)
   topCategories: '/api/categories/top',
-  // GET /api/categories/tree -> [{ title: "스킨케어", items: ["스킨/토너", ...] }, ...]
   categoryTree: '/api/categories/tree',
+
+  // 인증/세션 관련
+  login: '/api/auth/login',
+  logout: '/api/auth/logout',
+  session: '/api/auth/session',
+
+  // 사용자 리소스 관련
+  notificationCount: '/api/users/me/notifications/count',
+  cartCount: '/api/cart/count',
 };
 
 // API 응답 실패 시에도 레이아웃이 무너지지 않도록 준비된 기본 상단 카테고리
@@ -67,6 +93,7 @@ async function fetchJson(path, signal) {
   return response.json();
 }
 
+// 최상위 카테고리 응답을 문자열 배열로 정규화
 function normalizeTopCategories(data) {
   if (!Array.isArray(data)) return FALLBACK_TOP;
   const result = data
@@ -79,6 +106,7 @@ function normalizeTopCategories(data) {
   return result.length ? result : FALLBACK_TOP;
 }
 
+// 중첩 카테고리를 { title, items } 구조의 배열로 정규화
 function normalizeCategoryTree(data) {
   if (!Array.isArray(data)) return FALLBACK_TREE;
   const result = data
@@ -101,6 +129,11 @@ function normalizeCategoryTree(data) {
   return result.length ? result : FALLBACK_TREE;
 }
 
+/**
+ * 사용자 레이아웃 공통 헤더 컴포넌트.
+ * - 로그인 상태 / 알림 / 드롭다운 카테고리 등을 하나의 컴포넌트에서 관리한다.
+ * - Spring Boot 백엔드와의 연계를 가정하여 작성되어 있으며, props 콜백으로 라우팅을 제어한다.
+ */
 export function Header({
   isLoggedIn,
   onLoginChange,
@@ -109,6 +142,13 @@ export function Header({
   onSignupClick,
   onMyPageClick,
   onLogoutClick,
+  onNotificationsClick,
+  onCartClick,
+  onOrdersClick,
+  onReviewManageClick,
+  onSupportClick,
+  notificationCount,
+  cartCount,
 }) {
   // 로그인 관련 prop 설명
   // isLoggedIn      : Spring Boot 인증 결과(세션/토큰 검사)를 부모가 내려줌
@@ -118,7 +158,9 @@ export function Header({
   // onMyPageClick   : 필요 시 Spring Boot에서 사용자 정보를 불러오는 페이지로 이동시키는 콜백
   // onLogoutClick   : Spring Boot 로그아웃 API 호출 후 정리하는 커스텀 콜백
 
-  // 헤더 렌더링 전반에 필요한 상태와 참조 값들
+  // ------------------------------
+  // UI 상태(state) & DOM 참조(ref)
+  // ------------------------------
   const [scrolled, setScrolled] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [topCategories, setTopCategories] = useState(FALLBACK_TOP);
@@ -129,6 +171,15 @@ export function Header({
   const dropdownRef = useRef(null);
   const categoryButtonRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(140);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+  const userMenuButtonRef = useRef(null);
+  const [autoNotificationCount, setAutoNotificationCount] = useState(FALLBACK_COUNTS.notifications);
+  const [autoCartCount, setAutoCartCount] = useState(FALLBACK_COUNTS.cart);
+
+  // ------------------------------
+  // 라이프사이클 관련 이펙트
+  // ------------------------------
 
   // 스크롤 위치에 따라 헤더 그림자 토글
   useEffect(() => {
@@ -153,6 +204,82 @@ export function Header({
     if (categoryOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [categoryOpen]);
+
+  useEffect(() => {
+    if (!userMenuOpen) return undefined;
+    const handleClickOutside = event => {
+      const withinMenu = userMenuRef.current && userMenuRef.current.contains(event.target);
+      const onToggle = userMenuButtonRef.current && userMenuButtonRef.current.contains(event.target);
+      if (withinMenu || onToggle) return;
+      setUserMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [userMenuOpen]);
+
+  useEffect(() => {
+    if (!isLoggedIn) setUserMenuOpen(false);
+  }, [isLoggedIn]);
+
+  // 로그인 이후 알림/장바구니 카운트를 API에서 읽어온다 (상위에서 내려주지 않은 경우에 한해)
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setAutoNotificationCount(FALLBACK_COUNTS.notifications);
+      setAutoCartCount(FALLBACK_COUNTS.cart);
+      return undefined;
+    }
+
+    const aborters = [];
+
+    if (typeof notificationCount !== 'number') {
+      const controller = new AbortController();
+      aborters.push(() => controller.abort());
+      fetchJson(ENDPOINTS.notificationCount, controller.signal)
+        .then(result => {
+          const value =
+            typeof result === 'number'
+              ? result
+              : result && typeof result === 'object'
+              ? result.count ?? result.total ?? result.value ?? FALLBACK_COUNTS.notifications
+              : FALLBACK_COUNTS.notifications;
+          setAutoNotificationCount(value);
+        })
+        .catch(error => {
+          console.error('알림 수 불러오기 실패:', error);
+          setAutoNotificationCount(FALLBACK_COUNTS.notifications);
+        });
+    } else {
+      setAutoNotificationCount(notificationCount);
+    }
+
+    if (typeof cartCount !== 'number') {
+      const controller = new AbortController();
+      aborters.push(() => controller.abort());
+      fetchJson(ENDPOINTS.cartCount, controller.signal)
+        .then(result => {
+          const value =
+            typeof result === 'number'
+              ? result
+              : result && typeof result === 'object'
+              ? result.count ?? result.total ?? result.value ?? FALLBACK_COUNTS.cart
+              : FALLBACK_COUNTS.cart;
+          setAutoCartCount(value);
+        })
+        .catch(error => {
+          console.error('장바구니 수 불러오기 실패:', error);
+          setAutoCartCount(FALLBACK_COUNTS.cart);
+        });
+    } else {
+      setAutoCartCount(cartCount);
+    }
+
+    return () => {
+      aborters.forEach(abort => abort());
+    };
+  }, [isLoggedIn, notificationCount, cartCount]);
+
+  const effectiveNotificationCount = typeof notificationCount === 'number' ? notificationCount : autoNotificationCount;
+  const effectiveCartCount = typeof cartCount === 'number' ? cartCount : autoCartCount;
 
   // Spring Boot API에서 카테고리 데이터 로드
   const loadCategories = useCallback(() => {
@@ -192,11 +319,13 @@ export function Header({
       <header ref={headerRef} className={`routy-header ${scrolled ? 'scrolled' : ''}`}>
         <div className="header-inner">
           <div className="header-top">
+            {/* 로고와 홈 이동 버튼 */}
             <button type="button" className="logo-button" onClick={() => onNavigate?.('home')} aria-label="홈으로 이동">
               <img src={logoImage} alt="Routy" className="logo-mark" width={52} height={52} />
               <span className="logo-text">Routy</span>
             </button>
 
+            {/* 검색 입력 영역 */}
             <div className="search-wrapper">
               <Search className="search-icon" size={18} strokeWidth={2.4} />
               <input type="text" placeholder="제품 검색..." className="search-input" aria-label="제품 검색" />
@@ -204,42 +333,159 @@ export function Header({
 
             <div className="auth-area">
               {isLoggedIn ? (
+                // ------------------------------
+                // 로그인 상태: 알림/장바구니 아이콘 + 사용자 메뉴
+                // ------------------------------
+                <div className="user-actions">
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label="알림 확인"
+                    onClick={() => {
+                      if (onNotificationsClick) {
+                        onNotificationsClick();
+                        return;
+                      }
+                      onNavigate?.('notifications');
+                    }}
+                  >
+                    <Bell size={20} />
+                    {effectiveNotificationCount > 0 && (
+                      <span className="icon-badge icon-badge--alert">
+                        {effectiveNotificationCount > 99 ? '99+' : effectiveNotificationCount}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label="장바구니 이동"
+                    onClick={() => {
+                      if (onCartClick) {
+                        onCartClick();
+                        return;
+                      }
+                      onNavigate?.('cart');
+                    }}
+                  >
+                    <ShoppingCart size={20} />
+                    {effectiveCartCount > 0 && (
+                      <span className="icon-badge icon-badge--cart">
+                        {effectiveCartCount > 99 ? '99+' : effectiveCartCount}
+                      </span>
+                    )}
+                  </button>
+                  <div className="user-menu-wrapper" ref={userMenuRef}>
+                    <button
+                      type="button"
+                      ref={userMenuButtonRef}
+                      className={`user-menu-button ${userMenuOpen ? 'open' : ''}`}
+                      aria-haspopup="true"
+                      aria-expanded={userMenuOpen}
+                      onClick={() => setUserMenuOpen(prev => !prev)}
+                    >
+                      <User size={20} />
+                      <ChevronDown size={16} className="user-menu-chevron" />
+                    </button>
+                    {userMenuOpen && (
+                      // 사용자 드롭다운 메뉴
+                      <div className="user-menu-dropdown">
+                        <div className="user-menu-section-title">내 계정</div>
+                        <button
+                          type="button"
+                          className="user-menu-item"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            if (onMyPageClick) {
+                              onMyPageClick();
+                              return;
+                            }
+                            onNavigate?.('mypage');
+                          }}
+                        >
+                          마이페이지
+                        </button>
+                        <button
+                          type="button"
+                          className="user-menu-item"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            if (onOrdersClick) {
+                              onOrdersClick();
+                              return;
+                            }
+                            onNavigate?.('orders');
+                          }}
+                        >
+                          주문/배송 조회
+                        </button>
+                        <button
+                          type="button"
+                          className="user-menu-item"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            if (onReviewManageClick) {
+                              onReviewManageClick();
+                              return;
+                            }
+                            onNavigate?.('reviews');
+                          }}
+                        >
+                          리뷰 관리
+                        </button>
+                        <button
+                          type="button"
+                          className="user-menu-item"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            if (onSupportClick) {
+                              onSupportClick();
+                              return;
+                            }
+                            onNavigate?.('support');
+                          }}
+                        >
+                          고객센터
+                        </button>
+                        <div className="user-menu-divider" />
+                        <button
+                          type="button"
+                          className="user-menu-item user-menu-item--logout"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            if (onLogoutClick) {
+                              onLogoutClick();
+                              return;
+                            }
+                            onLoginChange?.(false);
+                            onNavigate?.('home');
+                          }}
+                        >
+                          <LogOut size={16} />
+                          로그아웃
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                // ------------------------------
+                // 비로그인 상태: 로그인 / 회원가입 CTA
+                // ------------------------------
                 <>
                   <button
                     type="button"
                     className="auth-link"
-                    // 외부에서 모달/라우팅을 주입할 수 있도록 우선 콜백을 실행
                     onClick={() => {
-                      if (onMyPageClick) {
-                        onMyPageClick();
+                      // 추후 실제 로그인 다이얼로그를 연결할 수 있도록 콜백 우선 호출
+                      if (onLoginClick) {
+                        onLoginClick();
                         return;
                       }
-                      onNavigate?.('mypage');
+                      // 임시 로그인 로직: 버튼만 눌러도 로그인 상태 전환 (알림 영역 테스트용)
+                      onLoginChange?.(true);
                     }}
                   >
-                    <User size={18} />
-                    마이페이지
-                  </button>
-                  <button
-                    type="button"
-                    className="auth-button--primary"
-                    // 로그아웃도 동일하게 커스텀 콜백이 우선
-                    onClick={() => {
-                      if (onLogoutClick) {
-                        onLogoutClick();
-                        return;
-                      }
-                      onLoginChange?.(false);
-                      onNavigate?.('home');
-                    }}
-                  >
-                    <LogOut size={18} />
-                    로그아웃
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button type="button" className="auth-link" onClick={() => onLoginClick?.()}>
                     <LogIn size={18} />
                     로그인
                   </button>
@@ -268,6 +514,7 @@ export function Header({
 
             <div className="nav-separator" />
 
+            {/* 상단 네비게이션: 인기 카테고리 바로가기 */}
             <div className="nav-scroll">
               {(categoryError ? FALLBACK_TOP : topCategories).map(item => (
                 <button
@@ -277,6 +524,7 @@ export function Header({
                   // 상단 네비에서 별도 라우팅이 필요한 항목만 조건 처리
                   onClick={() => {
                     if (item === '랭킹') onNavigate?.('ranking');
+                    // if (item == '마이루틴') onNavigate?.('myrouty'); // 추후 구현
                   }}
                 >
                   {item}
@@ -288,10 +536,12 @@ export function Header({
       </header>
 
       {categoryOpen && (
+        // 카테고리 드롭다운 패널
         <div ref={dropdownRef} className="category-panel" style={{ top: `${headerHeight}px` }}>
           <div className="category-inner">
             {categoryLoading && <div className="category-loading">카테고리를 불러오는 중...</div>}
             {!categoryLoading && (
+              // 카테고리 2단 구조 (대분류 + 소분류)
               <div className="category-grid">
                 {(categoryError ? FALLBACK_TREE : categoryTree).map(category => (
                   <div key={category.title} className="category-column">
