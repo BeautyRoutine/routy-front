@@ -55,12 +55,18 @@
 .search-wrapper {
   flex: 1;
   max-width: 720px;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   background: #def6f6;
   border-radius: 999px;
   padding: 12px 24px;
+  transition: box-shadow 0.2s ease;
+}
+
+.search-wrapper.open {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
 }
 
 .search-icon {
@@ -79,6 +85,184 @@
 
 .search-input::placeholder {
   color: rgba(15, 23, 42, 0.55);
+}
+
+.search-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  width: 100%;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 32px 64px rgba(15, 23, 42, 0.16);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 1100;
+}
+
+.search-panel__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.search-panel__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.search-panel__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.search-panel__actions button {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+}
+
+.search-panel__actions button:disabled {
+  color: rgba(100, 116, 139, 0.4);
+  cursor: not-allowed;
+}
+
+.search-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  font-size: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: #f8fafc;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.search-chip:hover {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.search-panel__empty {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.search-panel__divider {
+  height: 1px;
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.search-panel__subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.search-panel__suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-panel__suggestions button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.search-panel__suggestions button:hover {
+  background: #e2e8f0;
+  transform: translateX(4px);
+}
+
+.search-panel__ranking {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-panel__ranking li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.search-panel__rank {
+  width: 20px;
+  text-align: right;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.search-panel__ranking button {
+  flex: 1;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: inherit;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.search-panel__ranking button:hover {
+  color: #2563eb;
+}
+
+.search-panel__trend {
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  color: #ef4444;
+}
+
+.search-panel__trend--down {
+  color: #3b82f6;
+}
+
+.search-panel__trend--steady {
+  color: #94a3b8;
 }
 
 .auth-area {
@@ -146,6 +330,11 @@
   color: #ffffff;
 }
 
+.icon-button-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
 .icon-badge {
   position: absolute;
   top: -6px;
@@ -170,6 +359,129 @@
 .icon-badge--cart {
   background: #38bdf8;
   box-shadow: 0 4px 10px rgba(56, 189, 248, 0.35);
+}
+
+.notification-panel {
+  /* 알림 드롭다운 컨테이너 (아이콘 옆에 떠 있는 카드) */
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 320px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 16px 0 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  animation: dropdownFade 0.2s ease;
+}
+
+.notification-panel__header {
+  /* 제목과 '모두 읽음' 버튼 영역 */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.notification-panel__header button {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.notification-panel__list {
+  /* 알림 카드 리스트 */
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0 0 12px;
+  list-style: none;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 20px;
+  position: relative;
+}
+
+.notification-item.unread {
+  background: rgba(239, 246, 255, 0.6);
+}
+
+.notification-item + .notification-item {
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.notification-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.notification-item__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.notification-item__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.notification-item__message {
+  font-size: 13px;
+  color: #475569;
+}
+
+.notification-item__time {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.notification-item__badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #2563eb;
+}
+
+.notification-panel__footer {
+  width: 100%;
+  border: none;
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  background: transparent;
+  padding: 14px 0;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.notification-panel__footer:hover {
+  background: rgba(226, 232, 240, 0.45);
 }
 
 .user-menu-wrapper {
