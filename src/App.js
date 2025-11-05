@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+
 import { Header } from './components/user/layouts/Header';
 import Home from './components/user/pages/Home';
 import AdminHome from './components/admin/pages/AdminHome';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function App() {
@@ -29,19 +30,24 @@ function App() {
     }
   };
 
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+
   return (
     <div className="App">
-      {/* Header 추가 */}
-      <Header
-        isLoggedIn={isLoggedIn}
-        onLoginChange={setIsLoggedIn}
-        onNavigate={handleNavigate}
-        userRole={userRole}
-        onRoleChange={setUserRole}
-      />
+      {/* Home인 경우에만 Header 추가 */}
+      {!isAdmin && (
+        <Header
+          isLoggedIn={isLoggedIn}
+          onLoginChange={setIsLoggedIn}
+          onNavigate={handleNavigate}
+          userRole={userRole}
+          onRoleChange={setUserRole}
+        />
+      )}
 
       {/* 콘텐츠 영역 */}
-      <div style={{ paddingTop: '140px' }}>
+      <div style={{ paddingTop: !isAdmin ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin/*" element={<AdminHome />} />
