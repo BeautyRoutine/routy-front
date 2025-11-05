@@ -1,6 +1,6 @@
 import React from 'react';
 import logo from 'logo.svg';
-import BannerCarousel from '../layouts/BannerCarousel';
+import BannerCarousel from 'components/user/layouts/BannerCarousel';
 const Home = () => {
   return (
     <div className="container mt-5">
