@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./RecommendedProducts.css";
 import { Link } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
+// import { useState, useEffect } from "react";
 
 const RecommendedProducts = () => {
   const categories = ["전체", "스킨", "로션", "에센스", "크림", "클렌징"];
