@@ -152,6 +152,41 @@ sequenceDiagram
 
 ---
 
+## ⚔️ PR 전 Conflict 미리 해결하기 (Rebase 권장)
+
+PR 생성 전에 `develop` 브랜치와의 충돌을 미리 해결해주세요.  
+이 과정을 거치면 리뷰어가 바로 머지할 수 있고, 불필요한 Conflict를 줄일 수 있습니다.
+
+````bash
+# 1️⃣ develop 최신화
+git fetch origin
+
+# 2️⃣ feature 브랜치로 이동
+git checkout feature/<기능명>
+
+# 3️⃣ develop 최신 커밋 위로 재배치 (rebase)
+git rebase origin/develop
+
+💥 충돌(conflict)이 발생하면:
+
+git status  # 충돌 파일 확인
+git add <파일명>
+git rebase --continue
+
+모두 해결되면:
+
+git push -f origin feature/<기능명>
+
+✅ 이 과정을 거치면 PR 시 Able to merge 상태가 유지되어
+리뷰어가 추가 조치 없이 바로 Merge할 수 있습니다.
+
+---
+
+## 💡 결과 구조 예시
+최종적으로는 문서의 큰 구조가 이렇게 됩니다 👇
+
+---
+
 ## 🧱 PR 머지 방식
 
 - Routy는 **Squash Merge**를 기본으로 사용합니다. (여러 커밋을 하나로 압축)
@@ -169,7 +204,7 @@ sequenceDiagram
 | **상태(Status)**       | `status: ready`, `status: review`, `status: blocked` |
 | **영역(Area)**         | `area: frontend`, `area: backend`, `area: infra`     |
 
-> 표기법: 소문자 + 콜론(`:`) 형식  
+> 표기법: 소문자 + 콜론(`:`) 형식
 > 예: `type: bug`, `status: review`
 
 ---
@@ -189,7 +224,7 @@ git push -u origin hotfix/<이슈명>
 
 # 3️⃣ PR 생성 (hotfix → main)
 # 4️⃣ main에 병합 후 develop에도 반영 (PR: main → develop)
-```
+````
 
 ---
 
