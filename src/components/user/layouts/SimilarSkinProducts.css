@@ -1,0 +1,34 @@
+.similar-skin-section {
+  background: linear-gradient(180deg, #f9fdff 0%, #f2fbff 100%);
+  border-radius: 20px;
+  padding: 40px 20px;
+}
+
+.product-card img {
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.heart-icon {
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.heart-icon:hover {
+  color: #ff4b4b;
+}
+
+.cart-btn {
+  background: linear-gradient(135deg, #00c2b2, #00bcd4);
+  color: white;
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.cart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #00bcd4, #00c2b2);
+}

@@ -1,0 +1,16 @@
+.routy-footer h5 {
+  color: #00bcd4; /* 브랜드 포인트 컬러 */
+  letter-spacing: 0.5px;
+}
+
+.routy-footer a:hover {
+  color: #00bcd4;
+  text-decoration: underline;
+}
+.routy-footer {
+  background: linear-gradient(180deg, #f5fcfd 0%, #e8f9fc 100%);
+  color: #555;
+  font-size: 0.9rem;
+  margin-top: 0 !important; /* ✅ 위쪽 여백 제거 */
+  padding-top: 30px; /* 살짝만 여백 유지 */
+}
