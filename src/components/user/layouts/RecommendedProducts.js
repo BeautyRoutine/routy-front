@@ -1,6 +1,7 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./RecommendedProducts.css";
+import { Link } from "react-router-dom";
 
 const RecommendedProducts = () => {
   const categories = ["전체", "스킨", "로션", "에센스", "크림", "클렌징"];
@@ -47,9 +48,10 @@ const RecommendedProducts = () => {
           <h4 className="fw-bold mb-1">당신을 위한 맞춤 추천</h4>
           <p className="text-muted small mb-0">당신의 피부 타입에 맞는 제품을 찾아보세요</p>
         </div>
-        <a href="#" className="text-decoration-none small text-muted">
+        <Link to="/" className="text-decoration-none small text-muted">
           전체보기 &gt;
-        </a>
+        </Link>
+        
       </div>
 
       {/* 카테고리 버튼 */}
