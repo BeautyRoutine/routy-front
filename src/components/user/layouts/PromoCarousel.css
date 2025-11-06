@@ -1,0 +1,27 @@
+.promo-card {
+  border-radius: 12px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.promo-card:hover {
+  transform: translateY(-5px);
+}
+
+.promo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.slick-slide {
+  padding: 5px;
+}
+
+.slick-dots li button:before {
+  color: #777 !important;
+  opacity: 0.6;
+}
+.slick-dots li.slick-active button:before {
+  color: #000 !important;
+  opacity: 1;
+}

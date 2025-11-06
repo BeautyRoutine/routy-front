@@ -1,11 +1,11 @@
 import React from 'react';
 import logo from 'logo.svg';
-import BannerCarousel from 'components/user/layouts/BannerCarousel';
+import PromoCarousel from 'components/user/layouts/PromoCarousel';
 const Home = () => {
   return (
     <div className="container mt-5">
       <div className="text-center">
-        <BannerCarousel />
+        <PromoCarousel />
       </div>
     </div>
   );
