@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./RecommendedProducts.css";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const RecommendedProducts = () => {
   const categories = ["전체", "스킨", "로션", "에센스", "크림", "클렌징"];
-  const products = [
+
+  // 🟢 더미 데이터 (백엔드 연결 전)
+  const [products, setProducts] = useState([
     {
       id: 1,
       name: "수분 세럼",
@@ -38,7 +41,17 @@ const RecommendedProducts = () => {
       review: "민감성 피부 진정, 약산성",
       img: "/images/product-cleanser.jpg",
     },
-  ];
+  ]);
+
+  // 🔸 나중에 백엔드 연결 시 사용할 코드 (현재는 주석 처리)
+  /*
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/products")
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error("상품 불러오기 실패:", err));
+  }, []);
+  */
 
   return (
     <div className="container my-5">
@@ -46,12 +59,14 @@ const RecommendedProducts = () => {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h4 className="fw-bold mb-1">당신을 위한 맞춤 추천</h4>
-          <p className="text-muted small mb-0">당신의 피부 타입에 맞는 제품을 찾아보세요</p>
+          <p className="text-muted small mb-0">
+            당신의 피부 타입에 맞는 제품을 찾아보세요
+          </p>
         </div>
-        <Link to="/" className="text-decoration-none small text-muted">
+        {/* a → Link로 교체하여 빌드 오류 해결 */}
+        <Link to="/products" className="text-decoration-none small text-muted">
           전체보기 &gt;
         </Link>
-        
       </div>
 
       {/* 카테고리 버튼 */}
@@ -73,12 +88,17 @@ const RecommendedProducts = () => {
         {products.map((p) => (
           <div key={p.id} className="col">
             <div className="card h-100 border-0 shadow-sm product-card">
-              <img src={p.img} className="card-img-top" alt={p.name} />
+              <img
+                src={p.img || "/images/default-product.jpg"}
+                className="card-img-top"
+                alt={p.name}
+              />
               <div className="card-body">
                 <h6 className="fw-semibold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
                 <p className="text-warning small mb-0">
-                  ★ {p.rating} <span className="text-muted"> | {p.review}</span>
+                  ★ {p.rating}{" "}
+                  <span className="text-muted"> | {p.review}</span>
                 </p>
               </div>
             </div>
