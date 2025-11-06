@@ -3,6 +3,6 @@
     "baseUrl": "src",
     "checkJs": false
   },
-  "include": ["src"],
+  "include": ["src", "src/components/user/layouts/PromoCarousel.js"],
   "exclude": ["node_modules"]
 }
