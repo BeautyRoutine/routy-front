@@ -13,7 +13,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import './Header.css';
-import logoImage from '../../../logo.svg';
+import logoImage from 'logo.svg';
 import {
   API_BASE_URL,
   ENDPOINTS,

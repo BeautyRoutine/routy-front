@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
-import { Header } from './components/user/layouts/Header';
+import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
+
 // TODO: 로그인/회원가입 API 연동 시 ENDPOINTS import를 복원하시면 됩니다.
 // import { Header, ENDPOINTS as HEADER_ENDPOINTS } from './components/user/layouts/Header';
 import Home from './components/user/pages/Home';
@@ -32,6 +33,14 @@ function App() {
     setIsLoggedIn(false);
   };
 
+  const handleRequireLogin = () => {
+    navigate('/login');
+  };
+
+  const handleCartNavigate = () => {
+    navigate('/cart');
+  };
+
   const handleNavigate = page => {
     const routes = {
       home: '/',
@@ -58,15 +67,17 @@ function App() {
       {/* Home인 경우에만 Header 추가 */}
       {/* 사용자 영역에는 헤더를 유지하고, 관리자 화면에서는 중복 레이아웃을 피하기 위해 제거 */}
       {!isAdmin && (
-        <Header
+        <UserGlobalLayout
           isLoggedIn={isLoggedIn}
+          userRole={userRole}
           onLoginChange={setIsLoggedIn}
           onLoginClick={handleLoginClick}
           onSignupClick={handleSignupClick}
           onLogoutClick={handleLogoutClick}
           onNavigate={handleNavigate}
-          userRole={userRole}
           onRoleChange={setUserRole}
+          onRequireLogin={handleRequireLogin}
+          onCartClick={handleCartNavigate}
         />
       )}
 
