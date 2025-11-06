@@ -10,7 +10,7 @@ import { Autoplay, Pagination } from 'swiper/modules';
 
 const PromoCarousel = () => {
   const cards = [
-    {
+    { 
       title: '메이크업 신상',
       subtitle: '트렌디한 컬러 라인',
       desc: '지금 바로 만나보세요',

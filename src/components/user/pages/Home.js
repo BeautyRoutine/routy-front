@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from 'logo.svg';
 import PromoCarousel from 'components/user/layouts/PromoCarousel';
 import CategoryCircleButtons from 'components/user/layouts/CategoryCircleButtons';
 import RecommendedProducts from 'components/user/layouts/RecommendedProducts';
