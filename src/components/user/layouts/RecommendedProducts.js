@@ -10,7 +10,6 @@ const RecommendedProducts = () => {
 
   // 더미 데이터 (백엔드 연결 전) 아래 주석은 백엔드 연결 후 제거 예정
   // eslint-disable-next-line no-unused-vars
-
   const [products, setProducts] = useState([
     {
       id: 1,
