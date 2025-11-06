@@ -35,7 +35,7 @@
   padding-bottom: 10px;
 }
 
-/* 카드 헤더 버튼 - 실제 클릭 가능한 영역을 전체로 확장한다. */
+/* 카드 헤더 버튼 - 실제 클릭 가능한 영역을 텍스트와 화살표로 한정한다. */
 .recent-toggle {
   width: 100%;
   border: none;
@@ -44,7 +44,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   cursor: pointer;
 }
 
@@ -60,19 +60,19 @@
   border-bottom: 1px solid #d6e7ff;
 }
 
-/* 아이콘과 버튼 라벨 영역 - 숫자 뱃지를 제거했으므로 gap 을 0으로 맞췄다. */
-.card-icon-row {
+/* 상단 시계 아이콘 - 버튼과 독립적으로 표시되며 hover 영향을 받지 않는다. */
+.recent-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  width: 100%;
+  margin-bottom: 12px;
+  pointer-events: none;
 }
 
-/* 공통 원형 아이콘 배경 */
-.circle-icon {
-  width: 28px;
-  height: 28px;
+/* 사이드 스티키 전용 원형 아이콘 */
+.sticky-circle-icon {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #e1f0ff;
   display: flex;
@@ -130,6 +130,7 @@
   max-height: 280px;
   overflow-y: auto;
   padding-right: 2px;
+  margin-top: 10px;
 }
 
 /* 최근 본 상품 리스트 자체 */
@@ -150,9 +151,9 @@
 
 /* 상품 썸네일 이미지 및 플레이스홀더 */
 .recent-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
   object-fit: cover;
   background: #eef3ff;
   flex-shrink: 0;

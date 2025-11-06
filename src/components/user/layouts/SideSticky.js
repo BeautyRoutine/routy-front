@@ -66,12 +66,12 @@ const SideSticky = ({
 
       {/* 최근 본 상품 카드 - 로그인 시에만 펼칠 수 있고, 이미지는 세로 목록으로 노출된다. */}
       <div className={`recent-wrapper ${isRecentOpen ? 'open' : ''}`}>
-        <button type="button" className="recent-toggle" onClick={handleRecentClick} aria-expanded={isRecentOpen}>
-          <span className="card-icon-row">
-            <span className="circle-icon">
-              <Clock3 size={16} />
-            </span>
+        <div className="recent-icon" aria-hidden="true">
+          <span className="sticky-circle-icon">
+            <Clock3 size={16} />
           </span>
+        </div>
+        <button type="button" className="recent-toggle" onClick={handleRecentClick} aria-expanded={isRecentOpen}>
           <span className="sticky-card-title">최근 본 상품</span>
           <ChevronUp size={14} className={`card-arrow ${isRecentOpen ? 'open' : 'closed'}`} />
         </button>
