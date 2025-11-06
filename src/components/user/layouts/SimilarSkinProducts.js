@@ -52,7 +52,7 @@ const SimilarSkinProducts = () => {
   ];
 
   return (
-    <div className="container my-5 text-center similar-skin-section">
+    <div className="container-fluid my-5 text-center similar-skin-section">
       {/* 타이틀 */}
       <h5 className="fw-bold text-primary mb-1">비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!</h5>
       <p className="text-muted small mb-4">건성·민감성 피부 사용자 12,440명이 선택</p>

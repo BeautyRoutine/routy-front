@@ -56,7 +56,7 @@ const RecommendedProducts = () => {
   */
 
   return (
-    <div className="container my-5">
+    <div className="container-fluid my-5">
       {/* 제목 & 필터 */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>

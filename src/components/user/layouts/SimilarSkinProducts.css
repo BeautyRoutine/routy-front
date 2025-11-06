@@ -1,7 +1,6 @@
 .similar-skin-section {
-  background: linear-gradient(180deg, #f9fdff 0%, #f2fbff 100%);
-  border-radius: 20px;
-  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .product-card img {
@@ -21,14 +20,12 @@
 }
 
 .cart-btn {
-  background: linear-gradient(135deg, #00c2b2, #00bcd4);
-  color: white;
-  border: none;
-  transition: all 0.3s ease-in-out;
+  background-color: #0dcaf0;
+  color: #fff;
+  font-weight: 500;
 }
 
 .cart-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, #00bcd4, #00c2b2);
+  background-color: #0bbcd8;
+  color: #fff;
 }
