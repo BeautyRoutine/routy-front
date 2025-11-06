@@ -1,10 +1,10 @@
 import React from 'react';
 import logo from 'logo.svg';
 import PromoCarousel from 'components/user/layouts/PromoCarousel';
-import CategoryCircleButtons from '../layouts/CategoryCircleButtons';
-import RecommendedProducts from '../layouts/RecommendedProducts';
-import SimilarSkinProducts from '../layouts/SimilarSkinProducts';
-import Footer from '../layouts/Footer';
+import CategoryCircleButtons from 'components/user/layouts/CategoryCircleButtons';
+import RecommendedProducts from 'components/user/layouts/RecommendedProducts';
+import SimilarSkinProducts from 'components/user/layouts/SimilarSkinProducts';
+
 const Home = () => {
   return (
     <div className="container mt-5">
@@ -13,7 +13,6 @@ const Home = () => {
         <CategoryCircleButtons />
         <RecommendedProducts />
         <SimilarSkinProducts />
-        <Footer />
       </div>
     </div>
   );
