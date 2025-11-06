@@ -1,5 +1,16 @@
 .App {
-  text-align: center;
+  /* 전체 페이지가 헤더/본문/푸터 세 영역으로 늘어설 수 있도록 플렉스 컨테이너 지정 */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+.app-body {
+  /* 콘텐츠 영역이 남는 높이를 모두 차지하게 해서 푸터가 항상 하단에 위치하도록 함 */
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .App-logo {
