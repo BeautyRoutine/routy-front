@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
-import { Header } from './components/user/layouts/Header';
-import SideSticky from './components/user/layouts/SideSticky';
+import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
+
 // TODO: 로그인/회원가입 API 연동 시 ENDPOINTS import를 복원하시면 됩니다.
 // import { Header, ENDPOINTS as HEADER_ENDPOINTS } from './components/user/layouts/Header';
 import Home from './components/user/pages/Home';
@@ -14,27 +14,6 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('user');
   const navigate = useNavigate();
-  const demoRecentItems = [
-    {
-      id: 'demo-1',
-      title: '히알루론산 앰플 세럼',
-      price: 45000,
-      image: 'https://images.unsplash.com/photo-1586495578044-4413f21062fa?auto=format&fit=crop&w=160&q=80',
-    },
-    {
-      id: 'demo-2',
-      title: '비타민 C 토너',
-      price: 35000,
-      image: 'https://images.unsplash.com/photo-1583241800696-c55fea4c4125?auto=format&fit=crop&w=160&q=80',
-    },
-    {
-      id: 'demo-3',
-      title: '세라마이드 에센스',
-      price: 39000,
-      image: 'https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=160&q=80',
-    },
-  ];
-  const cartItemCount = 3;
 
   const handleLoginClick = async () => {
     // 현재는 데모 목적으로 버튼 클릭 시 바로 로그인 상태로 전환한다.
@@ -58,10 +37,6 @@ function App() {
 
   const handleCartNavigate = () => {
     navigate('/cart');
-  };
-
-  const handleScrollTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleNavigate = page => {
@@ -89,26 +64,18 @@ function App() {
     <div className="App">
       {/* Home인 경우에만 Header 추가 */}
       {!isAdmin && (
-        <>
-          <Header
-            isLoggedIn={isLoggedIn}
-            onLoginChange={setIsLoggedIn}
-            onLoginClick={handleLoginClick}
-            onSignupClick={handleSignupClick}
-            onLogoutClick={handleLogoutClick}
-            onNavigate={handleNavigate}
-            userRole={userRole}
-            onRoleChange={setUserRole}
-          />
-          <SideSticky
-            isLoggedIn={isLoggedIn}
-            recentItems={isLoggedIn ? demoRecentItems : []}
-            cartCount={cartItemCount}
-            onRequireLogin={handleRequireLogin}
-            onCartClick={handleCartNavigate}
-            onScrollTop={handleScrollTop}
-          />
-        </>
+        <UserGlobalLayout
+          isLoggedIn={isLoggedIn}
+          userRole={userRole}
+          onLoginChange={setIsLoggedIn}
+          onLoginClick={handleLoginClick}
+          onSignupClick={handleSignupClick}
+          onLogoutClick={handleLogoutClick}
+          onNavigate={handleNavigate}
+          onRoleChange={setUserRole}
+          onRequireLogin={handleRequireLogin}
+          onCartClick={handleCartNavigate}
+        />
       )}
 
       {/* 콘텐츠 영역 */}
