@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import SignupPage from './components/user/pages/SignupPage';
+import LoginPage from './components/user/pages/LoginPage';
 
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 
@@ -86,6 +88,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin/*" element={<AdminHome />} />
+          
+          {/*회원가입 및 로그인 페이지 라우트 추가합니다. *}
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </main>
 
