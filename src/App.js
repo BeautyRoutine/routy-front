@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import SignupPage from './components/user/pages/SignupPage';
-import LoginPage from './components/user/pages/LoginPage';
+import LoginPage from 'components/user/pages/LoginPage';
+import SignupPage from 'components/user/pages/SignupPage';
 
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 
@@ -89,16 +89,19 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/admin/*" element={<AdminHome />} />
           
-          {/*회원가입 및 로그인 페이지 라우트 추가합니다. *}
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          {/*회원가입 및 로그인 페이지 라우트 추가합니다. */}
+          <Route path="/signup" element={<SignupPage onSuccess={() => navigate('/login')} />} />
+          <Route path="/login" element={<LoginPage onSuccess={() => setIsLoggedIn(true)} />} />
+
         </Routes>
       </main>
 
       {/* 관리자 페이지는 별도의 레이아웃을 갖기 때문에 푸터도 사용자 페이지에서만 노출 */}
       {!isAdmin && <Footer />}
     </div>
-  );
-}
+    );
+    }
+  
+
 
 export default App;
