@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { signUp } from "lib/apiClient";
 
 const EMAIL_RE =
-  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([^.\s@]+\.)+[^.\s@]{2,})$/i;
+  /^(([^<()>[\]\\.,;:\s@"]+(\.[^<()>[\]\\.,;:\s@"]+)*)|(".+"))@(([^.\s@]+\.)+[^.\s@]{2,})$/i;
 
 const h = React.createElement;
 

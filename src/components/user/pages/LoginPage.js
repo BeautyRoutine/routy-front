@@ -9,7 +9,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { login } from "lib/apiClient";
 
 const EMAIL_RE =
-  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([^.\s@]+\.)+[^.\s@]{2,})$/i;
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([^.\s@]+\.)+[^.\s@]{2,})$/i;
 
 const h = React.createElement;
 
@@ -75,7 +75,7 @@ export default function LoginPage({ onSuccess }) {
         }
       }
     } catch (err) {
-      // ❗ 인터셉터가 서버 resultMsg로 Error를 던져줌
+      // 인터셉터가 서버 resultMsg로 Error를 던져줌
       setMsg(err?.message || "로그인 중 오류가 발생했습니다.");
       // eslint-disable-next-line no-console
       console.error("Login Error:", err);
