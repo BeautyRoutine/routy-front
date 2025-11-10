@@ -1,0 +1,256 @@
+/* 사이드 스티키 컨테이너: Header 바로 아래에 고정되어 사용자 페이지에서 항상 노출된다. */
+.side-sticky {
+  position: fixed;
+  top: 180px;
+  right: 20px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+  z-index: 1000;
+}
+
+/* 최근 본 상품 카드 기본 레이아웃 */
+.recent-wrapper {
+  width: 120px;
+  background: linear-gradient(180deg, #f6fbff 0%, #eef5ff 100%);
+  border: 1px solid #c3dcff;
+  border-radius: 26px;
+  box-shadow: 0 12px 32px rgba(51, 99, 214, 0.22);
+  padding: 16px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.recent-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(51, 99, 214, 0.28);
+}
+
+/* 카드가 펼쳐진 뒤에는 하단 패딩을 조정해 카탈로그 영역과 간격을 맞춘다. */
+.recent-wrapper.open {
+  padding-bottom: 10px;
+}
+
+/* 카드 헤더 버튼 - 실제 클릭 가능한 영역을 텍스트와 화살표로 한정한다. */
+.recent-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.recent-toggle:focus-visible {
+  outline: 2px solid #64a3ff;
+  outline-offset: 3px;
+  border-radius: 18px;
+}
+
+.recent-wrapper.open .recent-toggle {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #d6e7ff;
+}
+
+/* 상단 시계 아이콘 - 버튼과 독립적으로 표시되며 hover 영향을 받지 않는다. */
+.recent-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  pointer-events: none;
+}
+
+/* 사이드 스티키 전용 원형 아이콘 */
+.sticky-circle-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e1f0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d5ace;
+}
+
+/* 뱃지 기본 스타일: 장바구니에서만 사용한다. */
+.count-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d4e7ff;
+  color: #0d5ace;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 카드 타이틀의 공통 타이포그래피 */
+.sticky-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3d6b;
+}
+
+.cart-title {
+  color: inherit;
+}
+
+/* 펼침 상태를 표시하는 화살표. 열린 경우 위쪽, 닫힌 경우 아래쪽을 가리킨다. */
+.card-arrow {
+  color: #2d63d6;
+  transition: transform 0.2s ease;
+}
+
+.card-arrow.open {
+  transform: rotate(0deg);
+}
+
+.card-arrow.closed {
+  transform: rotate(180deg);
+}
+
+/* 최근 본 상품 이미지 목록 컨테이너 */
+.recent-catalog {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 2px;
+  margin-top: 10px;
+}
+
+/* 최근 본 상품 리스트 자체 */
+.recent-catalog ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 상품 썸네일 이미지 및 플레이스홀더 */
+.recent-thumb {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #eef3ff;
+  flex-shrink: 0;
+}
+
+.recent-thumb.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #7d8db1;
+}
+
+.recent-empty {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: #7a879c;
+}
+
+/* 장바구니 카드 - 사이즈를 최소화하고 상단에 뱃지가 겹치도록 한다. */
+.sticky-card.cart {
+  width: 118px;
+  border: none;
+  border-radius: 26px;
+  padding: 12px 10px;
+  background: linear-gradient(156deg, #1ba6f6 0%, #0f6cd8 100%);
+  box-shadow: 0 12px 32px rgba(30, 135, 230, 0.35);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sticky-card.cart:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(30, 135, 230, 0.45);
+}
+
+.cart-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 장바구니 숫자 뱃지 위치를 아이콘 우측 상단으로 올린다. */
+.cart-icon .count-badge.cart-badge {
+  position: absolute;
+  top: -16px;
+  right: -18px;
+  background: #ff4f55;
+  color: #ffffff;
+}
+
+.count-badge.cart-badge {
+  background: #ff4f55;
+  color: #ffffff;
+}
+
+/* 맨 위로 이동 버튼 - sticky 열 하단에서 살짝 좌측으로 치우치게 배치 */
+.scroll-top-button {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid #9dc7ff;
+  background: linear-gradient(135deg, #ffffff, #eff7ff);
+  box-shadow: 0 12px 28px rgba(157, 199, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d5ace;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  margin-top: auto;
+  margin-right: 0;
+  margin-bottom: 10px;
+  align-self: center;
+}
+
+.scroll-top-button:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1280px) {
+  .side-sticky {
+    top: auto;
+    right: 16px;
+    bottom: 24px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .side-sticky {
+    display: none;
+  }
+}
