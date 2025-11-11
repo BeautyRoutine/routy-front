@@ -8,7 +8,6 @@ import OrderListItem from './OrderListItem';
 
 const OrderList = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const apiBaseUrl = useSelector(state => state.config.apiBaseUrl);
 
@@ -59,7 +58,7 @@ const OrderList = () => {
       }
     };
     loadData();
-  }, [page, memberName, startDate, endDate, dispatch]);
+  }, [page, pageGap, memberName, startDate, endDate, apiBaseUrl, dispatch]);
 
   return (
     <div className="container-fluid">
