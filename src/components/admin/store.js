@@ -14,10 +14,15 @@ const configSlice = createSlice({
 const ordersSlice = createSlice({
   name: 'orders',
   initialState: {
+    rowTotal: 0,
     list: [],
     selectedOrder: null,
+    pageGap: 2,
   },
   reducers: {
+    setOrdersCount: (state, action) => {
+      state.rowTotal = action.payload;
+    },
     setOrders: (state, action) => {
       state.list = action.payload;
     },
@@ -31,7 +36,7 @@ const ordersSlice = createSlice({
 });
 
 // reducer export
-export const { setOrders, selectOrder, clearSelectedOrder } = ordersSlice.actions;
+export const { setOrdersCount, setOrders, selectOrder, clearSelectedOrder } = ordersSlice.actions;
 
 const store = configureStore({
   reducer: {
