@@ -17,15 +17,15 @@ import {
 const buildNavSections = user => [
   {
     title: '마이 쇼핑',
-    items: ['주문/배송 조회', '취소·반품/교환 내역', '거래증빙서류 확인', '좋아요', '재입고 알림'],
+    items: ['주문/배송 조회', '취소·반품/교환 내역', '거래증빙서류 확인', '장바구니', '좋아요', '재입고 알림'],
   },
   {
     title: '마이 활동',
-    items: ['1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황'],
+    items: ['1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황', '체험단 리뷰'],
   },
   {
     title: '마이 정보',
-    items: ['회원정보 수정', '배송지/환불계좌', '회원탈퇴'],
+    items: ['회원정보 수정', '배송지/환불계좌', 'MY 환경설정', '회원탈퇴'],
   },
 ];
 
@@ -41,7 +41,7 @@ const MyPage = () => {
   // ===== State scaffolding =====
   // 각 state는 추후 API 응답으로 대체될 예정이며, 초기값만 더미 데이터로 채워둔다.
   const [userProfile, setUserProfile] = useState(FALLBACK_USER_PROFILE);
-  // const [activityStats, setActivityStats] = useState(buildActivityStats(FALLBACK_USER_PROFILE)); // Unused in new design
+  const [activityStats, setActivityStats] = useState(buildActivityStats(FALLBACK_USER_PROFILE));
   const [navSections, setNavSections] = useState(buildNavSections(FALLBACK_USER_PROFILE));
   const [ingredients, setIngredients] = useState(FALLBACK_INGREDIENT_GROUPS);
   const [orderSteps, setOrderSteps] = useState(FALLBACK_ORDER_STEPS);
@@ -52,7 +52,7 @@ const MyPage = () => {
     // ===== Example API wiring =====
     // axios.get(`${MYPAGE_ENDPOINTS.profile}/1`).then(({ data }) => {
     //   setUserProfile(data.profile);
-    //   // setActivityStats(buildActivityStats(data.profile));
+    //   setActivityStats(buildActivityStats(data.profile));
     //   setNavSections(buildNavSections(data.profile));
     //   setOrderSteps(data.orderSteps);
     //   setIngredients(data.favoriteIngredients);
