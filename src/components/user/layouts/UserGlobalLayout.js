@@ -1,7 +1,7 @@
 import React from 'react';
 import { Header } from './Header';
 import SideSticky from './SideSticky';
-import { DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from './demoData';
+import { DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from '../data/headerMocks';
 
 /**
  * 사용자용 전역 레이아웃. Header와 사이드 스티키를 묶어 렌더링하며,

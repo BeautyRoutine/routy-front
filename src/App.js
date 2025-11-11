@@ -15,6 +15,7 @@ import Footer from 'components/user/layouts/footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import ProductDetailPage from 'pages/ProductDetailPage';
+import MyPage from 'pages/MyPage';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -47,6 +48,11 @@ function App() {
   };
 
   const handleNavigate = page => {
+    if (page === 'mypage' && !isLoggedIn) {
+      handleRequireLogin();
+      return;
+    }
+
     const routes = {
       home: '/',
       admin: '/admin',
@@ -66,12 +72,13 @@ function App() {
 
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
+  const isConnectionTest = location.pathname.startsWith('/connection-test');
 
   return (
     <div className="App">
       {/* Home인 경우에만 Header 추가 */}
       {/* 사용자 영역에는 헤더를 유지하고, 관리자 화면에서는 중복 레이아웃을 피하기 위해 제거 */}
-      {!isAdmin && (
+      {!isAdmin && !isConnectionTest && (
         <UserGlobalLayout
           isLoggedIn={isLoggedIn}
           userRole={userRole}
@@ -87,10 +94,11 @@ function App() {
       )}
 
       {/* 메인 콘텐츠를 별도 래퍼로 감싸 레이아웃과 패딩을 일관되게 관리 */}
-      <main className="app-body" style={{ paddingTop: !isAdmin ? '140px' : '0px' }}>
+      <main className="app-body" style={{ paddingTop: !isAdmin && !isConnectionTest ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/mypage" element={isLoggedIn ? <MyPage /> : <Navigate to="/" replace />} />
           <Route path="/admin/*" element={<AdminHome />} />
           {/* 로그인 */}
           <Route
@@ -124,7 +132,7 @@ function App() {
       </main>
 
       {/* 관리자 페이지는 별도의 레이아웃을 갖기 때문에 푸터도 사용자 페이지에서만 노출 */}
-      {!isAdmin && <Footer />}
+      {!isAdmin && !isConnectionTest && <Footer />}
     </div>
   );
 }
