@@ -32,4 +32,4 @@ export {
   DEMO_SIMILAR_SKIN as FALLBACK_SIMILAR_SKIN,
   DEMO_RECENT_ITEMS,
   DEMO_CART_COUNT,
-} from './demoData';
+} from '../data/headerMocks';
