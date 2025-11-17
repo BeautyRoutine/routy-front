@@ -10,6 +10,7 @@ const RecommendedProducts = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('전체');
+  const categoriesLocal = ['전체', '스킨', '로션', '에센스', '크림', '클렌징'];
 
   useEffect(() => {
     const prdNos = [101, 102, 103, 104];
@@ -26,7 +27,7 @@ const RecommendedProducts = () => {
             rating: 4.7,
             review: p.prdDesc,
             img: `/images/product-${index + 1}.jpg`,
-            category: categories[index + 1] || '기타',
+            category: categoriesLocal[index + 1] || '기타',
           };
         });
 
