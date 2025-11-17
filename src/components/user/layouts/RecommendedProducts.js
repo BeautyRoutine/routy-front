@@ -26,7 +26,7 @@ const RecommendedProducts = () => {
             rating: 4.7,
             review: p.prdDesc,
             img: `/images/product-${index + 1}.jpg`,
-            category: categories[index + 1], // 예: 스킨, 로션, 에센스, 크림 …
+            category: categories[index + 1] || '기타',
           };
         });
 
@@ -44,6 +44,8 @@ const RecommendedProducts = () => {
       setProducts(allProducts.filter(p => p.category === cat));
     }
   };
+
+  const filledProducts = [...products, ...Array(4 - products.length).fill(null)].slice(0, 4);
 
   return (
     <div className="container my-5">
@@ -72,17 +74,29 @@ const RecommendedProducts = () => {
       </div>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
-        {products.map(p => (
-          <div key={p.id} className="col">
+        {filledProducts.map((p, index) => (
+          <div key={index} className="col">
             <div className="card h-100 border-0 shadow-sm product-card">
-              <img src={p.img} className="card-img-top" alt={p.name} />
-              <div className="card-body">
-                <h6 className="fw-semibold mb-1">{p.name}</h6>
-                <p className="text-muted small mb-1">{p.brand}</p>
-                <p className="text-warning small mb-0">
-                  ★ {p.rating} <span className="text-muted"> | {p.review}</span>
-                </p>
-              </div>
+              {p ? (
+                <>
+                  <img src={p.img} className="card-img-top" alt={p.name} />
+                  <div className="card-body">
+                    <h6 className="fw-semibold mb-1">{p.name}</h6>
+                    <p className="text-muted small mb-1">{p.brand}</p>
+                    <p className="text-warning small mb-0">
+                      ★ {p.rating} <span className="text-muted"> | {p.review}</span>
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="empty-card-img"></div>
+                  <div className="card-body">
+                    <h6 className="fw-semibold mb-1 text-muted">상품 없음</h6>
+                    <p className="text-muted small mb-0">추천 준비중</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         ))}
