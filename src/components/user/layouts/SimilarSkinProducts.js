@@ -2,6 +2,8 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './SimilarSkinProducts.css';
 import { Heart } from 'lucide-react';
+import axios from "axios";
+import { useState, useEffect } from "react";
 
 const SimilarSkinProducts = () => {
   const products = [
