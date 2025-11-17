@@ -4,13 +4,13 @@ import './RecommendedProducts.css';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-const RecommendedProducts = () => {
-  const categories = ['전체', '스킨', '로션', '에센스', '크림', '클렌징'];
+// 상수는 컴포넌트 외부에 선언
+const CATEGORIES = ['전체', '스킨', '로션', '에센스', '크림', '클렌징'];
 
+const RecommendedProducts = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('전체');
-  const categoriesLocal = ['전체', '스킨', '로션', '에센스', '크림', '클렌징'];
 
   useEffect(() => {
     const prdNos = [101, 102, 103, 104];
@@ -27,7 +27,7 @@ const RecommendedProducts = () => {
             rating: 4.7,
             review: p.prdDesc,
             img: `/images/product-${index + 1}.jpg`,
-            category: categoriesLocal[index + 1] || '기타',
+            category: CATEGORIES[index + 1] || '기타',
           };
         });
 
@@ -35,7 +35,7 @@ const RecommendedProducts = () => {
         setProducts(converted);
       })
       .catch(err => console.error('상품 불러오기 실패:', err));
-  }, []);
+  }, []); // ✅ 이제 경고 없음!
 
   const filterByCategory = cat => {
     setActiveCategory(cat);
@@ -61,7 +61,7 @@ const RecommendedProducts = () => {
       </div>
 
       <div className="d-flex gap-2 flex-wrap mb-4">
-        {categories.map((cat, i) => (
+        {CATEGORIES.map((cat, i) => (
           <button
             key={i}
             className={`btn btn-sm rounded-pill px-3 ${
