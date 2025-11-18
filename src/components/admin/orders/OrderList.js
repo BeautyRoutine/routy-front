@@ -61,6 +61,8 @@ const OrderList = () => {
       } catch (err) {
         console.error('주문목록 불러오기 실패: ', err);
         setError('❌ 목록 불러오기 실패');
+        dispatch(setOrders([]));
+        dispatch(setOrdersCount(0));
       } finally {
         setLoading(false);
       }
