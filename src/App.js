@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { CartPage } from './components/user/pages/Cart/CartPage';
 
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 
@@ -85,6 +86,7 @@ function App() {
       <main className="app-body" style={{ paddingTop: !isAdmin ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
         </Routes>
       </main>
