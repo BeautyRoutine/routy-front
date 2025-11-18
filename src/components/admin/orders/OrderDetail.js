@@ -20,6 +20,11 @@ const OrderDetail = () => {
   const handleBack = () => {
     navigate(-1);
   };
+  const getDeliveryKeyText = () => {
+    if (selectedOrder.ODDELVKEYTYPE === 2) return '자유출입가능';
+    if (selectedOrder.ODDELVKEYTYPE === 1 && selectedOrder.ODDELVKEY === null) return '없음';
+    return `공동현관번호: ${selectedOrder.ODDELVKEY}`;
+  };
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -121,8 +126,10 @@ const OrderDetail = () => {
               </td>
             </tr>
             <tr>
-              <th className="bg-light">수령 방법</th>
-              <td colSpan="3">{selectedOrder.ODRECEIVETYPE || '없음'}</td>
+              <th className="bg-light">택배 출입방법</th>
+              <td>{getDeliveryKeyText()}</td>
+              <th className="bg-light">택배 요청사항</th>
+              <td>{selectedOrder.ODDELVMSG}</td>
             </tr>
           </tbody>
         </table>
