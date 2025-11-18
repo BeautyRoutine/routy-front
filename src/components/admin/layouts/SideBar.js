@@ -7,14 +7,11 @@ import './Sidebar.css';
 
 function Sidebar() {
   const location = useLocation();
+  const path = location.pathname;
   const [openMenu, setOpenMenu] = useState('');
 
-  let path = location.pathname;
-
+  // console.log(path);
   useEffect(() => {
-    path = location.pathname;
-    console.log(path);
-
     if (path.includes('/admin/product')) {
       setOpenMenu('product');
     } else if (path.includes('/admin/order')) {
