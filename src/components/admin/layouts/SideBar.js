@@ -21,7 +21,7 @@ function Sidebar() {
     } else if (path.includes('/admin/post')) {
       setOpenMenu('post');
     }
-  }, [location]);
+  }, [location, path]);
 
   const toggleMenu = menu => {
     setOpenMenu(openMenu === menu ? '' : menu);
