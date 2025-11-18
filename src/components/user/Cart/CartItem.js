@@ -12,7 +12,7 @@
  * - onToggle: 체크박스 토글 핸들러
  * - onQuantityChange: 수량 변경 핸들러 (delta: +1 or -1)
  * - onDelete: 삭제 핸들러
- * 
+ *
  * 설계 특징:
  * - Presentational Component: 상태 관리 없이 props만 받아 렌더링
  * - 단방향 데이터 흐름
@@ -29,12 +29,7 @@ export function CartItem({ item, isSelected, onToggle, onQuantityChange, onDelet
       <div className="card-content">
         <div className="cart-item-inner">
           {/* 선택 체크박스 */}
-          <input
-            type="checkbox"
-            className="cart-item-checkbox"
-            checked={isSelected}
-            onChange={onToggle}
-          />
+          <input type="checkbox" className="cart-item-checkbox" checked={isSelected} onChange={onToggle} />
 
           {/* 상품 이미지 */}
           <img src={item.imageUrl} alt={item.name} className="cart-item-image" loading="lazy" />
@@ -57,22 +52,16 @@ export function CartItem({ item, isSelected, onToggle, onQuantityChange, onDelet
             <div className="item-footer">
               <div className="quantity-control">
                 {/* 수량 감소 버튼 */}
-                <button
-                  className="btn btn-icon btn-ghost"
-                  onClick={() => onQuantityChange(-1)}
-                >
-                  <i className="bi bi-dash-lg"></i>
+                <button className="btn btn-icon btn-ghost" onClick={() => onQuantityChange(-1)}>
+                  -
                 </button>
 
                 {/* 현재 수량 표시 */}
                 <span>{item.quantity}</span>
 
                 {/* 수량 증가 버튼 */}
-                <button
-                  className="btn btn-icon btn-ghost"
-                  onClick={() => onQuantityChange(1)}
-                >
-                  <i className="bi bi-plus-lg"></i>
+                <button className="btn btn-icon btn-ghost" onClick={() => onQuantityChange(1)}>
+                  +
                 </button>
               </div>
 

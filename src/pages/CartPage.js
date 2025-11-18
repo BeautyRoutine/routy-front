@@ -12,7 +12,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './CartPage.css';
+import '../components/user/Cart/CartPage.css';
 
 import { useSelector, useDispatch } from 'react-redux';
 import {
