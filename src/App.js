@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
-import Home from './components/user/pages/Home';
+import Home from './pages/Home';
 import AdminHome from './components/admin/pages/AdminHome';
 import Footer from './components/user/layouts/footer';
 import LoginModal from './components/user/modal/LoginModal';
-import SignupPage from './components/user/pages/SignupPage';
+import SignupPage from './pages/SignupPage';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -92,8 +92,8 @@ function App() {
             element={
               <SignupPage
                 onSuccess={() => {
-                  setIsLoggedIn(true);   // 로그인
-                  setLoginOpen(false);   // 혹시 열린 모달 확실히 닫기
+                  setIsLoggedIn(true); // 로그인
+                  setLoginOpen(false); // 혹시 열린 모달 확실히 닫기
                 }}
               />
             }

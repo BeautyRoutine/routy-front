@@ -5,4 +5,4 @@ export { Header } from './layouts/Header';
 export { Footer } from './layouts/Footer';
 
 // 페이지
-export { default as Home } from './pages/Home';
+export { default as Home } from '../../pages/Home';

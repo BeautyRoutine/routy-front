@@ -1,5 +1,5 @@
 import React from 'react';
-import LoginPage from '../pages/LoginPage';
+import LoginPage from '../../../pages/LoginPage';
 import './LoginModal.css';
 
 export default function LoginModal({ onClose, onSuccess, onSignupClick }) {
@@ -16,7 +16,7 @@ export default function LoginModal({ onClose, onSuccess, onSignupClick }) {
             onClose();
           }}
           onSignup={() => {
-            onClose();         // 모달 닫기
+            onClose(); // 모달 닫기
             onSignupClick?.(); // 🔥 SignupPage로 이동
           }}
         />
