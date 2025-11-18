@@ -1,209 +1,186 @@
 // -----------------------------------------------------------------------------
-// LoginPage.js - 로그인 페이지
-// - 저장소: '로그인 유지' 체크 시 localStorage, 아니면 sessionStorage
-// - 응답 규격 가정: { resultCode, resultMsg, data: { token, member  } }
+// LoginPage.js - 로그인 페이지 (임시 로그인 처리 버전)
 // -----------------------------------------------------------------------------
 
-import React, { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { login } from "../../../lib/apiClient";
+import React, { useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const h = React.createElement;
-
-// 이메일 최소 포맷 검증합니다. 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function LoginPage({ onSuccess }) {
-  const [form, setForm] = useState({ userEmail: "", userPw: "" });
+export default function LoginPage({ onSuccess, onSignup }) {
+  const [form, setForm] = useState({ userEmail: '', userPw: '' });
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState('');
 
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const redirectTo = params.get("redirect");
+  const redirectTo = params.get('redirect');
 
   const isEmailValid = useMemo(() => EMAIL_RE.test(form.userEmail.trim()), [form.userEmail]);
-  const isPwValid = useMemo(() => (form.userPw || "").length >= 8, [form.userPw]);
+  const isPwValid = useMemo(() => (form.userPw || '').length >= 8, [form.userPw]);
   const isFormValid = isEmailValid && isPwValid;
 
-  function onChange(e) {
+  const onChange = e => {
     const { name, value, type, checked } = e.target;
-    if (type === "checkbox") {
-      setRememberMe(checked);
-      return;
-    }
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
+    if (type === 'checkbox') return setRememberMe(checked);
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
 
   async function onSubmit(e) {
     e.preventDefault();
     if (loading) return;
 
-    if (!form.userEmail.trim()) return setMsg("이메일을 입력해주세요.");
-    if (!form.userPw) return setMsg("비밀번호를 입력해주세요.");
-    if (!isEmailValid) return setMsg("이메일 형식을 확인해주세요.");
-    if (!isPwValid) return setMsg("비밀번호는 8자 이상이어야 합니다.");
+    if (!form.userEmail.trim()) return setMsg('이메일을 입력해주세요.');
+    if (!form.userPw) return setMsg('비밀번호를 입력해주세요.');
+    if (!isEmailValid) return setMsg('이메일 형식을 확인해주세요.');
+    if (!isPwValid) return setMsg('비밀번호는 8자 이상이어야 합니다.');
 
     try {
       setLoading(true);
-      setMsg("");
+      setMsg('');
 
-      // apiClient 인터셉터 기준: 성공 시 { resultCode, resultMsg, data } 반환합니다. 
-      const resp = await login({ userEmail: form.userEmail.trim(), userPw: form.userPw });
-      const token = resp?.data?.token;
-      const member = resp?.data?.member || null;
+      // 🔥 임시 로그인
+      await new Promise(r => setTimeout(r, 500));
 
-      if (token) {
-        const storage = rememberMe ? window.localStorage : window.sessionStorage;
-        storage.setItem("token", token);
-        if (member) storage.setItem("member", JSON.stringify(member));
-      }
+      const member = {
+        userEmail: form.userEmail,
+        nickname: '임시사용자',
+      };
 
-      setMsg("로그인에 성공했습니다.");
-      try { onSuccess?.(member); } catch (_) {}
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem('token', 'TEMP_TOKEN_123');
+      storage.setItem('member', JSON.stringify(member));
 
-      // 리다이렉트 우선, 없으면 뒤로가기 -> 홈!
-      if (redirectTo) {
-        navigate(redirectTo, { replace: true });
-      } else {
-        try { navigate(-1); } catch { navigate("/", { replace: true }); }
-      }
-    } catch (err) {
-      // 인터셉터에서 서버 메시지로 Error 던짐을 가정~
-      setMsg(err?.message || "로그인 중 오류가 발생했습니다.");
-      // eslint-disable-next-line no-console
-      console.error("Login Error:", err);
+      onSuccess?.(member);
+
+      if (redirectTo) navigate(redirectTo, { replace: true });
+      else navigate('/', { replace: true });
+
+      return;
+    } catch (error) {
+      console.error(error);
+      setMsg(error?.message || '로그인 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
   }
 
   return h(
-    "div",
-    { className: "container", style: { maxWidth: 420 } },
-    h("h2", { className: "my-4" }, "로그인"),
+    'div',
+    { className: 'container', style: { maxWidth: 420 } },
+
+    h('h2', { className: 'my-4' }, '로그인'),
+
+    // ---------------------------- 폼 시작 ----------------------------
     h(
-      "form",
+      'form',
       { onSubmit, noValidate: true },
-      // 이메일
+
+      // 이메일 입력
       h(
-        "div",
-        { className: "mb-3" },
-        h("label", { htmlFor: "email", className: "form-label" }, "이메일(ID)"),
-        h("input", {
-          id: "email",
-          name: "userEmail",
+        'div',
+        { className: 'mb-3' },
+        h('label', { htmlFor: 'email', className: 'form-label' }, '이메일(ID)'),
+        h('input', {
+          id: 'email',
+          name: 'userEmail',
           value: form.userEmail,
           onChange,
-          className: "form-control " + (form.userEmail && !isEmailValid ? "is-invalid" : ""),
-          type: "email",
-          inputMode: "email",
-          autoComplete: "email",
-          placeholder: "example@routy.com",
+          className: 'form-control ' + (form.userEmail && !isEmailValid ? 'is-invalid' : ''),
+          type: 'email',
+          placeholder: 'example@routy.com',
           required: true,
         }),
         form.userEmail &&
           !isEmailValid &&
-          h("div", { className: "invalid-feedback" }, "유효한 이메일 주소를 입력하세요.")
+          h('div', { className: 'invalid-feedback' }, '유효한 이메일 주소를 입력하세요.')
       ),
-      // 비밀번호
+
+      // 비밀번호 입력
       h(
-        "div",
-        { className: "mb-2" },
-        h("label", { htmlFor: "password", className: "form-label" }, "비밀번호"),
-        h("input", {
-          id: "password",
-          name: "userPw",
+        'div',
+        { className: 'mb-2' },
+        h('label', { htmlFor: 'password', className: 'form-label' }, '비밀번호'),
+        h('input', {
+          id: 'password',
+          name: 'userPw',
           value: form.userPw,
           onChange,
-          className: "form-control " + (form.userPw && !isPwValid ? "is-invalid" : ""),
-          type: "password",
-          autoComplete: "current-password",
-          minLength: 8,
-          placeholder: "8자 이상 권장",
+          className: 'form-control ' + (form.userPw && !isPwValid ? 'is-invalid' : ''),
+          type: 'password',
+          placeholder: '8자 이상 입력',
           required: true,
         }),
         form.userPw &&
           !isPwValid &&
-          h("div", { className: "invalid-feedback" }, "비밀번호는 8자 이상이어야 합니다.")
+          h('div', { className: 'invalid-feedback' }, '비밀번호는 8자 이상이어야 합니다.')
       ),
-      // 옵션/링크
+
+      // 옵션 영역
       h(
-        "div",
-        { className: "d-flex align-items-center justify-content-between mb-3" },
+        'div',
+        { className: 'd-flex align-items-center justify-content-between mb-3' },
         h(
-          "div",
-          { className: "form-check" },
-          h("input", {
-            id: "rememberMe",
-            className: "form-check-input",
-            type: "checkbox",
-            name: "rememberMe",
+          'div',
+          { className: 'form-check' },
+          h('input', {
+            id: 'rememberMe',
+            className: 'form-check-input',
+            type: 'checkbox',
             checked: rememberMe,
             onChange,
           }),
-          h("label", { className: "form-check-label", htmlFor: "rememberMe" }, "로그인 유지")
+          h('label', { className: 'form-check-label', htmlFor: 'rememberMe' }, '로그인 유지')
         ),
+
+        // ---------------------- 🔥 회원가입 버튼 (모달 닫기만) ----------------------
         h(
-          "div",
-          { className: "d-flex gap-3" },
-          h(
-            "button",
-            { type: "button", className: "btn btn-link p-0", onClick: () => navigate("/signup") },
-            "회원가입"
-          ),
-          h(
-            "button",
-            {
-              type: "button",
-              className: "btn btn-link p-0",
-              onClick: () => navigate("/password/reset"),
+          'button',
+          {
+            type: 'button',
+            className: 'btn btn-link p-0',
+            onClick: () => {
+              onSignup?.(); // 모달 닫기
+              // 이동은 App.js에서 처리함
             },
-            "비밀번호 찾기"
-          )
+          },
+          '회원가입'
         )
       ),
-      // 제출
+
+      // 로그인 버튼
       h(
-        "button",
-        { className: "btn btn-primary w-100", type: "submit", disabled: loading || !isFormValid },
-        loading ? "처리 중..." : "로그인"
+        'button',
+        { className: 'btn btn-primary w-100', type: 'submit', disabled: loading || !isFormValid },
+        loading ? '처리 중...' : '로그인'
       )
     ),
-    // 상태 메시지
-    msg && h("p", { className: "mt-3 text-center text-muted", "aria-live": "polite" }, msg),
-    // SNS 로그인 (라우팅만 연결 – 실제 OAuth는 이후 연동합니다. )
-    h("hr", { className: "my-4" }),
+    // ---------------------------- 폼 끝 ----------------------------
+
+    msg && h('p', { className: 'mt-3 text-center text-muted' }, msg),
+
+    // ---------------------------- SNS 로그인 ----------------------------
+    h('hr', { className: 'my-4' }),
+
     h(
-      "div",
-      { className: "d-grid gap-2" },
+      'div',
+      { className: 'd-grid gap-2' },
       h(
-        "button",
-        {
-          className: "btn btn-outline-secondary",
-          type: "button",
-          onClick: () => navigate("/oauth/kakao?redirect=" + (redirectTo || "/")),
-        },
-        "카카오로 계속하기"
+        'button',
+        { className: 'btn btn-outline-secondary', type: 'button' },
+        '카카오로 계속하기'
       ),
       h(
-        "button",
-        {
-          className: "btn btn-outline-secondary",
-          type: "button",
-          onClick: () => navigate("/oauth/google?redirect=" + (redirectTo || "/")),
-        },
-        "구글로 계속하기"
+        'button',
+        { className: 'btn btn-outline-secondary', type: 'button' },
+        '구글로 계속하기'
       ),
       h(
-        "button",
-        {
-          className: "btn btn-outline-secondary",
-          type: "button",
-          onClick: () => navigate("/oauth/naver?redirect=" + (redirectTo || "/")),
-        },
-        "네이버로 계속하기"
+        'button',
+        { className: 'btn btn-outline-secondary', type: 'button' },
+        '네이버로 계속하기'
       )
     )
   );

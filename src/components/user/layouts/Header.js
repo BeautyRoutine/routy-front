@@ -958,7 +958,7 @@ export function Header({
                         return;
                       }
                       // 임시 로그인 로직: 버튼만 눌러도 로그인 상태 전환 (알림 영역 테스트용)
-                      onLoginChange?.(true);
+                      //onLoginChange?.(true);
                     }}
                   >
                     <LogIn size={18} />
