@@ -4,4 +4,4 @@
 export { default as Sidebar } from './layouts/SideBar';
 
 // 페이지
-export { default as AdminHome } from './pages/AdminHome';
+export { default as AdminHome } from './AdminHome';

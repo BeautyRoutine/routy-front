@@ -6,8 +6,8 @@ import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 
 // TODO: 로그인/회원가입 API 연동 시 ENDPOINTS import를 복원하시면 됩니다.
 // import { Header, ENDPOINTS as HEADER_ENDPOINTS } from './components/user/layouts/Header';
-import Home from './pages/Home';
-import AdminHome from './components/admin/pages/AdminHome';
+import Home from './components/user/pages/Home';
+import AdminHome from './components/admin/AdminHome';
 import Footer from './components/user/layouts/footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';

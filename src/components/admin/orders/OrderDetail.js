@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectOrder, clearSelectedOrder } from '../store';
 import axios from 'axios';
-import LoadingSpinner from '../common/LoadingSpinner';
+import LoadingSpinner from '../../common/LoadingSpinner';
 
 const OrderDetail = () => {
   const navigate = useNavigate();

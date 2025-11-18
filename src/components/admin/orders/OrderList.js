@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setOrders, setOrdersCount } from '../store';
 
 import OrderListItem from './OrderListItem';
-import LoadingSpinner from '../common/LoadingSpinner';
+import LoadingSpinner from '../../common/LoadingSpinner';
 
 const OrderList = () => {
   const dispatch = useDispatch();

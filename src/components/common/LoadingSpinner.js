@@ -1,4 +1,3 @@
-// src/components/common/LoadingSpinner.js
 import React from 'react';
 
 const LoadingSpinner = ({ message = '로딩 중입니다...' }) => (

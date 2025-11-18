@@ -58,13 +58,18 @@ routy-front/
 │   ├── components/
 │   │   ├── admin/
 │   │   │   ├── index.js
+│   │   │   ├── store.js
 │   │   │   ├── layouts/
 │   │   │   │   ├── SideBar.js
 │   │   │   │   └── Sidebar.css
-│   │   │   └── pages/
-│   │   │       ├── AdminHome.js
-│   │   │       └── Adminhome.css
+│   │   │   ├── orders/
+│   │   │   │   ├── OrderList.js
+│   │   │   │   ├── OrderListItem.js
+│   │   │   │   └── OrderDetail.js
+│   │   │   ├── AdminHome.js
+│   │   │   └── Adminhome.css
 │   │   ├── common/
+│   │   │   └── LoadingSpinner.js
 │   │   └── user/
 │   │       ├── index.js
 │   │       ├── layouts/

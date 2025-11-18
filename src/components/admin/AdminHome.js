@@ -1,12 +1,12 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-import admstore from '../store';
+import admstore from './store';
 import { Provider } from 'react-redux';
 
-import Sidebar from '../layouts/SideBar';
-import OrderList from '../orders/OrderList';
-import OrderDetail from '../orders/OrderDetail';
+import Sidebar from './layouts/SideBar';
+import OrderList from './orders/OrderList';
+import OrderDetail from './orders/OrderDetail';
 import './Adminhome.css';
 
 const AdminHome = () => {
