@@ -5,10 +5,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setOrders, setOrdersCount } from '../store';
 
 import OrderListItem from './OrderListItem';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const OrderList = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const apiBaseUrl = useSelector(state => state.config.apiBaseUrl);
 
   // paging
@@ -46,15 +49,20 @@ const OrderList = () => {
         od_end_day: endDate,
       };
 
-      console.log(`${apiBaseUrl}/orders/list`);
-      console.log(params);
+      // console.log(`${apiBaseUrl}/orders/list`);
+      // console.log(params);
+      setLoading(true);
+      setError('');
       try {
         const result = await axios.get(`${apiBaseUrl}/orders/list`, { params });
-        console.log(result);
-        dispatch(setOrders(result.data.list));
-        dispatch(setOrdersCount(result.data.total));
+        // console.log(result);
+        dispatch(setOrders(result.data.data.list));
+        dispatch(setOrdersCount(result.data.data.total));
       } catch (err) {
-        console.log('주문목록 불러오기 실패: ', err);
+        console.error('주문목록 불러오기 실패: ', err);
+        setError('❌ 목록 불러오기 실패');
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -145,9 +153,27 @@ const OrderList = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order, i) => (
-              <OrderListItem key={i} order={order} />
-            ))}
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="text-center py-5">
+                  <LoadingSpinner />
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan="7" className="text-center text-danger fw-bold py-5">
+                  {error}
+                </td>
+              </tr>
+            ) : orders.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center text-muted py-5">
+                  조회된 주문이 없습니다.
+                </td>
+              </tr>
+            ) : (
+              orders.map((order, i) => <OrderListItem key={i} order={order} />)
+            )}
           </tbody>
         </table>
       </div>

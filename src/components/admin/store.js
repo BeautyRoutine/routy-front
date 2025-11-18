@@ -6,7 +6,7 @@ const configSlice = createSlice({
   // 운영 배포시 api base url 변경
   name: 'config',
   initialState: {
-    apiBaseUrl: 'http://localhost:8085',
+    apiBaseUrl: 'http://localhost:8085/api',
   },
   reducers: {},
 });

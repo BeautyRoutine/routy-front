@@ -10,7 +10,7 @@ const OrderListItem = ({ order }) => {
 
   const handleClick = () => {
     dispatch(selectOrder(order));
-    navigate(`/admin/orderDetail/${order.ODNO}`);
+    navigate(`/admin/orderList/${order.ODNO}`);
   };
 
   return (
