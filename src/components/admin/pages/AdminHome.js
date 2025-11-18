@@ -20,7 +20,7 @@ const AdminHome = () => {
             <Route path="productList" />
             {/* 주문 관리 */}
             <Route path="orderList" Component={OrderList} />
-            <Route path="orderDetail/:odNo" Component={OrderDetail} />
+            <Route path="orderList/:odNo" Component={OrderDetail} />
             {/* 회원 관리 */}
             <Route path="members" />
             {/* 게시글 관리 */}

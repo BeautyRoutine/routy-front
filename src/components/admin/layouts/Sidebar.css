@@ -34,6 +34,8 @@
   border-bottom: 1px solid #42495a;
 }
 
-.submenu-link:hover {
+.submenu-link:hover,
+.submenu-link.active {
   color: #00bfff;
+  background-color: #4e5872;
 }
