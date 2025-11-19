@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { CartPage } from './pages/CartPage';
 
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 
 // TODO: 로그인/회원가입 API 연동 시 ENDPOINTS import를 복원하시면 됩니다.
 // import { Header, ENDPOINTS as HEADER_ENDPOINTS } from './components/user/layouts/Header';
-import Home from './components/user/pages/Home';
+import Home from './pages/Home';
 import AdminHome from './components/admin/pages/AdminHome';
 import Footer from './components/user/layouts/footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -85,6 +86,7 @@ function App() {
       <main className="app-body" style={{ paddingTop: !isAdmin ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
         </Routes>
       </main>
