@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 import axios from 'axios';
 
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // API Base URL (관리자)
   const apiBaseUrl = 'http://localhost:8085/api/admin/products';
@@ -128,7 +131,12 @@ const ProductList = () => {
             ) : (
               products.map(p => (
                 <tr key={p.prdNo}>
-                  <td>{p.prdNo}</td>
+                  <td
+                    style={{ cursor: 'pointer', color: '#0d6efd', fontWeight: '500' }}
+                    onClick={() => navigate(`/admin/products/detail/${p.prdNo}`)}
+                  >
+                    {p.prdNo}
+                  </td>
                   <td>
                     <img
                       src={`/images/${p.prdImg}`}
@@ -138,7 +146,12 @@ const ProductList = () => {
                       style={{ objectFit: 'cover', borderRadius: '6px' }}
                     />
                   </td>
-                  <td>{p.prdName}</td>
+                  <td
+                    style={{ cursor: 'pointer', color: '#0d6efd', fontWeight: '500' }}
+                    onClick={() => navigate(`/admin/products/detail/${p.prdNo}`)}
+                  >
+                    {p.prdName}
+                  </td>
                   <td>{p.prdCompany}</td>
                   <td>{p.prdPrice?.toLocaleString()}원</td>
                   <td>{p.prdStock}</td>
