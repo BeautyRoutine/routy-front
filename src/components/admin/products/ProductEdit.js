@@ -58,7 +58,9 @@ const ProductEdit = () => {
       // 이미지 파일 포함하면 multipart/form-data
       const formData = new FormData();
       Object.keys(product).forEach(key => {
-        formData.append(key, product[key]);
+        if (key !== 'prdRegdate' && key !== 'prdUpdate') {
+          formData.append(key, product[key]);
+        }
       });
 
       await axios.put(`${apiBaseUrl}/${prdNo}`, formData, {
