@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+<<<<<<< Updated upstream
 import { useNavigate } from 'react-router-dom';
 
+=======
+>>>>>>> Stashed changes
 import axios from 'axios';
 
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+<<<<<<< Updated upstream
   const navigate = useNavigate();
+=======
+>>>>>>> Stashed changes
 
   // API Base URL (관리자)
   const apiBaseUrl = 'http://localhost:8085/api/admin/products';
@@ -101,6 +107,7 @@ const ProductList = () => {
           </div>
         </div>
       </div>
+<<<<<<< Updated upstream
       {/* 상품 추가 */}
       <div className="text-end mb-3">
         <button
@@ -109,6 +116,9 @@ const ProductList = () => {
           ➕ 상품 추가
         </button>
       </div>
+=======
+
+>>>>>>> Stashed changes
       {/* 테이블 */}
       <div className="table-responsive">
         <div className="d-flex justify-content-end mb-2">
@@ -138,12 +148,16 @@ const ProductList = () => {
             ) : (
               products.map(p => (
                 <tr key={p.prdNo}>
+<<<<<<< Updated upstream
                   <td
                     style={{ cursor: 'pointer', color: '#0d6efd', fontWeight: '500' }}
                     onClick={() => navigate(`/admin/products/detail/${p.prdNo}`)}
                   >
                     {p.prdNo}
                   </td>
+=======
+                  <td>{p.prdNo}</td>
+>>>>>>> Stashed changes
                   <td>
                     <img
                       src={`/images/${p.prdImg}`}
@@ -153,12 +167,16 @@ const ProductList = () => {
                       style={{ objectFit: 'cover', borderRadius: '6px' }}
                     />
                   </td>
+<<<<<<< Updated upstream
                   <td
                     style={{ cursor: 'pointer', color: '#0d6efd', fontWeight: '500' }}
                     onClick={() => navigate(`/admin/products/detail/${p.prdNo}`)}
                   >
                     {p.prdName}
                   </td>
+=======
+                  <td>{p.prdName}</td>
+>>>>>>> Stashed changes
                   <td>{p.prdCompany}</td>
                   <td>{p.prdPrice?.toLocaleString()}원</td>
                   <td>{p.prdStock}</td>
