@@ -16,8 +16,8 @@ export default function SignupPage({ onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
 
+  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
-
   const isEmailValid = useMemo(() => EMAIL_RE.test(form.userEmail.trim()), [form.userEmail]);
   const isNickValid = useMemo(() => /^[가-힣a-zA-Z0-9]{2,12}$/.test(form.userNick.trim()), [form.userNick]);
   const isPwValid = useMemo(() => /^(?=.{8,16}$).*/.test(form.userPw), [form.userPw]); // 8~16자 권장
