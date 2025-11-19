@@ -15,7 +15,7 @@ export default function SignupPage({ onSuccess }) {
   const [form, setForm] = useState({ userEmail: '', userNick: '', userPw: '' });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
-
+  // navigate 미사용 중
   // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
   const isEmailValid = useMemo(() => EMAIL_RE.test(form.userEmail.trim()), [form.userEmail]);
