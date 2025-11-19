@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import Sidebar from '../layouts/SideBar';
 import OrderList from '../orders/OrderList';
 import OrderDetail from '../orders/OrderDetail';
+import ProductList from '../products/ProductList';
 import './Adminhome.css';
 
 const AdminHome = () => {
@@ -17,7 +18,7 @@ const AdminHome = () => {
         <div className="admin-content flex-grow-1">
           <Routes>
             {/* 상품 관리 */}
-            <Route path="productList" />
+            <Route path="productList" Component={ProductList} />
             {/* 주문 관리 */}
             <Route path="orderList" Component={OrderList} />
             <Route path="orderDetail/:odNo" Component={OrderDetail} />
