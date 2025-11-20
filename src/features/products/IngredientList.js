@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const IngredientList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const apiBaseUrl = "http://localhost:8085/api/admin/ingredients";
+  const apiBaseUrl = 'http://localhost:8085/api/admin/ingredients';
 
   // paging
-  const page = Number(searchParams.get("page")) || 1;
+  const page = Number(searchParams.get('page')) || 1;
   const pageGap = 10; // 한 페이지 개수
   const [rowTotal, setRowTotal] = useState(0);
 
   // 검색 파라미터
-  const ingName = searchParams.get("ing_name") || "";
-  const ingAllergen = searchParams.get("ing_allergen") || "";
+  const ingName = searchParams.get('ing_name') || '';
+  const ingAllergen = searchParams.get('ing_allergen') || '';
 
   // form input
   const [ingNameInput, setIngNameInput] = useState(ingName);
@@ -49,7 +49,7 @@ const IngredientList = () => {
         setIngredients(result.data.list || []);
         setRowTotal(result.data.total || 0);
       } catch (err) {
-        console.error("성분 목록 불러오기 실패:", err);
+        console.error('성분 목록 불러오기 실패:', err);
       }
     };
 
@@ -61,43 +61,34 @@ const IngredientList = () => {
       <h3 className="mb-4 text-center">🧪 성분 목록 관리</h3>
 
       {/* 검색 영역 */}
-      <div
-        className="card mb-4 shadow-sm"
-        style={{ maxWidth: "900px", margin: "0 auto" }}
-      >
+      <div className="card mb-4 shadow-sm" style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div className="card-header bg-light fw-bold">🔍 성분 검색</div>
         <div className="card-body">
           <div className="row gy-3 align-items-center">
             {/* 성분명 검색 */}
             <div className="col-md-6 d-flex align-items-center">
-              <label
-                className="form-label mb-0 me-2"
-                style={{ minWidth: "100px" }}
-              >
+              <label className="form-label mb-0 me-2" style={{ minWidth: '100px' }}>
                 성분명 :
               </label>
               <input
                 type="text"
                 className="form-control"
                 value={ingNameInput}
-                onChange={(e) => setIngNameInput(e.target.value)}
+                onChange={e => setIngNameInput(e.target.value)}
                 placeholder="성분명 검색"
               />
             </div>
 
             {/* 알러지 검색 */}
             <div className="col-md-6 d-flex align-items-center">
-              <label
-                className="form-label mb-0 me-2"
-                style={{ minWidth: "100px" }}
-              >
+              <label className="form-label mb-0 me-2" style={{ minWidth: '100px' }}>
                 알러지 :
               </label>
               <input
                 type="text"
                 className="form-control"
                 value={ingAllergenInput}
-                onChange={(e) => setIngAllergenInput(e.target.value)}
+                onChange={e => setIngAllergenInput(e.target.value)}
                 placeholder="알러지명 검색"
               />
             </div>
@@ -136,7 +127,7 @@ const IngredientList = () => {
                 </td>
               </tr>
             ) : (
-              ingredients.map((ing) => (
+              ingredients.map(ing => (
                 <tr key={ing.ingNo}>
                   <td>{ing.ingNo}</td>
                   <td>{ing.ingName}</td>
@@ -168,25 +159,21 @@ const IngredientList = () => {
           </button>
 
           {/* 페이지 번호 */}
-          {Array.from({ length: Math.ceil(rowTotal / pageGap) }, (_, i) => i + 1).map(
-            (p) => (
-              <button
-                key={p}
-                className={`btn ${
-                  p === page ? "btn-primary" : "btn-outline-secondary"
-                } mx-1`}
-                onClick={() =>
-                  setSearchParams({
-                    page: p,
-                    ing_name: ingName,
-                    ing_allergen: ingAllergen,
-                  })
-                }
-              >
-                {p}
-              </button>
-            )
-          )}
+          {Array.from({ length: Math.ceil(rowTotal / pageGap) }, (_, i) => i + 1).map(p => (
+            <button
+              key={p}
+              className={`btn ${p === page ? 'btn-primary' : 'btn-outline-secondary'} mx-1`}
+              onClick={() =>
+                setSearchParams({
+                  page: p,
+                  ing_name: ingName,
+                  ing_allergen: ingAllergen,
+                })
+              }
+            >
+              {p}
+            </button>
+          ))}
 
           {/* 다음 */}
           <button
