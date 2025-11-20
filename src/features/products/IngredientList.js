@@ -4,7 +4,8 @@ import axios from 'axios';
 
 const IngredientList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  // 나중에 사용 예정
+  //const navigate = useNavigate();
 
   const apiBaseUrl = 'http://localhost:8085/api/admin/ingredients';
 
