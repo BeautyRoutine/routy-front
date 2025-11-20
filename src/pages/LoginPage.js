@@ -1,16 +1,14 @@
 // -----------------------------------------------------------------------------
-// LoginPage.js - 로그인 페이지
-// - 저장소: '로그인 유지' 체크 시 localStorage, 아니면 sessionStorage
-// - 응답 규격 가정: { resultCode, resultMsg, data: { token, member  } }
+// LoginPage.js - 로그인 페이지 컴포넌트입니다. 
 // -----------------------------------------------------------------------------
 
 import React, { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { login } from "../../../lib/apiClient";
+import { login } from "../lib/apiClient"; // 💡 경로만 현재 구조에 맞게 수정
 
 const h = React.createElement;
 
-// 이메일 최소 포맷 검증합니다. 
+// 이메일 최소 포맷 검증
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage({ onSuccess }) {
@@ -23,12 +21,19 @@ export default function LoginPage({ onSuccess }) {
   const [params] = useSearchParams();
   const redirectTo = params.get("redirect");
 
-  const isEmailValid = useMemo(() => EMAIL_RE.test(form.userEmail.trim()), [form.userEmail]);
-  const isPwValid = useMemo(() => (form.userPw || "").length >= 8, [form.userPw]);
+  const isEmailValid = useMemo(
+    () => EMAIL_RE.test(form.userEmail.trim()),
+    [form.userEmail]
+  );
+  const isPwValid = useMemo(
+    () => (form.userPw || "").length >= 8,
+    [form.userPw]
+  );
   const isFormValid = isEmailValid && isPwValid;
 
   function onChange(e) {
     const { name, value, type, checked } = e.target;
+
     if (type === "checkbox") {
       setRememberMe(checked);
       return;
@@ -49,30 +54,45 @@ export default function LoginPage({ onSuccess }) {
       setLoading(true);
       setMsg("");
 
-      // apiClient 인터셉터 기준: 성공 시 { resultCode, resultMsg, data } 반환합니다. 
-      const resp = await login({ userEmail: form.userEmail.trim(), userPw: form.userPw });
-      const token = resp?.data?.token;
-      const member = resp?.data?.member || null;
+      // apiClient 기준: 성공 시 { resultCode, resultMsg, data } 반환
+      const resp = await login({
+        userEmail: form.userEmail.trim(),
+        userPw: form.userPw,
+      });
+
+      const body = resp;
+      const token = body?.data?.token;
+      const member = body?.data?.member || null;
 
       if (token) {
         const storage = rememberMe ? window.localStorage : window.sessionStorage;
+
+        // auth 객체 저장
+        const authObj = { token, member };
+        storage.setItem("auth", JSON.stringify(authObj));
+
+        // 하위 호환: token / member 개별 저장
         storage.setItem("token", token);
         if (member) storage.setItem("member", JSON.stringify(member));
       }
 
       setMsg("로그인에 성공했습니다.");
-      try { onSuccess?.(member); } catch (_) {}
+      try {
+        onSuccess?.(member);
+      } catch (_) {}
 
-      // 리다이렉트 우선, 없으면 뒤로가기 -> 홈!
+      // redirect 우선, 없으면 뒤로가기 -> 홈
       if (redirectTo) {
         navigate(redirectTo, { replace: true });
       } else {
-        try { navigate(-1); } catch { navigate("/", { replace: true }); }
+        try {
+          navigate(-1);
+        } catch {
+          navigate("/", { replace: true });
+        }
       }
     } catch (err) {
-      // 인터셉터에서 서버 메시지로 Error 던짐을 가정~
       setMsg(err?.message || "로그인 중 오류가 발생했습니다.");
-      // eslint-disable-next-line no-console
       console.error("Login Error:", err);
     } finally {
       setLoading(false);
@@ -90,13 +110,19 @@ export default function LoginPage({ onSuccess }) {
       h(
         "div",
         { className: "mb-3" },
-        h("label", { htmlFor: "email", className: "form-label" }, "이메일(ID)"),
+        h(
+          "label",
+          { htmlFor: "email", className: "form-label" },
+          "이메일(ID)"
+        ),
         h("input", {
           id: "email",
           name: "userEmail",
           value: form.userEmail,
           onChange,
-          className: "form-control " + (form.userEmail && !isEmailValid ? "is-invalid" : ""),
+          className:
+            "form-control " +
+            (form.userEmail && !isEmailValid ? "is-invalid" : ""),
           type: "email",
           inputMode: "email",
           autoComplete: "email",
@@ -105,19 +131,29 @@ export default function LoginPage({ onSuccess }) {
         }),
         form.userEmail &&
           !isEmailValid &&
-          h("div", { className: "invalid-feedback" }, "유효한 이메일 주소를 입력하세요.")
+          h(
+            "div",
+            { className: "invalid-feedback" },
+            "유효한 이메일 주소를 입력하세요."
+          )
       ),
       // 비밀번호
       h(
         "div",
         { className: "mb-2" },
-        h("label", { htmlFor: "password", className: "form-label" }, "비밀번호"),
+        h(
+          "label",
+          { htmlFor: "password", className: "form-label" },
+          "비밀번호"
+        ),
         h("input", {
           id: "password",
           name: "userPw",
           value: form.userPw,
           onChange,
-          className: "form-control " + (form.userPw && !isPwValid ? "is-invalid" : ""),
+          className:
+            "form-control " +
+            (form.userPw && !isPwValid ? "is-invalid" : ""),
           type: "password",
           autoComplete: "current-password",
           minLength: 8,
@@ -126,12 +162,19 @@ export default function LoginPage({ onSuccess }) {
         }),
         form.userPw &&
           !isPwValid &&
-          h("div", { className: "invalid-feedback" }, "비밀번호는 8자 이상이어야 합니다.")
+          h(
+            "div",
+            { className: "invalid-feedback" },
+            "비밀번호는 8자 이상이어야 합니다."
+          )
       ),
       // 옵션/링크
       h(
         "div",
-        { className: "d-flex align-items-center justify-content-between mb-3" },
+        {
+          className:
+            "d-flex align-items-center justify-content-between mb-3",
+        },
         h(
           "div",
           { className: "form-check" },
@@ -143,14 +186,22 @@ export default function LoginPage({ onSuccess }) {
             checked: rememberMe,
             onChange,
           }),
-          h("label", { className: "form-check-label", htmlFor: "rememberMe" }, "로그인 유지")
+          h(
+            "label",
+            { className: "form-check-label", htmlFor: "rememberMe" },
+            "로그인 유지"
+          )
         ),
         h(
           "div",
           { className: "d-flex gap-3" },
           h(
             "button",
-            { type: "button", className: "btn btn-link p-0", onClick: () => navigate("/signup") },
+            {
+              type: "button",
+              className: "btn btn-link p-0",
+              onClick: () => navigate("/signup"),
+            },
             "회원가입"
           ),
           h(
@@ -167,13 +218,25 @@ export default function LoginPage({ onSuccess }) {
       // 제출
       h(
         "button",
-        { className: "btn btn-primary w-100", type: "submit", disabled: loading || !isFormValid },
+        {
+          className: "btn btn-primary w-100",
+          type: "submit",
+          disabled: loading || !isFormValid,
+        },
         loading ? "처리 중..." : "로그인"
       )
     ),
     // 상태 메시지
-    msg && h("p", { className: "mt-3 text-center text-muted", "aria-live": "polite" }, msg),
-    // SNS 로그인 (라우팅만 연결 – 실제 OAuth는 이후 연동합니다. )
+    msg &&
+      h(
+        "p",
+        {
+          className: "mt-3 text-center text-muted",
+          "aria-live": "polite",
+        },
+        msg
+      ),
+    // SNS 로그인 (라우팅만 연결 – 실제 OAuth는 이후 연동)
     h("hr", { className: "my-4" }),
     h(
       "div",
@@ -183,7 +246,8 @@ export default function LoginPage({ onSuccess }) {
         {
           className: "btn btn-outline-secondary",
           type: "button",
-          onClick: () => navigate("/oauth/kakao?redirect=" + (redirectTo || "/")),
+          onClick: () =>
+            navigate("/oauth/kakao?redirect=" + (redirectTo || "/")),
         },
         "카카오로 계속하기"
       ),
@@ -192,7 +256,8 @@ export default function LoginPage({ onSuccess }) {
         {
           className: "btn btn-outline-secondary",
           type: "button",
-          onClick: () => navigate("/oauth/google?redirect=" + (redirectTo || "/")),
+          onClick: () =>
+            navigate("/oauth/google?redirect=" + (redirectTo || "/")),
         },
         "구글로 계속하기"
       ),
@@ -201,7 +266,8 @@ export default function LoginPage({ onSuccess }) {
         {
           className: "btn btn-outline-secondary",
           type: "button",
-          onClick: () => navigate("/oauth/naver?redirect=" + (redirectTo || "/")),
+          onClick: () =>
+            navigate("/oauth/naver?redirect=" + (redirectTo || "/")),
         },
         "네이버로 계속하기"
       )
