@@ -59,14 +59,17 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #def6f6;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 999px;
-  padding: 12px 24px;
-  transition: box-shadow 0.2s ease;
+  padding: 11px 24px;
+  transition: all 0.2s ease;
 }
 
-.search-wrapper.open {
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+.search-wrapper:focus-within {
+  background: #ffffff;
+  border-color: #6a6de0; /* Brand color focus */
+  box-shadow: 0 4px 12px rgba(106, 109, 224, 0.15);
 }
 
 .search-icon {
