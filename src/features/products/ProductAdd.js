@@ -13,7 +13,7 @@ const ProductAdd = () => {
     prdCompany: '',
     prdMainCate: '',
     prdSubCate: '',
-    prdImg: '',
+    prdImg: '', // ← 파일 이름만 저장
     prdDesc: '',
     prdStock: '',
     prdStatus: '정상',
@@ -21,43 +21,30 @@ const ProductAdd = () => {
 
   const [previewImg, setPreviewImg] = useState('');
 
-  // input change
+  // 일반 입력
   const handleChange = e => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
-  // 이미지 선택
+  // 이미지 선택 → 파일명만 저장
   const handleImageChange = e => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setProduct({ ...product, prdImg: file });
+    // DB에는 파일명만 저장
+    setProduct({ ...product, prdImg: file.name });
 
+    // 화면 미리보기용
     const reader = new FileReader();
     reader.onload = () => setPreviewImg(reader.result);
     reader.readAsDataURL(file);
   };
 
-  // 상품 등록
+  // 저장 버튼
   const handleSave = async () => {
     try {
-      const formData = new FormData();
-
-      // 문자열 필드만 append
-      Object.keys(product).forEach(key => {
-        if (key !== 'prdImg') {
-          formData.append(key, product[key]);
-        }
-      });
-
-      // 파일 append
-      if (product.prdImg) {
-        formData.append('prdImg', product.prdImg);
-      }
-
-      await axios.post(apiBaseUrl, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // 파일을 보내지 않으므로 JSON 전송
+      await axios.post(apiBaseUrl, product);
 
       alert('상품이 등록되었습니다!');
       navigate('/admin/products');
@@ -73,7 +60,7 @@ const ProductAdd = () => {
 
       <div className="card shadow-sm">
         <div className="card-body">
-          {/* 이미지 업로드 */}
+          {/* 이미지 미리보기 */}
           <div className="text-center mb-4">
             <img
               src={previewImg || '/images/default.png'}
@@ -89,9 +76,10 @@ const ProductAdd = () => {
             <div className="mt-2">
               <input type="file" onChange={handleImageChange} />
             </div>
+            <div className="mt-1 text-muted">{product.prdImg || '선택된 파일 없음'}</div>
           </div>
 
-          {/* 입력 폼 */}
+          {/* 입력 폼 테이블 */}
           <table className="table table-bordered">
             <tbody>
               <tr>
