@@ -1,10 +1,11 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
-import ProductImageGallery from '../layouts/details/ProductImageGallery';
-import ProductInfo from '../layouts/details/ProductInfo';
-import ProductDetailTabs from '../layouts/details/ProductDetailTabs';
-import ReviewSnapshot from '../layouts/details/ReviewSnapshot';
+import ProductImageGallery from 'components/user/details/ProductImageGallery';
+import ProductInfo from 'components/user/details/ProductInfo';
+import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
+import ReviewSnapshot from 'components/user/details/ReviewSnapshot';
+import IngredientAnalysis from 'components/user/details/IngredientAnalysis';
 
 // 더미데이터 받아오기
 import { dummyProductData } from './demoProductData';
@@ -29,10 +30,17 @@ const ProductDetailPage = () => {
           <ProductInfo product={productInfo} reviewSummary={reviewInfo.summary} />
         </Col>
       </Row>
-
+      {/*별점, 우수리뷰 */}
       <Row className="mt-5">
         <Col>
           <ReviewSnapshot reviewInfo={reviewInfo} />
+        </Col>
+      </Row>
+
+      {/*성분 분석 */}
+      <Row className="mt-5">
+        <Col>
+          <IngredientAnalysis ingredientInfo={ingredientInfo} />
         </Col>
       </Row>
 
@@ -40,7 +48,7 @@ const ProductDetailPage = () => {
 
       <Row>
         <Col>
-          {/* 탭 컴포넌트에는 필요한 모든 데이터를 각각 명시적으로 전달합니다. */}
+          {/* 분해한 데이터 전달 */}
           <ProductDetailTabs
             productInfo={productInfo}
             purchaseInfo={purchaseInfo}
