@@ -7,6 +7,13 @@ import { setItems, setItemsCount } from 'features/orders/admOrdersSlice';
 import LoadingSpinner from 'components/common/LoadingSpinner';
 import OrderListItem from './OrderListItem';
 
+const paramKeys = {
+  page: 'page',
+  memberName: 'm_name',
+  startDate: 's_date',
+  endDate: 'e_date',
+};
+
 const OrderList = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,31 +21,42 @@ const OrderList = () => {
   const [error, setError] = useState('');
   const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
-  // paging
   const rowTotal = useSelector(state => state.admOrders.rowTotal);
   const pageGap = useSelector(state => state.admOrders.pageGap);
-  const page = Number(searchParams.get('page')) || 1;
-  const orders = useSelector(state => state.admOrders.list);
+  const items = useSelector(state => state.admOrders.list);
 
-  // get params
-  const memberName = searchParams.get('m_name') || '';
-  const startDate = searchParams.get('s_date') || '';
-  const endDate = searchParams.get('e_date') || '';
+  const getParamsFromSearch = () => ({
+    page: Number(searchParams.get(paramKeys.page)) || 1,
+    memberName: searchParams.get(paramKeys.memberName) || '',
+    startDate: searchParams.get(paramKeys.startDate) || '',
+    endDate: searchParams.get(paramKeys.endDate) || '',
+  });
+
+  const { page, memberName, startDate, endDate } = getParamsFromSearch();
 
   // form
   const [memberNameInput, setMemberNameInput] = useState(memberName);
   const [startDateInput, setStartDateInput] = useState(startDate);
   const [endDateInput, setEndDateInput] = useState(endDate);
-  const handleSearch = () => {
-    setSearchParams({
-      page: 1,
-      m_name: memberNameInput,
-      s_date: startDateInput,
-      e_date: endDateInput,
-    });
+
+  const buildSearchParams = (overrides = {}) => ({
+    [paramKeys.page]: overrides.page || 1,
+    [paramKeys.memberName]: overrides.memberName ?? memberNameInput,
+    [paramKeys.startDate]: overrides.startDate ?? startDateInput,
+    [paramKeys.endDate]: overrides.endDate ?? endDateInput,
+  });
+
+  const handleSearch = e => {
+    e.preventDefault();
+    setSearchParams(buildSearchParams());
   };
 
   useEffect(() => {
+    const { memberName, startDate, endDate } = getParamsFromSearch();
+    setMemberNameInput(memberName);
+    setStartDateInput(startDate);
+    setEndDateInput(endDate);
+
     // 컴포넌트 첫 렌더링 시 실행 hook
     const loadData = async () => {
       const params = {
@@ -77,7 +95,7 @@ const OrderList = () => {
       <div className="card mb-4 shadow-sm" style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div className="card-header bg-light fw-bold">🔍 주문 검색</div>
         <div className="card-body">
-          <form>
+          <form onSubmit={handleSearch}>
             <div className="row gy-3 align-items-center">
               <div className="col-md-6 d-flex align-items-center">
                 <label className="form-label mb-0 me-2" style={{ minWidth: '100px' }}>
@@ -103,7 +121,7 @@ const OrderList = () => {
               </div>
               <div className="col-md-12 d-flex align-items-center">
                 <label className="form-label mb-0 me-2" style={{ minWidth: '100px' }}>
-                  이름 :
+                  결제자 성명 :
                 </label>
                 <input
                   type="text"
@@ -116,7 +134,7 @@ const OrderList = () => {
 
               {/* 검색 버튼 */}
               <div className="col-md-12 text-center">
-                <button className="btn btn-primary px-4" onClick={handleSearch}>
+                <button type="submit" className="btn btn-primary px-4">
                   🔎 검색
                 </button>
               </div>
@@ -135,14 +153,9 @@ const OrderList = () => {
             <tr>
               <th>주문번호</th>
               <th>
-                주문 회원ID
+                결제자 성명(닉네임)
                 <br />
-                <small className="opacity-75">(회원번호)</small>
-              </th>
-              <th>
-                주문 회원명
-                <br />
-                <small className="opacity-75">(닉네임)</small>
+                <small className="opacity-75">ID</small>
               </th>
               <th>수취인 정보</th>
               <th>
@@ -167,14 +180,14 @@ const OrderList = () => {
                   {error}
                 </td>
               </tr>
-            ) : orders.length === 0 ? (
+            ) : items.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center text-muted py-5">
                   조회된 주문이 없습니다.
                 </td>
               </tr>
             ) : (
-              orders.map((order, i) => <OrderListItem key={i} order={order} />)
+              items.map((item, i) => <OrderListItem key={i} item={item} />)
             )}
           </tbody>
         </table>
@@ -186,14 +199,7 @@ const OrderList = () => {
           <button
             className="btn btn-outline-secondary mx-3"
             disabled={page <= 1}
-            onClick={() =>
-              setSearchParams({
-                page: page - 1,
-                m_name: memberName,
-                s_date: startDate,
-                e_date: endDate,
-              })
-            }
+            onClick={() => setSearchParams(buildSearchParams({ page: page - 1 }))}
           >
             ← 이전
           </button>
@@ -202,14 +208,7 @@ const OrderList = () => {
             <button
               key={p}
               className={`btn ${p === page ? 'btn-primary' : 'btn-outline-secondary'} mx-1`}
-              onClick={() =>
-                setSearchParams({
-                  page: p,
-                  m_name: memberName,
-                  s_date: startDate,
-                  e_date: endDate,
-                })
-              }
+              onClick={() => setSearchParams(buildSearchParams({ page: p }))}
             >
               {p}
             </button>
@@ -218,14 +217,7 @@ const OrderList = () => {
           <button
             className="btn btn-outline-secondary mx-3"
             disabled={page >= Math.ceil(rowTotal / pageGap)}
-            onClick={() =>
-              setSearchParams({
-                page: page + 1,
-                m_name: memberName,
-                s_date: startDate,
-                e_date: endDate,
-              })
-            }
+            onClick={() => setSearchParams(buildSearchParams({ page: page + 1 }))}
           >
             다음 →
           </button>
