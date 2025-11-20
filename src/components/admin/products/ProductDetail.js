@@ -3,15 +3,15 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const ProductDetail = () => {
-  const { prdNo } = useParams(); // URL에서 prdNo 가져오기
+  const { prdNo } = useParams();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 관리자 API URL
   const apiBaseUrl = 'http://localhost:8085/api/admin/products';
 
+  // 상품 정보 로드
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -27,6 +27,21 @@ const ProductDetail = () => {
     loadProduct();
   }, [prdNo]);
 
+  // 삭제 기능
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm('정말로 이 상품을 삭제하시겠습니까?');
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${apiBaseUrl}/${prdNo}`);
+      alert('상품이 삭제되었습니다.');
+      navigate('/admin/products'); // 목록으로 이동
+    } catch (err) {
+      console.error(err);
+      alert('상품 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   if (loading) return <div className="text-center mt-5">⏳ 불러오는 중...</div>;
   if (!product) return <div className="text-center mt-5">상품 정보를 찾을 수 없습니다.</div>;
 
@@ -34,10 +49,9 @@ const ProductDetail = () => {
     <div className="container mt-4" style={{ maxWidth: '800px' }}>
       <h2 className="mb-4 text-center">🧴 상품 상세 정보</h2>
 
-      {/* 상품 정보 카드 */}
       <div className="card shadow-sm">
         <div className="card-body">
-          {/* 이미지 */}
+          {/* 상품 이미지 */}
           <div className="text-center mb-4">
             <img
               src={`/images/${product.prdImg}`}
@@ -52,6 +66,7 @@ const ProductDetail = () => {
             />
           </div>
 
+          {/* 상품 정보 테이블 */}
           <table className="table table-bordered">
             <tbody>
               <tr>
@@ -103,8 +118,12 @@ const ProductDetail = () => {
               ← 목록으로
             </button>
 
-            <button className="btn btn-primary" onClick={() => navigate(`/admin/products/edit/${prdNo}`)}>
+            <button className="btn btn-primary me-2" onClick={() => navigate(`/admin/products/edit/${prdNo}`)}>
               ✏ 수정하기
+            </button>
+
+            <button className="btn btn-danger" onClick={handleDelete}>
+              🗑 삭제하기
             </button>
           </div>
         </div>

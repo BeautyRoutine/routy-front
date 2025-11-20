@@ -10,7 +10,8 @@ import OrderDetail from '../orders/OrderDetail';
 import ProductList from '../products/ProductList';
 import ProductDetail from '../products/ProductDetail';
 import ProductEdit from '../products/ProductEdit';
-import ProductIng from '../ingredient/ProductIng';
+import ProductAdd from '../products/ProductAdd';
+import IngredientList from '../ingredient/IngredientList';
 import './Adminhome.css';
 
 const AdminHome = () => {
@@ -22,9 +23,10 @@ const AdminHome = () => {
           <Routes>
             {/* 상품 관리 */}
             <Route path="productList" Component={ProductList} />
-            <Route path="productIng" Component={ProductIng} />
             <Route path="products/detail/:prdNo" element={<ProductDetail />} />
             <Route path="products/edit/:prdNo" element={<ProductEdit />} />
+            <Route path="products/add" element={<ProductAdd />} />
+            <Route path="ingredientList" Component={IngredientList} />
             {/* 주문 관리 */}
             <Route path="orderList" Component={OrderList} />
             <Route path="orderDetail/:odNo" Component={OrderDetail} />

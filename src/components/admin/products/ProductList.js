@@ -101,7 +101,14 @@ const ProductList = () => {
           </div>
         </div>
       </div>
-
+      {/* 상품 추가 */}
+      <div className="text-end mb-3">
+        <button
+          className='btn btn-success'
+          onClick={() => navigate('/admin/products/add')}>
+          ➕ 상품 추가
+        </button>
+      </div>
       {/* 테이블 */}
       <div className="table-responsive">
         <div className="d-flex justify-content-end mb-2">

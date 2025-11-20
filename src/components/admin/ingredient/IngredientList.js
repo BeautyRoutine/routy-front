@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const ProductIng = () => {
+const IngredientList = () => {
   const [ingredients, setIngredients] = useState([]);
 
   // 첫 로드 시 성분 목록 조회
@@ -53,4 +53,4 @@ const ProductIng = () => {
   );
 };
 
-export default ProductIng;
+export default IngredientList;
