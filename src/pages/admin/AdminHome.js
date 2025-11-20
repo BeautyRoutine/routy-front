@@ -24,7 +24,8 @@ const AdminHome = () => {
           <Route path="products/detail/:prdNo" element={<ProductDetail />} />
           <Route path="products/edit/:prdNo" element={<ProductEdit />} />
           <Route path="products/add" element={<ProductAdd />} />
-          <Route path="productIng" Component={IngredientList} />
+
+          <Route path="productIng" Component={IngredientList} />      
 
           {/* 주문 관리 */}
           <Route path="orderList" Component={OrderList} />
