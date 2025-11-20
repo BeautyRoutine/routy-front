@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { CartPage } from './pages/CartPage';
 
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
@@ -7,6 +7,9 @@ import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 // TODO: 로그인/회원가입 API 연동 시 ENDPOINTS import를 복원하시면 됩니다.
 // import { Header, ENDPOINTS as HEADER_ENDPOINTS } from './components/user/layouts/Header';
 import Home from 'pages/Home';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import LogoutPage from './pages/LogoutPage';
 import AdminHome from 'pages/admin/AdminHome';
 import Footer from 'components/user/layouts/footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -19,14 +22,14 @@ function App() {
 
   // 공통 네비게이션 요청을 route key 기반으로 처리해 헤더/푸터에서 같은 매핑을 재사용할 수 있도록 함
   const handleLoginClick = async () => {
-    // 현재는 데모 목적으로 버튼 클릭 시 바로 로그인 상태로 전환한다.
-    // 실제 적용 시 HEADER_ENDPOINTS.login을 활용해 모달/로그인 API와 연동하도록 변경한다.
-    setIsLoggedIn(true);
+    //  로그인 버튼 클릭 시 로그인 페이지로 이동합니다.
+   // 실제 적용 시 HEADER_ENDPOINTS.login을 활용해 모달/로그인 API와 연동하도록 변경한다.
+    navigate('/login');
   };
 
   const handleSignupClick = () => {
     // 회원가입 페이지 또는 모달이 준비되면 여기에서 navigate를 호출해 흐름을 연결한다.
-    console.info('회원가입 절차를 연결하세요.');
+    navigate('/signup');
   };
 
   const handleLogoutClick = () => {
@@ -88,6 +91,35 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
+          {/* 로그인 */}
+        <Route
+            path="/login"
+            element={
+              isLoggedIn
+                ? <Navigate to="/" replace />
+                : <LoginPage onSuccess={(member) => {
+              setIsLoggedIn(true);
+              setUserRole(member?.role || 'user');
+            }}
+            />
+            }
+          />
+
+         {/* 회원가입 */}
+          <Route
+            path="/signup"
+            element={
+              isLoggedIn
+                ? <Navigate to="/" replace />
+                : <SignupPage />
+            }
+          />
+
+         {/* 로그아웃 */}
+          <Route path="/logout" element={<LogoutPage />} />
+
+         {/* 404 */}
+          <Route path="*" element={<div style={{ padding: 24 }}>페이지를 찾을 수 없습니다.</div>} />
         </Routes>
       </main>
 
