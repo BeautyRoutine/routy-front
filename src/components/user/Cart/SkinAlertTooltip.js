@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './CartPage.css'; // 공통 CSS 사용
+import './CartPage.css';
 
 export function SkinAlertTooltip({ item }) {
-  const { skinAlert } = item;
-  if (!skinAlert) return null;
+  if (!item || !item.skinAlert) {
+    return null;
+  }
 
+  const { skinAlert } = item;
   let iconClass, tooltipType;
 
   switch (skinAlert.type) {
@@ -16,10 +18,6 @@ export function SkinAlertTooltip({ item }) {
     case 'warning':
       iconClass = 'bi bi-exclamation-triangle-fill text-warning';
       tooltipType = 'warning';
-      break;
-    case 'duplicate':
-      iconClass = 'bi bi-lightning-fill text-duplicate';
-      tooltipType = 'duplicate';
       break;
     default:
       return null;
@@ -33,5 +31,5 @@ export function SkinAlertTooltip({ item }) {
 }
 
 SkinAlertTooltip.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
 };
