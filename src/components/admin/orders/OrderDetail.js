@@ -1,45 +1,46 @@
-// src/components/admin/orders/OrderDetail.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectOrder, clearSelectedOrder } from '../store';
 import axios from 'axios';
-import LoadingSpinner from '../../common/LoadingSpinner';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectItem, clearSelectedItem } from 'features/orders/admOrdersSlice';
+
+import LoadingSpinner from 'components/common/LoadingSpinner';
 
 const OrderDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const apiBaseUrl = useSelector(state => state.config.apiBaseUrl);
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   const { odNo } = useParams();
-  const orderList = useSelector(state => state.orders.list);
-  const selectedOrder = useSelector(state => state.orders.selectedOrder);
+  const orderList = useSelector(state => state.admOrders.list);
+  console.log(orderList);
+  const selectedItem = useSelector(state => state.admOrders.selectedItem);
 
   const handleBack = () => {
     navigate(-1);
   };
   const getDeliveryKeyText = () => {
-    if (selectedOrder.ODDELVKEYTYPE === 2) return '자유출입가능';
-    if (selectedOrder.ODDELVKEYTYPE === 1 && selectedOrder.ODDELVKEY === null) return '없음';
-    return `공동현관번호: ${selectedOrder.ODDELVKEY}`;
+    if (selectedItem.ODDELVKEYTYPE === 2) return '자유출입가능';
+    if (selectedItem.ODDELVKEYTYPE === 1 && selectedItem.ODDELVKEY === null) return '없음';
+    return `공동현관번호: ${selectedItem.ODDELVKEY}`;
   };
 
   useEffect(() => {
     const loadOrder = async () => {
-      dispatch(clearSelectedOrder());
+      dispatch(clearSelectedItem());
       const existence = orderList.find(e => e.ODNO === parseInt(odNo));
       setLoading(true);
       try {
         if (existence) {
           console.log(existence);
-          dispatch(selectOrder(existence));
+          dispatch(selectItem(existence));
           return;
         } else {
           console.log(`${apiBaseUrl}/orders/detail/${odNo}`);
           const response = await axios.get(`${apiBaseUrl}/orders/detail/${odNo}`);
-          dispatch(selectOrder(response.data.data));
+          dispatch(selectItem(response.data.data));
         }
       } catch (err) {
         console.error('주문번호 조회 실패: ', err);
@@ -53,12 +54,12 @@ const OrderDetail = () => {
 
   if (loading) return <LoadingSpinner message="주문 정보를 불러오는 중입니다..." />;
   if (error) return <div className="text-danger text-center my-5">{error}</div>;
-  if (!selectedOrder) return <div className="text-center my-5">해당 주문 정보를 찾을 수 없습니다.</div>;
+  if (!selectedItem) return <div className="text-center my-5">해당 주문 정보를 찾을 수 없습니다.</div>;
 
   return (
     <div>
       <fieldset>
-        <legend className="mb-3">📦 주문 상세 정보</legend>
+        <legend className="mb-3">📜 주문 상세 정보</legend>
         <h5 className="fw-bold border-bottom pb-2 mb-3 text-primary">주문 정보</h5>
         <table className="table table-hover table-bordered align-middle">
           <colgroup>
@@ -70,27 +71,27 @@ const OrderDetail = () => {
           <tbody>
             <tr>
               <th className="bg-light">주문번호</th>
-              <td>{selectedOrder.ODNO}</td>
+              <td>{selectedItem.ODNO}</td>
               <th className="bg-light">결제일</th>
-              <td>{selectedOrder.ODREGDATE}</td>
+              <td>{selectedItem.ODREGDATE}</td>
             </tr>
             <tr>
               <th className="bg-light">상품가격 / 택배비</th>
               <td>
-                {selectedOrder.ODPRDPRICE} 원 / {selectedOrder.ODDELVPRICE} 원
+                {selectedItem.ODPRDPRICE} 원 / {selectedItem.ODDELVPRICE} 원
               </td>
               <th className="bg-light">총 결제금액</th>
-              <td>{selectedOrder.ODPRDPRICE + selectedOrder.ODDELVPRICE} 원</td>
+              <td>{selectedItem.ODPRDPRICE + selectedItem.ODDELVPRICE} 원</td>
             </tr>
             <tr>
               <th className="bg-light">결제자 성명(ID) / 닉네임</th>
               <td colSpan="3">
-                {selectedOrder.USERNAME}({selectedOrder.USERID}) / {selectedOrder.USERNICK}
+                {selectedItem.USERNAME}({selectedItem.USERID}) / {selectedItem.USERNICK}
               </td>
             </tr>
             <tr>
               <th className="bg-light">결제자 연락처</th>
-              <td colSpan="3">{selectedOrder.USERHP}</td>
+              <td colSpan="3">{selectedItem.USERHP}</td>
             </tr>
           </tbody>
         </table>
@@ -105,23 +106,23 @@ const OrderDetail = () => {
           <tbody>
             <tr>
               <th className="bg-light">수령인</th>
-              <td>{selectedOrder.ODNAME}</td>
+              <td>{selectedItem.ODNAME}</td>
               <th className="bg-light">수령인 연락처</th>
-              <td>{selectedOrder.ODHP}</td>
+              <td>{selectedItem.ODHP}</td>
             </tr>
             <tr>
               <th className="bg-light">지번 주소</th>
               <td colSpan="3">
-                {selectedOrder.ODJIBUNADDR
-                  ? `(${selectedOrder.ODZIP}) ${selectedOrder.ODJIBUNADDR}, ${selectedOrder.ODDETAILADDR}`
+                {selectedItem.ODJIBUNADDR
+                  ? `(${selectedItem.ODZIP}) ${selectedItem.ODJIBUNADDR}, ${selectedItem.ODDETAILADDR}`
                   : '없음'}
               </td>
             </tr>
             <tr>
               <th className="bg-light">도로명 주소</th>
               <td colSpan="3">
-                {selectedOrder.ODROADADDR
-                  ? `(${selectedOrder.ODZIP}) ${selectedOrder.ODROADADDR}, ${selectedOrder.ODDETAILADDR}`
+                {selectedItem.ODROADADDR
+                  ? `(${selectedItem.ODZIP}) ${selectedItem.ODROADADDR}, ${selectedItem.ODDETAILADDR}`
                   : '없음'}
               </td>
             </tr>
@@ -129,7 +130,7 @@ const OrderDetail = () => {
               <th className="bg-light">택배 출입방법</th>
               <td>{getDeliveryKeyText()}</td>
               <th className="bg-light">택배 요청사항</th>
-              <td>{selectedOrder.ODDELVMSG}</td>
+              <td>{selectedItem.ODDELVMSG}</td>
             </tr>
           </tbody>
         </table>

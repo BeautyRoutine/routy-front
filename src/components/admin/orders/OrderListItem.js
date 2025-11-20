@@ -1,15 +1,14 @@
-// src/components/admin/orders/OrderListItem.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { selectOrder } from '../store';
+import { selectItem } from 'features/orders/admOrdersSlice';
 
 const OrderListItem = ({ order }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleClick = () => {
-    dispatch(selectOrder(order));
+    dispatch(selectItem(order));
     navigate(`/admin/orderList/${order.ODNO}`);
   };
 

@@ -2,23 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setOrders, setOrdersCount } from '../store';
+import { setItems, setItemsCount } from 'features/orders/admOrdersSlice';
 
+import LoadingSpinner from 'components/common/LoadingSpinner';
 import OrderListItem from './OrderListItem';
-import LoadingSpinner from '../../common/LoadingSpinner';
 
 const OrderList = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const apiBaseUrl = useSelector(state => state.config.apiBaseUrl);
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   // paging
-  const rowTotal = useSelector(state => state.orders.rowTotal);
-  const pageGap = useSelector(state => state.orders.pageGap);
+  const rowTotal = useSelector(state => state.admOrders.rowTotal);
+  const pageGap = useSelector(state => state.admOrders.pageGap);
   const page = Number(searchParams.get('page')) || 1;
-  const orders = useSelector(state => state.orders.list);
+  const orders = useSelector(state => state.admOrders.list);
 
   // get params
   const memberName = searchParams.get('m_name') || '';
@@ -56,13 +56,13 @@ const OrderList = () => {
       try {
         const result = await axios.get(`${apiBaseUrl}/orders/list`, { params });
         // console.log(result);
-        dispatch(setOrders(result.data.data.list));
-        dispatch(setOrdersCount(result.data.data.total));
+        dispatch(setItems(result.data.data.list));
+        dispatch(setItemsCount(result.data.data.total));
       } catch (err) {
         console.error('주문목록 불러오기 실패: ', err);
         setError('❌ 목록 불러오기 실패');
-        dispatch(setOrders([]));
-        dispatch(setOrdersCount(0));
+        dispatch(setItems([]));
+        dispatch(setItemsCount(0));
       } finally {
         setLoading(false);
       }

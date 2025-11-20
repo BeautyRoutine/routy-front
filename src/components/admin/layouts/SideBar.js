@@ -75,8 +75,8 @@ function Sidebar() {
               주문 목록
             </Link>
             <Link
-              to="/admin/orderDelivery"
-              className={`submenu-link ${path.includes('/admin/orderDelivery') ? 'active' : ''}`}
+              to="/admin/orderDeliveryList"
+              className={`submenu-link ${path.includes('/admin/orderDeliveryList') ? 'active' : ''}`}
             >
               배송 목록
             </Link>
