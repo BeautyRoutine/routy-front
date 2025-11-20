@@ -1,8 +1,5 @@
 // -----------------------------------------------------------------------------
-// SignupPage.js - 회원가입 페이지
-// - 이메일 / 닉네임 / 비밀번호만 우선 사용
-// - 기본 유효성: 이메일 형식, 닉네임(2~12자 한/영/숫자), 비밀번호(8~16자)
-// - 성공 시 /login 으로 이동
+// SignupPage.js -회원가입 페이지 (주소 찾기 기능 포함)
 // -----------------------------------------------------------------------------
 
 import React, { useMemo, useState } from "react";
@@ -14,174 +11,311 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function SignupPage({ onSuccess }) {
   const [form, setForm] = useState({
-    userEmail: "",
     userNick: "",
+    userEmail: "",
     userPw: "",
+    userPwConfirm: "",
+    phone: "",
+    birthYear: "",
+    birthMonth: "",
+    birthDay: "",
+    gender: "",
+    zipCode: "",
+    addr1: "",
+    addr2: "",
+    agreeTerms: false,
+    agreeMarketing: false,
   });
+
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const navigate = useNavigate();
-
-  const isEmailValid = useMemo(
-    () => EMAIL_RE.test(form.userEmail.trim()),
-    [form.userEmail]
-  );
+  // 기본 유효성
   const isNickValid = useMemo(
-    () => /^[가-힣a-zA-Z0-9]{2,12}$/.test(form.userNick.trim()),
+    () => /^[가-힣a-zA-Z0-9]{2,20}$/.test(form.userNick.trim()),
     [form.userNick]
   );
-  const isPwValid = useMemo(
-    () => /^(?=.{8,16}$).*/.test(form.userPw),
-    [form.userPw]
+  const isEmailValid = useMemo(() => EMAIL_RE.test(form.userEmail.trim()), [form.userEmail]);
+  const isPwValid = useMemo(() => /^(?=.{8,16}$).*/.test(form.userPw), [form.userPw]);
+  const isPwConfirmValid = useMemo(
+    () => !!form.userPw && form.userPw === form.userPwConfirm,
+    [form.userPw, form.userPwConfirm]
   );
-  const isFormValid = isEmailValid && isNickValid && isPwValid;
+
+  const isFormValid =
+    isNickValid && isEmailValid && isPwValid && isPwConfirmValid && form.agreeTerms;
 
   function onChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+  }
+
+  function goBack() {
+    navigate(-1);
+  }
+
+  // 카카오 주소찾기
+  function handleFindAddress() {
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        const addr = data.userSelectedType === "R" ? data.roadAddress : data.jibunAddress;
+
+        setForm((prev) => ({
+          ...prev,
+          zipCode: data.zonecode,
+          addr1: addr,
+        }));
+      },
+    }).open();
+  }
+
+  function handleKakaoSignup() {
+    navigate("/oauth/kakao?redirect=/");
+  }
+
+  function handlePhoneVerify() {
+    alert("휴대폰 인증 기능은 추후 연동 예정입니다.");
   }
 
   async function onSubmit(e) {
     e.preventDefault();
-    if (loading) return;
-
-    if (!form.userEmail.trim()) return setMsg("이메일을 입력해주세요.");
-    if (!isEmailValid) return setMsg("이메일 형식을 확인해주세요.");
-    if (!isNickValid)
-      return setMsg("닉네임은 2~12자의 한글/영문/숫자만 가능합니다.");
-    if (!isPwValid)
-      return setMsg("비밀번호는 8~16자 이내로 입력해주세요.");
+    if (!isFormValid) return setMsg("입력하신 내용을 다시 확인해주세요.");
 
     try {
       setLoading(true);
       setMsg("");
 
-      const body = await signUp(form); // { resultCode, resultMsg, data }
-      if (body.resultCode === 200) {
+      const payload = {
+        userEmail: form.userEmail,
+        userNick: form.userNick,
+        userPw: form.userPw,
+      };
+
+      const { data, resultCode, resultMsg } = await signUp(payload);
+
+      if (resultCode === 200) {
         setMsg("회원가입이 완료되었습니다.");
         try {
-          onSuccess?.(body?.data?.member);
-        } catch {
-          // 콜백 에러는 무시합니다. 
-        }
-        setTimeout(() => navigate("/login"), 600);
+          onSuccess?.(data?.member);
+        } catch {}
+        setTimeout(() => navigate("/login"), 700);
       } else {
-        setMsg(body.resultMsg || "회원가입 처리 중 오류가 발생했습니다.");
+        setMsg(resultMsg || "회원가입 중 오류가 발생했습니다.");
       }
-    } catch (error) {
-      const serverMsg =
-        error?.body?.resultMsg ||
-        error?.message ||
-        "회원가입에 실패했습니다. 다시 시도해주세요.";
-      setMsg(serverMsg);
-      console.error("Signup Error:", error);
+    } catch (err) {
+      setMsg(err?.message || "회원가입에 실패했습니다.");
     } finally {
       setLoading(false);
     }
   }
 
+  const inputStyle = {
+    fontSize: 14,
+    height: 44,
+  };
+
   return h(
     "div",
-    { className: "container", style: { maxWidth: 420 } },
-    h("h2", { className: "my-4" }, "회원가입"),
+    { className: "bg-light", style: { minHeight: "100vh", padding: "40px 16px" } },
+
     h(
-      "form",
-      { onSubmit, noValidate: true },
-      // 이메일
+      "div",
+      {
+        className: "bg-white shadow-sm rounded-4 mx-auto",
+        style: { maxWidth: 640, padding: "32px 28px" },
+      },
+
+      // 뒤로가기
+      h(
+        "button",
+        { type: "button", onClick: goBack, className: "btn btn-link px-0 mb-3 text-muted", style: { fontSize: 14 } },
+        "← 돌아가기"
+      ),
+
+      // 타이틀
       h(
         "div",
-        { className: "mb-3" },
-        h("label", { className: "form-label" }, "이메일"),
-        h("input", {
-          name: "userEmail",
-          value: form.userEmail,
-          onChange,
-          className:
-            "form-control " +
-            (form.userEmail && !isEmailValid ? "is-invalid" : ""),
-          type: "email",
-          placeholder: "example@routy.com",
-          autoComplete: "email",
-          required: true,
-        }),
-        form.userEmail &&
-          !isEmailValid &&
-          h(
-            "div",
-            { className: "invalid-feedback" },
-            "유효한 이메일 주소를 입력하세요."
-          )
+        { className: "text-center mb-4" },
+        h("h2", { className: "fw-semibold mb-1", style: { fontSize: 22 } }, "회원가입"),
+        h("p", { className: "text-muted", style: { fontSize: 14 } }, "맞춤형 뷰티 루틴을 시작해 보세요.")
       ),
-      // 닉네임
-      h(
-        "div",
-        { className: "mb-3" },
-        h("label", { className: "form-label" }, "닉네임"),
-        h("input", {
-          name: "userNick",
-          value: form.userNick,
-          onChange,
-          className:
-            "form-control " +
-            (form.userNick && !isNickValid ? "is-invalid" : ""),
-          placeholder: "2~12자 (한글/영문/숫자)",
-          autoComplete: "nickname",
-          required: true,
-        }),
-        form.userNick &&
-          !isNickValid &&
-          h(
-            "div",
-            { className: "invalid-feedback" },
-            "닉네임은 2~12자의 한글/영문/숫자만 가능합니다."
-          )
-      ),
-      // 비밀번호
-      h(
-        "div",
-        { className: "mb-4" },
-        h("label", { className: "form-label" }, "비밀번호"),
-        h("input", {
-          name: "userPw",
-          value: form.userPw,
-          onChange,
-          className:
-            "form-control " +
-            (form.userPw && !isPwValid ? "is-invalid" : ""),
-          type: "password",
-          placeholder: "8~16자 권장",
-          autoComplete: "new-password",
-          required: true,
-        }),
-        form.userPw &&
-          !isPwValid &&
-          h(
-            "div",
-            { className: "invalid-feedback" },
-            "비밀번호는 8~16자를 권장합니다."
-          )
-      ),
-      // 제출 버튼
+
+      // 카카오 가입
       h(
         "button",
         {
-          className: "btn btn-primary w-100",
-          type: "submit",
-          disabled: loading || !isFormValid,
+          type: "button",
+          className: "btn w-100 mb-4",
+          onClick: handleKakaoSignup,
+          style: {
+            backgroundColor: "#FEE500",
+            borderColor: "#FEE500",
+            borderRadius: "999px",
+            height: 44,
+            fontWeight: 600,
+            fontSize: 14,
+          },
         },
-        loading ? "처리 중..." : "회원가입"
-      )
-    ),
-    // 상태 메시지
-    msg &&
+        "카카오로 가입하기"
+      ),
+
       h(
-        "p",
-        {
-          className: "mt-3 text-center text-muted",
-          "aria-live": "polite",
-        },
-        msg
+        "div",
+        { className: "d-flex align-items-center text-muted mb-4", style: { fontSize: 12 } },
+        h("div", { className: "flex-grow-1 border-top" }),
+        h("span", { className: "px-2" }, "이메일로 가입하기"),
+        h("div", { className: "flex-grow-1 border-top" })
+      ),
+
+      // 이메일 폼
+      h(
+        "form",
+        { onSubmit },
+
+        // 이름
+        h("label", { className: "form-label fw-semibold", style: { fontSize: 14.5 } }, "이름"),
+        h("input", {
+          className: "form-control mb-3",
+          name: "userNick",
+          value: form.userNick,
+          onChange,
+          placeholder: "홍길동",
+          style: inputStyle,
+        }),
+
+        // 이메일
+        h("label", { className: "form-label fw-semibold", style: { fontSize: 14.5 } }, "이메일"),
+        h("input", {
+          className: "form-control mb-3",
+          type: "email",
+          name: "userEmail",
+          value: form.userEmail,
+          onChange,
+          placeholder: "your@email.com",
+          style: inputStyle,
+        }),
+
+        // 비밀번호
+        h("label", { className: "form-label fw-semibold", style: { fontSize: 14.5 } }, "비밀번호"),
+        h("input", {
+          className: "form-control mb-3",
+          type: "password",
+          name: "userPw",
+          value: form.userPw,
+          onChange,
+          placeholder: "8~16자 입력",
+          style: inputStyle,
+        }),
+
+        // 비밀번호 확인
+        h("label", { className: "form-label fw-semibold", style: { fontSize: 14.5 } }, "비밀번호 확인"),
+        h("input", {
+          className: "form-control mb-4",
+          type: "password",
+          name: "userPwConfirm",
+          value: form.userPwConfirm,
+          onChange,
+          placeholder: "비밀번호 재입력",
+          style: inputStyle,
+        }),
+
+        // 주소
+        h("label", { className: "form-label fw-semibold", style: { fontSize: 14.5 } }, "주소"),
+        h(
+          "div",
+          { className: "d-flex gap-2 mb-2" },
+          h("input", {
+            className: "form-control",
+            name: "zipCode",
+            value: form.zipCode,
+            onChange,
+            placeholder: "우편번호",
+            style: inputStyle,
+          }),
+          h(
+            "button",
+            {
+              className: "btn btn-outline-secondary",
+              type: "button",
+              onClick: handleFindAddress,
+              style: { fontSize: 13, padding: "0 12px" },
+            },
+            "주소 찾기"
+          )
+        ),
+        h("input", {
+          className: "form-control mb-2",
+          name: "addr1",
+          value: form.addr1,
+          onChange,
+          placeholder: "기본 주소",
+          style: inputStyle,
+        }),
+        h("input", {
+          className: "form-control mb-4",
+          name: "addr2",
+          value: form.addr2,
+          onChange,
+          placeholder: "상세 주소",
+          style: inputStyle,
+        }),
+
+        // 약관
+        h(
+          "div",
+          { className: "mb-4" },
+          h(
+            "label",
+            { className: "form-check mb-2", style: { fontSize: 14 } },
+            h("input", {
+              type: "checkbox",
+              className: "form-check-input",
+              name: "agreeTerms",
+              checked: form.agreeTerms,
+              onChange,
+            }),
+            h("span", { className: "ms-2" }, "이용약관 및 개인정보처리방침 동의 (필수)")
+          ),
+          h(
+            "label",
+            { className: "form-check", style: { fontSize: 14 } },
+            h("input", {
+              type: "checkbox",
+              className: "form-check-input",
+              name: "agreeMarketing",
+              checked: form.agreeMarketing,
+              onChange,
+            }),
+            h("span", { className: "ms-2" }, "마케팅 정보 수신 동의 (선택)")
+          )
+        ),
+
+        msg &&
+          h("p", { className: "text-center small mb-2 text-danger" }, msg),
+
+        h(
+          "button",
+          {
+            type: "submit",
+            className: "btn btn-primary w-100 mb-3",
+            disabled: loading || !isFormValid,
+            style: { fontSize: 15, height: 46 },
+          },
+          loading ? "처리 중..." : "가입하기"
+        ),
+
+        h(
+          "p",
+          { className: "text-center text-muted mb-0", style: { fontSize: 14 } },
+          "이미 계정이 있으신가요? ",
+          h(
+            "button",
+            { type: "button", onClick: () => navigate("/login"), className: "btn btn-link p-0", style: { fontSize: 14 } },
+            "로그인하기"
+          )
+        )
       )
+    )
   );
 }

@@ -1,19 +1,20 @@
 // -----------------------------------------------------------------------------
-// LoginPage.js - 로그인 페이지 컴포넌트입니다. 
+// LoginPage.js - 로그인 페이지
+// - '로그인 상태 유지' 시 localStorage, 아니면 sessionStorage에 토큰 저장
+// - 응답 규격: { resultCode, resultMsg, data: { token, member } } 가정
+// - 관리자 로그인 체크 시, 성공 후 /admin 으로 이동
 // -----------------------------------------------------------------------------
 
 import React, { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { login } from "../lib/apiClient"; // 💡 경로만 현재 구조에 맞게 수정
+import { login } from "../lib/apiClient";
 
-const h = React.createElement;
-
-// 이메일 최소 포맷 검증
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage({ onSuccess }) {
   const [form, setForm] = useState({ userEmail: "", userPw: "" });
   const [rememberMe, setRememberMe] = useState(true);
+  const [asAdmin, setAsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -31,47 +32,58 @@ export default function LoginPage({ onSuccess }) {
   );
   const isFormValid = isEmailValid && isPwValid;
 
-  function onChange(e) {
+  function handleChange(e) {
     const { name, value, type, checked } = e.target;
 
-    if (type === "checkbox") {
+    if (name === "rememberMe") {
       setRememberMe(checked);
+      return;
+    }
+    if (name === "asAdmin") {
+      setAsAdmin(checked);
       return;
     }
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function onSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (loading) return;
 
-    if (!form.userEmail.trim()) return setMsg("이메일을 입력해주세요.");
-    if (!form.userPw) return setMsg("비밀번호를 입력해주세요.");
-    if (!isEmailValid) return setMsg("이메일 형식을 확인해주세요.");
-    if (!isPwValid) return setMsg("비밀번호는 8자 이상이어야 합니다.");
+    if (!form.userEmail.trim()) {
+      setMsg("이메일을 입력해주세요.");
+      return;
+    }
+    if (!form.userPw) {
+      setMsg("비밀번호를 입력해주세요.");
+      return;
+    }
+    if (!isEmailValid) {
+      setMsg("이메일 형식을 확인해주세요.");
+      return;
+    }
+    if (!isPwValid) {
+      setMsg("비밀번호는 8자 이상이어야 합니다.");
+      return;
+    }
 
     try {
       setLoading(true);
       setMsg("");
 
-      // apiClient 기준: 성공 시 { resultCode, resultMsg, data } 반환
       const resp = await login({
         userEmail: form.userEmail.trim(),
         userPw: form.userPw,
+        asAdmin,
       });
 
-      const body = resp;
-      const token = body?.data?.token;
-      const member = body?.data?.member || null;
+      const token = resp?.data?.token;
+      const member = resp?.data?.member || null;
 
       if (token) {
-        const storage = rememberMe ? window.localStorage : window.sessionStorage;
-
-        // auth 객체 저장
-        const authObj = { token, member };
-        storage.setItem("auth", JSON.stringify(authObj));
-
-        // 하위 호환: token / member 개별 저장
+        const storage = rememberMe
+          ? window.localStorage
+          : window.sessionStorage;
         storage.setItem("token", token);
         if (member) storage.setItem("member", JSON.stringify(member));
       }
@@ -81,9 +93,10 @@ export default function LoginPage({ onSuccess }) {
         onSuccess?.(member);
       } catch (_) {}
 
-      // redirect 우선, 없으면 뒤로가기 -> 홈
       if (redirectTo) {
         navigate(redirectTo, { replace: true });
+      } else if (asAdmin) {
+        navigate("/admin", { replace: true });
       } else {
         try {
           navigate(-1);
@@ -93,184 +106,189 @@ export default function LoginPage({ onSuccess }) {
       }
     } catch (err) {
       setMsg(err?.message || "로그인 중 오류가 발생했습니다.");
+      // eslint-disable-next-line no-console
       console.error("Login Error:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  return h(
-    "div",
-    { className: "container", style: { maxWidth: 420 } },
-    h("h2", { className: "my-4" }, "로그인"),
-    h(
-      "form",
-      { onSubmit, noValidate: true },
-      // 이메일
-      h(
-        "div",
-        { className: "mb-3" },
-        h(
-          "label",
-          { htmlFor: "email", className: "form-label" },
-          "이메일(ID)"
-        ),
-        h("input", {
-          id: "email",
-          name: "userEmail",
-          value: form.userEmail,
-          onChange,
-          className:
-            "form-control " +
-            (form.userEmail && !isEmailValid ? "is-invalid" : ""),
-          type: "email",
-          inputMode: "email",
-          autoComplete: "email",
-          placeholder: "example@routy.com",
-          required: true,
-        }),
-        form.userEmail &&
-          !isEmailValid &&
-          h(
-            "div",
-            { className: "invalid-feedback" },
-            "유효한 이메일 주소를 입력하세요."
-          )
-      ),
-      // 비밀번호
-      h(
-        "div",
-        { className: "mb-2" },
-        h(
-          "label",
-          { htmlFor: "password", className: "form-label" },
-          "비밀번호"
-        ),
-        h("input", {
-          id: "password",
-          name: "userPw",
-          value: form.userPw,
-          onChange,
-          className:
-            "form-control " +
-            (form.userPw && !isPwValid ? "is-invalid" : ""),
-          type: "password",
-          autoComplete: "current-password",
-          minLength: 8,
-          placeholder: "8자 이상 권장",
-          required: true,
-        }),
-        form.userPw &&
-          !isPwValid &&
-          h(
-            "div",
-            { className: "invalid-feedback" },
-            "비밀번호는 8자 이상이어야 합니다."
-          )
-      ),
-      // 옵션/링크
-      h(
-        "div",
-        {
-          className:
-            "d-flex align-items-center justify-content-between mb-3",
-        },
-        h(
-          "div",
-          { className: "form-check" },
-          h("input", {
-            id: "rememberMe",
-            className: "form-check-input",
-            type: "checkbox",
-            name: "rememberMe",
-            checked: rememberMe,
-            onChange,
-          }),
-          h(
-            "label",
-            { className: "form-check-label", htmlFor: "rememberMe" },
-            "로그인 유지"
-          )
-        ),
-        h(
-          "div",
-          { className: "d-flex gap-3" },
-          h(
-            "button",
-            {
-              type: "button",
-              className: "btn btn-link p-0",
-              onClick: () => navigate("/signup"),
-            },
-            "회원가입"
-          ),
-          h(
-            "button",
-            {
-              type: "button",
-              className: "btn btn-link p-0",
-              onClick: () => navigate("/password/reset"),
-            },
-            "비밀번호 찾기"
-          )
-        )
-      ),
-      // 제출
-      h(
-        "button",
-        {
-          className: "btn btn-primary w-100",
-          type: "submit",
-          disabled: loading || !isFormValid,
-        },
-        loading ? "처리 중..." : "로그인"
-      )
-    ),
-    // 상태 메시지
-    msg &&
-      h(
-        "p",
-        {
-          className: "mt-3 text-center text-muted",
-          "aria-live": "polite",
-        },
-        msg
-      ),
-    // SNS 로그인 (라우팅만 연결 – 실제 OAuth는 이후 연동)
-    h("hr", { className: "my-4" }),
-    h(
-      "div",
-      { className: "d-grid gap-2" },
-      h(
-        "button",
-        {
-          className: "btn btn-outline-secondary",
-          type: "button",
-          onClick: () =>
-            navigate("/oauth/kakao?redirect=" + (redirectTo || "/")),
-        },
-        "카카오로 계속하기"
-      ),
-      h(
-        "button",
-        {
-          className: "btn btn-outline-secondary",
-          type: "button",
-          onClick: () =>
-            navigate("/oauth/google?redirect=" + (redirectTo || "/")),
-        },
-        "구글로 계속하기"
-      ),
-      h(
-        "button",
-        {
-          className: "btn btn-outline-secondary",
-          type: "button",
-          onClick: () =>
-            navigate("/oauth/naver?redirect=" + (redirectTo || "/")),
-        },
-        "네이버로 계속하기"
-      )
-    )
+  return (
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ minHeight: "calc(100vh - 160px)" }}
+    >
+      <div className="card shadow-sm" style={{ width: "100%", maxWidth: 420 }}>
+        <div className="card-body p-4">
+          {/* 상단 헤더 */}
+          <div className="mb-4 text-center">
+            <div className="fw-semibold text-primary mb-1">Routy</div>
+            <h2 className="h4 mb-2">로그인</h2>
+            <p className="text-muted small mb-0">
+              나만의 뷰티 루틴을 이어가려면 로그인이 필요해요.
+            </p>
+          </div>
+
+          {/* 로그인 폼 */}
+          <form onSubmit={handleSubmit} noValidate>
+            {/* 이메일 */}
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label fw-semibold">
+                이메일
+              </label>
+              <input
+                id="email"
+                name="userEmail"
+                value={form.userEmail}
+                onChange={handleChange}
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="your@email.com"
+                required
+                className={
+                  "form-control" +
+                  (form.userEmail && !isEmailValid ? " is-invalid" : "")
+                }
+              />
+              <div className="form-text">
+                Routy에 가입하신 이메일 주소를 입력해주세요.
+              </div>
+              {form.userEmail && !isEmailValid && (
+                <div className="invalid-feedback">
+                  유효한 이메일 주소를 입력해주세요.
+                </div>
+              )}
+            </div>
+
+            {/* 비밀번호 */}
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label fw-semibold">
+                비밀번호
+              </label>
+              <input
+                id="password"
+                name="userPw"
+                value={form.userPw}
+                onChange={handleChange}
+                type="password"
+                autoComplete="current-password"
+                minLength={8}
+                placeholder="8자 이상 입력해주세요"
+                required
+                className={
+                  "form-control" +
+                  (form.userPw && !isPwValid ? " is-invalid" : "")
+                }
+              />
+              <div className="form-text">
+                영문/숫자 조합으로 8자 이상을 추천드립니다.
+              </div>
+              {form.userPw && !isPwValid && (
+                <div className="invalid-feedback">
+                  비밀번호는 8자 이상이어야 합니다.
+                </div>
+              )}
+            </div>
+
+            {/* 옵션 영역 */}
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="form-check">
+                <input
+                  id="rememberMe"
+                  name="rememberMe"
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={rememberMe}
+                  onChange={handleChange}
+                />
+                <label htmlFor="rememberMe" className="form-check-label">
+                  로그인 상태 유지
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-link p-0 small"
+                onClick={() => navigate("/password/reset")}
+              >
+                비밀번호 찾기
+              </button>
+            </div>
+
+            {/* 관리자 로그인 */}
+            <div className="form-check mb-3">
+              <input
+                id="asAdmin"
+                name="asAdmin"
+                type="checkbox"
+                className="form-check-input"
+                checked={asAdmin}
+                onChange={handleChange}
+              />
+              <label htmlFor="asAdmin" className="form-check-label small">
+                관리자로 로그인
+              </label>
+            </div>
+
+            {/* 로그인 버튼 */}
+            <button
+              type="submit"
+              className="btn btn-primary w-100 py-2"
+              disabled={loading || !isFormValid}
+            >
+              {loading ? "처리 중..." : "이메일로 로그인"}
+            </button>
+          </form>
+
+          {/* 상태 메시지 */}
+          {msg && (
+            <p
+              className="mt-3 text-center text-muted small"
+              aria-live="polite"
+            >
+              {msg}
+            </p>
+          )}
+
+          {/* 구분선 */}
+          <div className="d-flex align-items-center my-4">
+            <div className="flex-grow-1 border-top" />
+            <span className="mx-2 text-muted small">또는</span>
+            <div className="flex-grow-1 border-top" />
+          </div>
+
+          {/* 카카오 로그인만 남김 */}
+          <button
+            type="button"
+            className="btn w-100 py-2"
+            style={{
+              backgroundColor: "#FEE500",
+              borderColor: "#FEE500",
+              fontWeight: 500,
+            }}
+            onClick={() =>
+              navigate(
+                `/oauth/kakao?redirect=${encodeURIComponent(redirectTo || "/")}`
+              )
+            }
+          >
+            카카오로 계속하기
+          </button>
+
+          {/* 회원가입 링크 */}
+          <p className="mt-4 text-center text-muted small mb-0">
+            아직 계정이 없으신가요?{" "}
+            <button
+              type="button"
+              className="btn btn-link p-0 align-baseline"
+              onClick={() => navigate("/signup")}
+            >
+              회원가입
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
