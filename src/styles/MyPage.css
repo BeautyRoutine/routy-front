@@ -11,7 +11,7 @@
   background: #ffffff;
   border-radius: 24px;
   padding: 28px;
-  box-shadow: 0 20px 40px rgba(92, 115, 255, 0.12);
+  box-shadow: 0 20px 40px rgba(108, 197, 255, 0.12);
   position: sticky;
   top: 160px;
   height: fit-content;
@@ -31,7 +31,7 @@
 .sidebar-title {
   margin: 0 0 10px;
   font-weight: 700;
-  color: #6a6de0;
+  color: #6cc5ff;
 }
 
 .sidebar-section ul {
@@ -41,7 +41,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: #6a728d;
+  color: #64748b;
   font-size: 14px;
 }
 
@@ -62,14 +62,14 @@
 
 /* ...existing code... */
 .mypage-hero {
-  background: linear-gradient(135deg, #6cc5ff, #9b7bff);
+  background: linear-gradient(135deg, #6cc5ff, #5ab3ed);
   border-radius: 30px;
   padding: 0;
   color: #fff;
   display: flex;
   flex-direction: column;
   gap: 0;
-  box-shadow: 0 25px 50px rgba(111, 142, 255, 0.3);
+  box-shadow: 0 25px 50px rgba(108, 197, 255, 0.3);
   border: none;
   overflow: hidden;
 }
@@ -112,16 +112,17 @@
   line-height: 1.2;
 }
 
-.hero-tags {
+.hero-tags-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .skin-tag {
   font-size: 13px;
   font-weight: 600;
-  color: #6a6de0;
+  color: #6cc5ff;
   background: #fff;
   padding: 4px 10px;
   border-radius: 12px;
@@ -131,15 +132,18 @@
 .hero-settings-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  border-radius: 20px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 0;
+  padding: 0 12px;
   transition: background 0.2s;
+  gap: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .hero-settings-btn:hover {
@@ -151,13 +155,18 @@
   margin-right: 6px;
 }
 
+.hero-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .hero-links button {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: #fff;
   padding: 6px 14px;
   border-radius: 20px;
-  margin-left: 10px;
   font-size: 13px;
   cursor: pointer;
   transition: background 0.2s;
@@ -169,39 +178,42 @@
 
 .hero-stats {
   display: flex;
-  justify-content: space-around;
   align-items: center;
-  padding: 20px 0;
-  background: rgba(255, 255, 255, 0.15);
+  padding: 24px 0;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
 }
 
 .stat-item {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   font-size: 15px;
 }
 
 .stat-label {
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  color: #6f7591;
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .stat-value {
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+  color: #2f315a;
+  letter-spacing: -0.5px;
 }
 
 .stat-value.point {
-  color: #fff;
+  color: #2f315a;
 }
 
 .stat-divider {
   width: 1px;
-  height: 20px;
-  background-color: rgba(255, 255, 255, 0.3);
+  height: 24px;
+  background-color: #e2e5f3;
 }
 
 .mypage-activity,
@@ -212,7 +224,7 @@
   background: #fff;
   border-radius: 28px;
   padding: 28px 32px;
-  box-shadow: 0 18px 36px rgba(86, 105, 173, 0.12);
+  box-shadow: 0 18px 36px rgba(108, 197, 255, 0.12);
   margin-bottom: 32px;
 }
 
@@ -248,7 +260,7 @@
 .mypage-status button,
 .mypage-favorite button,
 .mypage-inquiry-grid button {
-  color: #6a6de0;
+  color: #6cc5ff;
   font-size: 13px;
   font-weight: 600;
   border: 1px solid #e2e5f3;
@@ -262,15 +274,15 @@
 .mypage-status button:hover,
 .mypage-favorite button:hover,
 .mypage-inquiry-grid button:hover {
-  background: #f6f8ff;
-  border-color: #d4d8f5;
+  background: #f0f9ff;
+  border-color: #bae6fd;
 }
 
 .status-steps {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f6f8ff;
+  background: #f0f9ff;
   padding: 40px 30px;
   border-radius: 20px;
 }
@@ -304,7 +316,7 @@
 }
 
 .step-arrow {
-  color: #d4d8f5;
+  color: #bae6fd;
   font-size: 24px;
   font-weight: 300;
   margin-top: -20px; /* Align with numbers */
@@ -322,16 +334,16 @@
 .empty-icon {
   width: 64px;
   height: 64px;
-  border: 2px dashed #d4d8f5;
+  border: 2px dashed #bae6fd;
   border-radius: 16px; /* Softer square */
-  color: #6a6de0;
+  color: #6cc5ff;
   font-size: 32px;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  background: #fcfdff;
+  background: #f0f9ff;
 }
 
 .mypage-favorite .empty-state p {
@@ -378,7 +390,7 @@
 
 /* Focus (Interested) - Blue Theme Background */
 .ingredient-block.focus {
-  background-color: #eef6ff;
+  background-color: #f0f9ff;
 }
 
 /* Avoid - Red Theme Background */
@@ -400,7 +412,7 @@
 }
 
 .ingredient-block.focus .ingredient-block-header h4 {
-  color: #1a73e8;
+  color: #5ab3ed;
 }
 
 .ingredient-block.avoid .ingredient-block-header h4 {
@@ -452,7 +464,7 @@
 
 /* Text colors inside the white pill */
 .ingredient-block.focus .ingredient-pill {
-  color: #1a73e8;
+  color: #5ab3ed;
 }
 
 .ingredient-block.avoid .ingredient-pill {

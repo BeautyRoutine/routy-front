@@ -16,7 +16,7 @@
 .header-inner {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 20px 32px 12px;
+  padding: 20px 32px 12px 60px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -68,8 +68,8 @@
 
 .search-wrapper:focus-within {
   background: #ffffff;
-  border-color: #6a6de0; /* Brand color focus */
-  box-shadow: 0 4px 12px rgba(106, 109, 224, 0.15);
+  border-color: #5ab3ed; /* Brand color focus */
+  box-shadow: 0 4px 12px rgba(90, 179, 237, 0.15);
 }
 
 .search-icon {
@@ -261,7 +261,7 @@
 }
 
 .search-panel__trend--down {
-  color: #3b82f6;
+  color: #5ab3ed;
 }
 
 .search-panel__trend--steady {
@@ -286,7 +286,7 @@
 }
 
 .auth-link:hover {
-  color: #2563eb;
+  color: #5ab3ed;
 }
 
 .auth-button--primary {
@@ -397,7 +397,7 @@
   background: transparent;
   font-size: 13px;
   font-weight: 600;
-  color: #2563eb;
+  color: #5ab3ed;
   cursor: pointer;
 }
 
@@ -467,7 +467,7 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: #2563eb;
+  background: #5ab3ed;
 }
 
 .notification-panel__footer {
@@ -561,13 +561,13 @@
 }
 
 .user-menu-item--highlight {
-  color: #2563eb;
+  color: #5ab3ed;
   font-weight: 600;
 }
 
 .user-menu-item--highlight:hover {
-  color: #1d4ed8;
-  background: rgba(37, 99, 235, 0.08);
+  color: #4fa0d8;
+  background: rgba(90, 179, 237, 0.08);
 }
 
 .user-menu-item--logout {
@@ -706,7 +706,7 @@
 }
 
 .category-title:hover {
-  color: #2563eb;
+  color: #5ab3ed;
 }
 
 .category-list {

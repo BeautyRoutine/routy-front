@@ -1,0 +1,486 @@
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.profile-modal-container {
+  background: #fff;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1;
+}
+
+.header-icon {
+  color: #5ab3ed;
+  stroke-width: 2.5px;
+}
+
+.header-desc {
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 400;
+  margin-left: 0;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Profile Image */
+.profile-image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.profile-image-wrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid #eef2ff;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.profile-image-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.photo-change-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.photo-change-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Form Fields */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-group label::before {
+  content: '';
+  /* Icons can be added here via pseudo-elements if needed, or keep simple */
+}
+
+.modal-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #f8fafc;
+  font-size: 15px;
+  color: #1e293b;
+  transition: all 0.2s;
+}
+
+.modal-input:focus {
+  background: #fff;
+  border-color: #5ab3ed;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(90, 179, 237, 0.1);
+}
+
+.modal-input:read-only {
+  color: #94a3b8;
+  cursor: default;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 8px;
+}
+
+.input-with-button .modal-input {
+  flex: 1;
+}
+
+.check-btn {
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.check-btn:hover {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 32px 0;
+}
+
+/* Chips */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip-btn:hover {
+  background: #f8fafc;
+}
+
+.chip-btn.active {
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.chip-btn.skin-type.active {
+  background: #5ab3ed;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(90, 179, 237, 0.25);
+}
+
+.chip-btn.skin-concern.active {
+  background: #14b8a6; /* Teal/Mint */
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.25);
+}
+
+/* Social Accounts */
+.helper-text {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: -4px 0 16px;
+}
+
+.social-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.social-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.social-icon.google {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #ea4335;
+}
+.social-icon.facebook {
+  background: #1877f2;
+  color: #fff;
+}
+.social-icon.kakao {
+  background: #fee500;
+  color: #3c1e1e;
+}
+.social-icon.naver {
+  background: #03c75a;
+  color: #fff;
+}
+
+.social-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.social-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.social-status {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.social-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.social-action-btn.connect {
+  background: #1e293b;
+  color: #fff;
+}
+
+.social-action-btn.connect:hover {
+  background: #334155;
+}
+
+.social-action-btn.disconnect {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.social-action-btn.disconnect:hover {
+  background: #fecaca;
+}
+
+/* Footer */
+.modal-footer {
+  padding: 20px 32px 32px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cancel-btn {
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.save-btn {
+  padding: 12px 32px;
+  border-radius: 999px;
+  border: none;
+  background: #5ab3ed;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(90, 179, 237, 0.3);
+  transition: all 0.2s;
+}
+
+.save-btn:hover {
+  background: #4fa0d8;
+  transform: translateY(-1px);
+}
+
+/* Section Title */
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px;
+}
+
+/* Notification Settings */
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.notification-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.notification-desc {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.toggle-switch {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: #e2e8f0;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 2px;
+}
+
+.toggle-switch.active {
+  background: #5ab3ed;
+}
+
+.toggle-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-switch.active .toggle-thumb {
+  transform: translateX(20px);
+}
