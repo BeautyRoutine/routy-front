@@ -1,7 +1,5 @@
 // -----------------------------------------------------------------------------
 // LoginPage.js - 로그인 페이지
-// - '로그인 상태 유지' 시 localStorage, 아니면 sessionStorage에 토큰 저장
-// - 응답 규격: { resultCode, resultMsg, data: { token, member } } 가정
 // - 관리자 로그인 체크 시, 성공 후 /admin 으로 이동
 // -----------------------------------------------------------------------------
 
@@ -33,7 +31,8 @@ export default function LoginPage({ onSuccess }) {
   const isFormValid = isEmailValid && isPwValid;
 
   function handleChange(e) {
-    const { name, value, type, checked } = e.target;
+    // ❗ type 제거 (안 써서 eslint 에러)
+    const { name, value, checked } = e.target;
 
     if (name === "rememberMe") {
       setRememberMe(checked);
