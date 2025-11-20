@@ -52,7 +52,6 @@ const OrderList = () => {
   };
 
   useEffect(() => {
-    const { memberName, startDate, endDate } = getParamsFromSearch();
     setMemberNameInput(memberName);
     setStartDateInput(startDate);
     setEndDateInput(endDate);
