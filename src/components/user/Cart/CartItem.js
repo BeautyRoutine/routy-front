@@ -69,7 +69,7 @@ export function CartItem({ item, isSelected, onToggle, onQuantityChange, onDelet
               <div className="item-total-price">합계: {(item.price * item.quantity).toLocaleString()}원</div>
             </div>
 
-            {/* 피부 타입 알림 (선택사항) */}
+            {/* 성분 알림 툴팁 */}
             <div className="skin-alert-container">
               <SkinAlertTooltip item={item} />
             </div>
