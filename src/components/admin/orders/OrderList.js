@@ -2,20 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setOrders, setOrdersCount } from '../store';
+import { setItems, setItemsCount } from 'features/orders/admOrdersSlice';
 
+import LoadingSpinner from 'components/common/LoadingSpinner';
 import OrderListItem from './OrderListItem';
 
 const OrderList = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const apiBaseUrl = useSelector(state => state.config.apiBaseUrl);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   // paging
-  const rowTotal = useSelector(state => state.orders.rowTotal);
-  const pageGap = useSelector(state => state.orders.pageGap);
+  const rowTotal = useSelector(state => state.admOrders.rowTotal);
+  const pageGap = useSelector(state => state.admOrders.pageGap);
   const page = Number(searchParams.get('page')) || 1;
-  const orders = useSelector(state => state.orders.list);
+  const orders = useSelector(state => state.admOrders.list);
 
   // get params
   const memberName = searchParams.get('m_name') || '';
@@ -46,15 +49,22 @@ const OrderList = () => {
         od_end_day: endDate,
       };
 
-      console.log(`${apiBaseUrl}/orders/list`);
-      console.log(params);
+      // console.log(`${apiBaseUrl}/orders/list`);
+      // console.log(params);
+      setLoading(true);
+      setError('');
       try {
         const result = await axios.get(`${apiBaseUrl}/orders/list`, { params });
-        console.log(result);
-        dispatch(setOrders(result.data.list));
-        dispatch(setOrdersCount(result.data.total));
+        // console.log(result);
+        dispatch(setItems(result.data.data.list));
+        dispatch(setItemsCount(result.data.data.total));
       } catch (err) {
-        console.log('주문목록 불러오기 실패: ', err);
+        console.error('주문목록 불러오기 실패: ', err);
+        setError('❌ 목록 불러오기 실패');
+        dispatch(setItems([]));
+        dispatch(setItemsCount(0));
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -145,9 +155,27 @@ const OrderList = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order, i) => (
-              <OrderListItem key={i} order={order} />
-            ))}
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="text-center py-5">
+                  <LoadingSpinner />
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan="7" className="text-center text-danger fw-bold py-5">
+                  {error}
+                </td>
+              </tr>
+            ) : orders.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center text-muted py-5">
+                  조회된 주문이 없습니다.
+                </td>
+              </tr>
+            ) : (
+              orders.map((order, i) => <OrderListItem key={i} order={order} />)
+            )}
           </tbody>
         </table>
       </div>

@@ -1,55 +1,145 @@
-// src/components/admin/orders/OrderDetail.js
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectOrder } from '../store';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectItem, clearSelectedItem } from 'features/orders/admOrdersSlice';
+
+import LoadingSpinner from 'components/common/LoadingSpinner';
 
 const OrderDetail = () => {
-  const { odNo } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const orderList = useSelector(state => state.orders.list);
-  const selectedOrder = useSelector(state => state.orders.selectedOrder);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
+
+  const { odNo } = useParams();
+  const orderList = useSelector(state => state.admOrders.list);
+  console.log(orderList);
+  const selectedItem = useSelector(state => state.admOrders.selectedItem);
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+  const getDeliveryKeyText = () => {
+    if (selectedItem.ODDELVKEYTYPE === 2) return '자유출입가능';
+    if (selectedItem.ODDELVKEYTYPE === 1 && selectedItem.ODDELVKEY === null) return '없음';
+    return `공동현관번호: ${selectedItem.ODDELVKEY}`;
+  };
 
   useEffect(() => {
-    const existing = orderList.find(o => o.ODNO === parseInt(odNo));
-    if (existing) {
-      dispatch(selectOrder(existing));
-    } else {
-      const fetchDetail = async () => {
-        setLoading(true);
-        try {
-          const response = await axios.get(`http://localhost:8085/orders/detail/${odNo}`);
-          dispatch(selectOrder(response.data));
-        } catch (error) {
-          console.error('주문 상세 조회 실패:', error);
-        } finally {
-          setLoading(false);
+    const loadOrder = async () => {
+      dispatch(clearSelectedItem());
+      const existence = orderList.find(e => e.ODNO === parseInt(odNo));
+      setLoading(true);
+      try {
+        if (existence) {
+          console.log(existence);
+          dispatch(selectItem(existence));
+          return;
+        } else {
+          console.log(`${apiBaseUrl}/orders/detail/${odNo}`);
+          const response = await axios.get(`${apiBaseUrl}/orders/detail/${odNo}`);
+          dispatch(selectItem(response.data.data));
         }
-      };
-      fetchDetail();
-    }
-  }, [odNo, orderList, dispatch]);
+      } catch (err) {
+        console.error('주문번호 조회 실패: ', err);
+        setError('주문 정보를 불러오지 못했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadOrder();
+  }, [odNo, orderList, dispatch, apiBaseUrl]);
 
-  if (loading || !selectedOrder) return <div>로딩 중...</div>;
+  if (loading) return <LoadingSpinner message="주문 정보를 불러오는 중입니다..." />;
+  if (error) return <div className="text-danger text-center my-5">{error}</div>;
+  if (!selectedItem) return <div className="text-center my-5">해당 주문 정보를 찾을 수 없습니다.</div>;
 
   return (
-    <div className="container">
-      <h3 className="mb-4">📦 주문 상세 정보</h3>
-      <form>
-        <label>회원명</label>
-        <input type="text" value={selectedOrder.USERNAME} readOnly className="form-control" />
-        <label>회원ID</label>
-        <input type="text" value={selectedOrder.USERID} readOnly className="form-control" />
-        <label>상품금액</label>
-        <input type="number" value={selectedOrder.ODPRDPRICE} readOnly className="form-control" />
-        <label>배송비</label>
-        <input type="number" value={selectedOrder.ODDELVPRICE} readOnly className="form-control" />
-        <label>주문일시</label>
-        <input type="text" value={selectedOrder.ODREGDATE} readOnly className="form-control" />
-        {/* 필요한 필드 추가 */}
-      </form>
+    <div>
+      <fieldset>
+        <legend className="mb-3">📜 주문 상세 정보</legend>
+        <h5 className="fw-bold border-bottom pb-2 mb-3 text-primary">주문 정보</h5>
+        <table className="table table-hover table-bordered align-middle">
+          <colgroup>
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '30%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '30%' }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th className="bg-light">주문번호</th>
+              <td>{selectedItem.ODNO}</td>
+              <th className="bg-light">결제일</th>
+              <td>{selectedItem.ODREGDATE}</td>
+            </tr>
+            <tr>
+              <th className="bg-light">상품가격 / 택배비</th>
+              <td>
+                {selectedItem.ODPRDPRICE} 원 / {selectedItem.ODDELVPRICE} 원
+              </td>
+              <th className="bg-light">총 결제금액</th>
+              <td>{selectedItem.ODPRDPRICE + selectedItem.ODDELVPRICE} 원</td>
+            </tr>
+            <tr>
+              <th className="bg-light">결제자 성명(ID) / 닉네임</th>
+              <td colSpan="3">
+                {selectedItem.USERNAME}({selectedItem.USERID}) / {selectedItem.USERNICK}
+              </td>
+            </tr>
+            <tr>
+              <th className="bg-light">결제자 연락처</th>
+              <td colSpan="3">{selectedItem.USERHP}</td>
+            </tr>
+          </tbody>
+        </table>
+        <h5 className="fw-bold border-bottom pb-2 mb-3 text-primary">배송 정보</h5>
+        <table className="table table-hover table-bordered align-middle">
+          <colgroup>
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '30%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '30%' }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th className="bg-light">수령인</th>
+              <td>{selectedItem.ODNAME}</td>
+              <th className="bg-light">수령인 연락처</th>
+              <td>{selectedItem.ODHP}</td>
+            </tr>
+            <tr>
+              <th className="bg-light">지번 주소</th>
+              <td colSpan="3">
+                {selectedItem.ODJIBUNADDR
+                  ? `(${selectedItem.ODZIP}) ${selectedItem.ODJIBUNADDR}, ${selectedItem.ODDETAILADDR}`
+                  : '없음'}
+              </td>
+            </tr>
+            <tr>
+              <th className="bg-light">도로명 주소</th>
+              <td colSpan="3">
+                {selectedItem.ODROADADDR
+                  ? `(${selectedItem.ODZIP}) ${selectedItem.ODROADADDR}, ${selectedItem.ODDETAILADDR}`
+                  : '없음'}
+              </td>
+            </tr>
+            <tr>
+              <th className="bg-light">택배 출입방법</th>
+              <td>{getDeliveryKeyText()}</td>
+              <th className="bg-light">택배 요청사항</th>
+              <td>{selectedItem.ODDELVMSG}</td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
+      <div className="text-center mt-4">
+        <button className="btn btn-outline-secondary px-4" onClick={handleBack}>
+          ← 돌아가기
+        </button>
+      </div>
     </div>
   );
 };
