@@ -40,3 +40,99 @@ export const DEMO_INGREDIENT_BLOCK_META = [
   { key: 'focus', label: '관심 성분' },
   { key: 'avoid', label: '피할 성분' },
 ];
+
+export const DEMO_ORDERS = [
+  {
+    id: 'ORD-20251120-001',
+    date: '2025.11.20',
+    status: '배송중',
+    items: [
+      {
+        id: 101,
+        name: '퓨어 히알루론산 앰플 50ml',
+        brand: '루티',
+        price: 28000,
+        quantity: 1,
+        image: 'https://via.placeholder.com/80',
+      },
+      {
+        id: 102,
+        name: '시카 카밍 토너 200ml',
+        brand: '루티',
+        price: 18000,
+        quantity: 1,
+        image: 'https://via.placeholder.com/80',
+      },
+    ],
+    totalAmount: 46000,
+  },
+  {
+    id: 'ORD-20251015-002',
+    date: '2025.10.15',
+    status: '배송완료',
+    items: [
+      {
+        id: 103,
+        name: '비타민 C 세럼 30ml',
+        brand: '루티',
+        price: 32000,
+        quantity: 1,
+        image: 'https://via.placeholder.com/80',
+      },
+    ],
+    totalAmount: 32000,
+  },
+];
+
+export const DEMO_CLAIMS = [
+  {
+    id: 'CLM-20250910-001',
+    date: '2025.09.10',
+    type: '취소',
+    status: '취소완료',
+    items: [
+      {
+        id: 104,
+        name: '데일리 모이스처 크림 100ml',
+        brand: '루티',
+        price: 25000,
+        quantity: 1,
+        image: 'https://via.placeholder.com/80',
+      },
+    ],
+    reason: '단순변심',
+  },
+];
+
+export const DEMO_LIKES = {
+  products: [
+    {
+      id: 201,
+      name: '그린티 밸런싱 로션',
+      brand: '이니스프리',
+      price: 18000,
+      salePrice: 14400,
+      discount: 20,
+      image: 'https://via.placeholder.com/150',
+      tags: ['진정', '수분'],
+    },
+    {
+      id: 202,
+      name: '어성초 진정 토너',
+      brand: '아누아',
+      price: 25000,
+      salePrice: null,
+      discount: 0,
+      image: 'https://via.placeholder.com/150',
+      tags: ['트러블케어'],
+    },
+  ],
+  brands: [
+    {
+      id: 301,
+      name: '루티 (Routy)',
+      desc: '나만의 루틴을 찾아주는 스킨케어',
+      image: 'https://via.placeholder.com/100',
+    },
+  ],
+};
