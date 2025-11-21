@@ -35,7 +35,7 @@ const ProductDetail = () => {
     try {
       await axios.delete(`${apiBaseUrl}/${prdNo}`);
       alert('상품이 삭제되었습니다.');
-      navigate('/admin/productList');
+      navigate('/admin/product/list');
     } catch (err) {
       console.error(err);
       alert('상품 삭제 중 오류가 발생했습니다.');
@@ -114,11 +114,11 @@ const ProductDetail = () => {
 
           {/* 버튼 영역 */}
           <div className="text-center mt-4">
-            <button className="btn btn-secondary me-2" onClick={() => navigate('/admin/productList')}>
+            <button className="btn btn-secondary me-2" onClick={() => navigate('/admin/product/list')}>
               ← 목록으로
             </button>
 
-            <button className="btn btn-primary me-2" onClick={() => navigate(`/admin/products/edit/${prdNo}`)}>
+            <button className="btn btn-primary me-2" onClick={() => navigate(`/admin/product/edit/${prdNo}`)}>
               ✏ 수정하기
             </button>
 
