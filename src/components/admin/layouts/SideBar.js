@@ -12,13 +12,13 @@ function Sidebar() {
 
   // console.log(path);
   useEffect(() => {
-    if (path.includes('/admin/product')) {
+    if (path.includes('/admin/product/')) {
       setOpenMenu('product');
-    } else if (path.includes('/admin/order')) {
+    } else if (path.includes('/admin/order/')) {
       setOpenMenu('order');
-    } else if (path.includes('/admin/member')) {
+    } else if (path.includes('/admin/member/')) {
       setOpenMenu('member');
-    } else if (path.includes('/admin/post')) {
+    } else if (path.includes('/admin/post/')) {
       setOpenMenu('post');
     }
   }, [location, path]);
@@ -38,26 +38,26 @@ function Sidebar() {
         <Collapse in={openMenu === 'product'}>
           <div className="submenu">
             <Link
-              to="/admin/productList"
-              className={`submenu-link ${path.includes('/admin/productList') ? 'active' : ''}`}
+              to="/admin/product/list"
+              className={`submenu-link ${path.includes('/admin/product/list') ? 'active' : ''}`}
             >
               상품 목록
             </Link>
             <Link
-              to="/admin/productRank"
-              className={`submenu-link ${path.includes('/admin/productRank') ? 'active' : ''}`}
+              to="/admin/product/rank"
+              className={`submenu-link ${path.includes('/admin/product/rank') ? 'active' : ''}`}
             >
               상품 랭킹 수정
             </Link>
             <Link
-              to="/admin/productIng"
-              className={`submenu-link ${path.includes('/admin/productIng') ? 'active' : ''}`}
+              to="/admin/product/ing"
+              className={`submenu-link ${path.includes('/admin/product/ing') ? 'active' : ''}`}
             >
               성분 목록
             </Link>
             <Link
-              to="/admin/productStats"
-              className={`submenu-link ${path.includes('/admin/productStats') ? 'active' : ''}`}
+              to="/admin/product/stats"
+              className={`submenu-link ${path.includes('/admin/product/stats') ? 'active' : ''}`}
             >
               상품 통계 조회
             </Link>
@@ -71,24 +71,27 @@ function Sidebar() {
         </Button>
         <Collapse in={openMenu === 'order'}>
           <div className="submenu">
-            <Link to="/admin/orderList" className={`submenu-link ${path.includes('/admin/orderList') ? 'active' : ''}`}>
+            <Link
+              to="/admin/order/list"
+              className={`submenu-link ${path.includes('/admin/order/list') ? 'active' : ''}`}
+            >
               주문 목록
             </Link>
             <Link
-              to="/admin/orderDeliveryList"
-              className={`submenu-link ${path.includes('/admin/orderDeliveryList') ? 'active' : ''}`}
+              to="/admin/order/delivery"
+              className={`submenu-link ${path.includes('/admin/order/delivery') ? 'active' : ''}`}
             >
               배송 목록
             </Link>
             <Link
-              to="/admin/orderRequest"
-              className={`submenu-link ${path.includes('/admin/orderRequest') ? 'active' : ''}`}
+              to="/admin/order/request"
+              className={`submenu-link ${path.includes('/admin/order/request') ? 'active' : ''}`}
             >
               교환&환불 요청 조회
             </Link>
             <Link
-              to="/admin/ordersPayout"
-              className={`submenu-link ${path.includes('/admin/ordersPayout') ? 'active' : ''}`}
+              to="/admin/order/payout"
+              className={`submenu-link ${path.includes('/admin/order/payout') ? 'active' : ''}`}
             >
               정산 조회
             </Link>
@@ -103,14 +106,14 @@ function Sidebar() {
         <Collapse in={openMenu === 'member'}>
           <div className="submenu">
             <Link
-              to="/admin/memberList"
-              className={`submenu-link ${path.includes('/admin/memberList') ? 'active' : ''}`}
+              to="/admin/member/list"
+              className={`submenu-link ${path.includes('/admin/member/list') ? 'active' : ''}`}
             >
               회원 목록
             </Link>
             <Link
-              to="/admin/memberRole"
-              className={`submenu-link ${path.includes('/admin/memberRole') ? 'active' : ''}`}
+              to="/admin/member/role"
+              className={`submenu-link ${path.includes('/admin/member/role') ? 'active' : ''}`}
             >
               권한 관리
             </Link>
@@ -124,19 +127,19 @@ function Sidebar() {
         </Button>
         <Collapse in={openMenu === 'post'}>
           <div className="submenu">
-            <Link to="/admin/posts" className={`submenu-link ${path.includes('/admin/posts') ? 'active' : ''}`}>
+            <Link to="/admin/post/" className={`submenu-link ${path.includes('/admin/post/') ? 'active' : ''}`}>
               공지 목록
             </Link>
-            <Link to="/admin/posts" className={`submenu-link ${path.includes('/admin/posts') ? 'active' : ''}`}>
+            <Link to="/admin/post/" className={`submenu-link ${path.includes('/admin/post/') ? 'active' : ''}`}>
               배너 목록
             </Link>
-            <Link to="/admin/posts" className={`submenu-link ${path.includes('/admin/posts') ? 'active' : ''}`}>
+            <Link to="/admin/post/" className={`submenu-link ${path.includes('/admin/post/') ? 'active' : ''}`}>
               문의 목록
             </Link>
-            <Link to="/admin/posts" className={`submenu-link ${path.includes('/admin/posts') ? 'active' : ''}`}>
+            <Link to="/admin/post/" className={`submenu-link ${path.includes('/admin/post/') ? 'active' : ''}`}>
               후기 목록
             </Link>
-            <Link to="/admin/posts" className={`submenu-link ${path.includes('/admin/posts') ? 'active' : ''}`}>
+            <Link to="/admin/post/" className={`submenu-link ${path.includes('/admin/post/') ? 'active' : ''}`}>
               신고 목록
             </Link>
           </div>

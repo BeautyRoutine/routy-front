@@ -6,6 +6,8 @@ import Sidebar from 'components/admin/layouts/SideBar';
 
 import OrderList from 'components/admin/orders/OrderList';
 import OrderDetail from 'components/admin/orders/OrderDetail';
+import OrderDeliveryList from 'components/admin/orders/OrderDeliveryList';
+import OrderDeliveryDetail from 'components/admin/orders/OrderDeliveryDetail';
 
 import ProductList from 'features/products/ProductList';
 import ProductDetail from 'features/products/ProductDetail';
@@ -25,15 +27,16 @@ const AdminHome = () => {
           <Route path="products/edit/:prdNo" element={<ProductEdit />} />
           <Route path="products/add" element={<ProductAdd />} />
 
-          <Route path="productIng" Component={IngredientList} />      
-
+          <Route path="productIng" Component={IngredientList} />
           {/* 주문 관리 */}
-          <Route path="orderList" Component={OrderList} />
-          <Route path="orderList/:odNo" Component={OrderDetail} />
+          <Route path="order/list" Component={OrderList} />
+          <Route path="order/list/:odNo" Component={OrderDetail} />
+          <Route path="order/delivery" Component={OrderDeliveryList} />
+          <Route path="order/delivery/:delvNo" Component={OrderDeliveryDetail} />
           {/* 회원 관리 */}
-          <Route path="members" />
+          <Route path="member/list" element={<div>추가 예정</div>} />
           {/* 게시글 관리 */}
-          <Route path="posts" />
+          <Route path="post/list" element={<div>추가 예정</div>} />
         </Routes>
       </div>
     </div>

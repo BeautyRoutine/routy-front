@@ -3,42 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { selectItem } from 'features/orders/admOrdersSlice';
 
-const OrderListItem = ({ order }) => {
+const OrderListItem = ({ item }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleClick = () => {
-    dispatch(selectItem(order));
-    navigate(`/admin/orderList/${order.ODNO}`);
+    dispatch(selectItem(item));
+    navigate(`/admin/order/list/${item.ODNO}`);
   };
 
   return (
     <tr onClick={handleClick} style={{ cursor: 'pointer' }}>
-      <td>{order.ODNO}</td>
+      <td>{item.ODNO}</td>
       <td>
-        {order.USERID}
+        {item.USERNAME}({item.USERNICK})
         <br />
-        <small className="text-muted">({order.USERNO})</small>
+        <small className="text-muted">{item.USERID}</small>
       </td>
       <td>
-        {order.USERNAME}
+        {item.ODNAME}
         <br />
-        <small className="text-muted">({order.USERNICK})</small>
+        <small className="text-muted">{item.ODHP}</small>
       </td>
       <td>
-        {order.ODNAME}
-        <br />
-        <small className="text-muted">{order.ODHP}</small>
+        {item.ODPRDPRICE.toLocaleString()}원<br />
+        <small className="text-muted">{item.ODDELVPRICE.toLocaleString()}</small>원
       </td>
+      <td>{(item.ODPRDPRICE + item.ODDELVPRICE).toLocaleString()}원</td>
       <td>
-        {order.ODPRDPRICE.toLocaleString()}원<br />
-        <small className="text-muted">{order.ODDELVPRICE.toLocaleString()}</small>원
-      </td>
-      <td>{(order.ODPRDPRICE + order.ODDELVPRICE).toLocaleString()}원</td>
-      <td>
-        {order.ODREGDATE.split(' ')[0]}
+        {item.ODREGDATE.split(' ')[0]}
         <br />
-        {order.ODREGDATE.split(' ')[1]}
+        {item.ODREGDATE.split(' ')[1]}
       </td>
     </tr>
   );

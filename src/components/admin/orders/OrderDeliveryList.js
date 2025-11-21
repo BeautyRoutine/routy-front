@@ -2,48 +2,56 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setItems, setItemsCount } from 'features/orders/admOrdersSlice';
+import { setItems, setItemsCount } from 'features/orders/admDeliveriesSlice';
 
 import LoadingSpinner from 'components/common/LoadingSpinner';
-import ListItem from './OrderListItem';
+import ListItem from './OrderDeliveryListItem';
 
 const paramKeys = {
   page: 'page',
   memberName: 'm_name',
-  startDate: 's_date',
-  endDate: 'e_date',
+  startRegDate: 's_regdate',
+  endRegDate: 'e_regdate',
+  startEndDate: 's_enddate',
+  endEndDate: 'e_enddate',
 };
 
-const OrderList = () => {
+const OrderDeliveryList = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
-  const rowTotal = useSelector(state => state.admOrders.rowTotal);
-  const pageGap = useSelector(state => state.admOrders.pageGap);
-  const items = useSelector(state => state.admOrders.list);
+  const rowTotal = useSelector(state => state.admDeliveries.rowTotal);
+  const pageGap = useSelector(state => state.admDeliveries.pageGap);
+  const items = useSelector(state => state.admDeliveries.list);
 
   const getParamsFromSearch = () => ({
     page: Number(searchParams.get(paramKeys.page)) || 1,
     memberName: searchParams.get(paramKeys.memberName) || '',
-    startDate: searchParams.get(paramKeys.startDate) || '',
-    endDate: searchParams.get(paramKeys.endDate) || '',
+    startRegDate: searchParams.get(paramKeys.startRegDate) || '',
+    endRegDate: searchParams.get(paramKeys.endRegDate) || '',
+    startEndDate: searchParams.get(paramKeys.startEndDate) || '',
+    endEndDate: searchParams.get(paramKeys.endEndDate) || '',
   });
 
-  const { page, memberName, startDate, endDate } = getParamsFromSearch();
+  const { page, memberName, startRegDate, endRegDate, startEndDate, endEndDate } = getParamsFromSearch();
 
   // form
   const [memberNameInput, setMemberNameInput] = useState(memberName);
-  const [startDateInput, setStartDateInput] = useState(startDate);
-  const [endDateInput, setEndDateInput] = useState(endDate);
+  const [startRegDateInput, setStartRegDateInput] = useState(startRegDate);
+  const [endRegDateInput, setEndRegDateInput] = useState(endRegDate);
+  const [startEndDateInput, setStartEndDateInput] = useState(startEndDate);
+  const [endEndDateInput, setEndEndDateInput] = useState(endEndDate);
 
   const buildSearchParams = (overrides = {}) => ({
     [paramKeys.page]: overrides.page || 1,
     [paramKeys.memberName]: overrides.memberName ?? memberNameInput,
-    [paramKeys.startDate]: overrides.startDate ?? startDateInput,
-    [paramKeys.endDate]: overrides.endDate ?? endDateInput,
+    [paramKeys.startRegDate]: overrides.startRegDate ?? startRegDateInput,
+    [paramKeys.endRegDate]: overrides.endRegDate ?? endRegDateInput,
+    [paramKeys.startEndDate]: overrides.startEndDate ?? startEndDateInput,
+    [paramKeys.endEndDate]: overrides.endEndDate ?? endEndDateInput,
   });
 
   const handleSearch = e => {
@@ -53,8 +61,10 @@ const OrderList = () => {
 
   useEffect(() => {
     setMemberNameInput(memberName);
-    setStartDateInput(startDate);
-    setEndDateInput(endDate);
+    setStartRegDateInput(startRegDate);
+    setEndRegDateInput(endRegDate);
+    setStartEndDateInput(startEndDate);
+    setEndEndDateInput(endEndDate);
 
     // 컴포넌트 첫 렌더링 시 실행 hook
     const loadData = async () => {
@@ -62,21 +72,23 @@ const OrderList = () => {
         page: page,
         page_gap: pageGap,
         mem_name: memberName,
-        od_start_day: startDate,
-        od_end_day: endDate,
+        delv_s_start_day: startRegDate,
+        delv_s_end_day: endRegDate,
+        delv_e_start_day: startEndDate,
+        delv_e_end_day: endEndDate,
       };
 
-      // console.log(`${apiBaseUrl}/orders/list`);
+      // console.log(`${apiBaseUrl}/order_delivery/list`);
       // console.log(params);
       setLoading(true);
       setError('');
       try {
-        const result = await axios.get(`${apiBaseUrl}/orders/list`, { params });
+        const result = await axios.get(`${apiBaseUrl}/order_delivery/list`, { params });
         // console.log(result);
         dispatch(setItems(result.data.data.list));
         dispatch(setItemsCount(result.data.data.total));
       } catch (err) {
-        console.error('주문목록 불러오기 실패: ', err);
+        console.error('택배목록 불러오기 실패: ', err);
         setError('❌ 목록 불러오기 실패');
         dispatch(setItems([]));
         dispatch(setItemsCount(0));
@@ -85,38 +97,62 @@ const OrderList = () => {
       }
     };
     loadData();
-  }, [page, pageGap, memberName, startDate, endDate, apiBaseUrl, dispatch]);
+  }, [page, pageGap, memberName, startRegDate, endRegDate, startEndDate, endEndDate, apiBaseUrl, dispatch]);
 
   return (
     <div className="container-fluid">
-      <h3 className="mb-4 text-center">📜 주문 목록 조회</h3>
+      <h3 className="mb-4 text-center">📦 택배 목록 조회</h3>
 
       <div className="card mb-4 shadow-sm" style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <div className="card-header bg-light fw-bold">🔍 주문 검색</div>
+        <div className="card-header bg-light fw-bold">🔍 택배 검색</div>
         <div className="card-body">
           <form onSubmit={handleSearch}>
             <div className="w-100 d-flex flex-column align-items-center">
               <dl className="w-100 row align-items-center">
                 <dt className="col-2 text-end" style={{ margin: '0px', padding: '0px' }}>
-                  주문 시작일 :
+                  접수 시작일 :
                 </dt>
                 <dd className="col-4 justify-content-end" style={{ margin: '0px', padding: '0px 15px' }}>
                   <input
                     type="date"
                     className="form-control"
-                    value={startDateInput}
-                    onChange={e => setStartDateInput(e.target.value)}
+                    value={startRegDateInput}
+                    onChange={e => setStartRegDateInput(e.target.value)}
                   />
                 </dd>
                 <dt className="col-2 text-end" style={{ margin: '0px', padding: '0px' }}>
-                  주문 종료일 :
+                  접수 종료일 :
                 </dt>
                 <dd className="col-4 justify-content-end" style={{ margin: '0px', padding: '0px 15px' }}>
                   <input
                     type="date"
                     className="form-control"
-                    value={endDateInput}
-                    onChange={e => setEndDateInput(e.target.value)}
+                    value={endRegDateInput}
+                    onChange={e => setEndRegDateInput(e.target.value)}
+                  />
+                </dd>
+              </dl>
+              <dl className="w-100 row align-items-center">
+                <dt className="col-2 text-end" style={{ margin: '0px', padding: '0px' }}>
+                  완료 시작일 :
+                </dt>
+                <dd className="col-4 justify-content-end" style={{ margin: '0px', padding: '0px 15px' }}>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={startEndDateInput}
+                    onChange={e => setStartEndDateInput(e.target.value)}
+                  />
+                </dd>
+                <dt className="col-2 text-end" style={{ margin: '0px', padding: '0px' }}>
+                  완료 종료일 :
+                </dt>
+                <dd className="col-4 justify-content-end" style={{ margin: '0px', padding: '0px 15px' }}>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={endEndDateInput}
+                    onChange={e => setEndEndDateInput(e.target.value)}
                   />
                 </dd>
               </dl>
@@ -154,20 +190,21 @@ const OrderList = () => {
         <table className="table table-bordered table-hover align-middle text-center shadow-sm rounded">
           <thead className="table-dark align-middle">
             <tr>
-              <th>주문번호</th>
+              <th>택배 번호</th>
               <th>
                 결제자 성명(닉네임)
                 <br />
                 <small className="opacity-75">ID</small>
               </th>
-              <th>수취인 정보</th>
-              <th>
-                상품금액
+              <th>수령인 정보</th>
+              <th>지번 주소</th>
+              <th className="text-warning fw-bold">
+                택배사
                 <br />
-                <small className="opacity-75">배송비</small>
+                <small className="opacity-75">송장번호</small>
               </th>
-              <th className="text-warning fw-bold">총금액</th>
-              <th>주문일시</th>
+              <th>완료일</th>
+              <th>접수일</th>
             </tr>
           </thead>
           <tbody>
@@ -186,7 +223,7 @@ const OrderList = () => {
             ) : items.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center text-muted py-5">
-                  조회된 주문이 없습니다.
+                  조회된 택배가 없습니다.
                 </td>
               </tr>
             ) : (
@@ -230,4 +267,4 @@ const OrderList = () => {
   );
 };
 
-export default OrderList;
+export default OrderDeliveryList;
