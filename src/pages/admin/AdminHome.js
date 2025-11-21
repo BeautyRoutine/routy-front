@@ -22,12 +22,11 @@ const AdminHome = () => {
       <div className="admin-content flex-grow-1">
         <Routes>
           {/* 상품 관리 */}
-          <Route path="productList" Component={ProductList} />
-          <Route path="products/detail/:prdNo" element={<ProductDetail />} />
-          <Route path="products/edit/:prdNo" element={<ProductEdit />} />
-          <Route path="products/add" element={<ProductAdd />} />
-
-          <Route path="productIng" Component={IngredientList} />
+          <Route path="product/list" element={<ProductList />} />
+          <Route path="product/detail/:prdNo" element={<ProductDetail />} />
+          <Route path="product/edit/:prdNo" element={<ProductEdit />} />
+          <Route path="product/add" element={<ProductAdd />} />
+          <Route path="product/ing" element={<IngredientList />} />
           {/* 주문 관리 */}
           <Route path="order/list" Component={OrderList} />
           <Route path="order/list/:odNo" Component={OrderDetail} />
