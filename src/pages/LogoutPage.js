@@ -18,7 +18,7 @@ export default function LogoutPage() {
       window.sessionStorage.removeItem("member");
       window.sessionStorage.removeItem("auth");
     } catch (e) {
-      // eslint-disable-next-line no-console
+      
       console.error("Logout storage clear error:", e);
     }
 
