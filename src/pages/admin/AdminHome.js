@@ -22,26 +22,21 @@ const AdminHome = () => {
       <div className="admin-content flex-grow-1">
         <Routes>
           {/* 상품 관리 */}
-<<<<<<< HEAD
           <Route path="productList" Component={ProductList} />
           <Route path="products/detail/:prdNo" element={<ProductDetail />} />
           <Route path="products/edit/:prdNo" element={<ProductEdit />} />
           <Route path="products/add" element={<ProductAdd />} />
 
-          <Route path="productIng" Component={IngredientList} />      
-
-=======
-          <Route path="product/list" />
->>>>>>> 07aaab5 (feat: 라우트 정리, 기능 탬플릿화)
+          <Route path="productIng" Component={IngredientList} />
           {/* 주문 관리 */}
           <Route path="order/list" Component={OrderList} />
           <Route path="order/list/:odNo" Component={OrderDetail} />
           <Route path="order/delivery" Component={OrderDeliveryList} />
           <Route path="order/delivery/:delvNo" Component={OrderDeliveryDetail} />
           {/* 회원 관리 */}
-          <Route path="member/list" />
+          <Route path="member/list" element={<div>추가 예정</div>} />
           {/* 게시글 관리 */}
-          <Route path="post/list" />
+          <Route path="post/list" element={<div>추가 예정</div>} />
         </Routes>
       </div>
     </div>
