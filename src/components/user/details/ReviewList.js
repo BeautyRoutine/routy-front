@@ -7,7 +7,7 @@ const ReviewList = ({ reviewInfo }) => {
   const [sortOption, setSortOption] = useState('latest');
 
   // 현재 페이지 번호 -작동 안됨 현재
-  const [activePage, setActivePage] = useState(1);
+  //const [activePage, setActivePage] = useState(1);
 
   // 데이터가 없으면 아무것도 안 그림
   if (!reviewInfo || !reviewInfo.reviews) return null;
