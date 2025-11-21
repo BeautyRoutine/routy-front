@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setItems, setItemsCount } from 'features/orders/admOrdersSlice';
 
 import LoadingSpinner from 'components/common/LoadingSpinner';
-import OrderListItem from './OrderListItem';
+import ListItem from './OrderListItem';
 
 const paramKeys = {
   page: 'page',
@@ -95,44 +95,48 @@ const OrderList = () => {
         <div className="card-header bg-light fw-bold">🔍 주문 검색</div>
         <div className="card-body">
           <form onSubmit={handleSearch}>
-            <div className="row gy-3 align-items-center">
-              <div className="col-md-6 d-flex align-items-center">
-                <label className="form-label mb-0 me-2" style={{ minWidth: '100px' }}>
+            <div className="w-100 d-flex flex-column align-items-center">
+              <dl className="w-100 row align-items-center">
+                <dt className="col-2 text-end" style={{ margin: '0px', padding: '0px' }}>
                   주문 시작일 :
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={startDateInput}
-                  onChange={e => setStartDateInput(e.target.value)}
-                />
-              </div>
-              <div className="col-md-6 d-flex align-items-center">
-                <label className="form-label mb-0 me-2" style={{ minWidth: '100px' }}>
+                </dt>
+                <dd className="col-4 justify-content-end" style={{ margin: '0px', padding: '0px 15px' }}>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={startDateInput}
+                    onChange={e => setStartDateInput(e.target.value)}
+                  />
+                </dd>
+                <dt className="col-2 text-end" style={{ margin: '0px', padding: '0px' }}>
                   주문 종료일 :
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={endDateInput}
-                  onChange={e => setEndDateInput(e.target.value)}
-                />
-              </div>
-              <div className="col-md-12 d-flex align-items-center">
-                <label className="form-label mb-0 me-2" style={{ minWidth: '100px' }}>
+                </dt>
+                <dd className="col-4 justify-content-end" style={{ margin: '0px', padding: '0px 15px' }}>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={endDateInput}
+                    onChange={e => setEndDateInput(e.target.value)}
+                  />
+                </dd>
+              </dl>
+              <dl className="w-100 row align-items-center">
+                <dt className="col-2 text-end" style={{ margin: '0px', padding: '0px' }}>
                   결제자 성명 :
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="회원명 검색"
-                  value={memberNameInput}
-                  onChange={e => setMemberNameInput(e.target.value)}
-                />
-              </div>
+                </dt>
+                <dd className="col-10 justify-content-end" style={{ margin: '0px', padding: '0px 15px' }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="결제자 성명 검색"
+                    value={memberNameInput}
+                    onChange={e => setMemberNameInput(e.target.value)}
+                  />
+                </dd>
+              </dl>
 
               {/* 검색 버튼 */}
-              <div className="col-md-12 text-center">
+              <div className="col-12 text-center mt-3">
                 <button type="submit" className="btn btn-primary px-4">
                   🔎 검색
                 </button>
@@ -186,7 +190,7 @@ const OrderList = () => {
                 </td>
               </tr>
             ) : (
-              items.map((item, i) => <OrderListItem key={i} item={item} />)
+              items.map((item, i) => <ListItem key={i} item={item} />)
             )}
           </tbody>
         </table>

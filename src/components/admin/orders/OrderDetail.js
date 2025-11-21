@@ -14,8 +14,7 @@ const OrderDetail = () => {
   const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   const { odNo } = useParams();
-  const orderList = useSelector(state => state.admOrders.list);
-  console.log(orderList);
+  const itemList = useSelector(state => state.admOrders.list);
   const selectedItem = useSelector(state => state.admOrders.selectedItem);
 
   const handleBack = () => {
@@ -30,7 +29,7 @@ const OrderDetail = () => {
   useEffect(() => {
     const loadOrder = async () => {
       dispatch(clearSelectedItem());
-      const existence = orderList.find(e => e.ODNO === parseInt(odNo));
+      const existence = itemList.find(e => e.ODNO === parseInt(odNo));
       setLoading(true);
       try {
         if (existence) {
@@ -50,7 +49,7 @@ const OrderDetail = () => {
       }
     };
     loadOrder();
-  }, [odNo, orderList, dispatch, apiBaseUrl]);
+  }, [odNo, itemList, dispatch, apiBaseUrl]);
 
   if (loading) return <LoadingSpinner message="주문 정보를 불러오는 중입니다..." />;
   if (error) return <div className="text-danger text-center my-5">{error}</div>;
