@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { DEMO_CLAIMS } from '../data/mypageMocks';
 import './ClaimHistory.css';
 
-const ClaimHistory = () => {
+const ClaimHistory = ({ claims = DEMO_CLAIMS }) => {
   const [period, setPeriod] = useState('3months');
 
-  const filteredClaims = DEMO_CLAIMS;
+  const filteredClaims = claims;
 
   return (
     <div className="claim-history-container">

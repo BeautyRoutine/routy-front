@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { DEMO_ORDERS } from '../data/mypageMocks';
 import './OrderHistory.css';
 
-const OrderHistory = () => {
+const OrderHistory = ({ orders = DEMO_ORDERS }) => {
   const [period, setPeriod] = useState('3months'); // '1month', '3months', '6months', '12months'
 
   // In a real app, these would filter the data or trigger an API call
-  const filteredOrders = DEMO_ORDERS;
+  const filteredOrders = orders;
 
   return (
     <div className="order-history-container">

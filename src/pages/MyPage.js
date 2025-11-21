@@ -14,7 +14,7 @@ import IngredientModal from '../components/user/mypage/IngredientModal';
 import { fetchMyPageData, updateUserProfile } from '../features/user/userSlice';
 import '../styles/MyPage.css';
 import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConstants';
-import { DEMO_ORDERS, DEMO_LIKES } from '../components/user/data/mypageMocks';
+import { DEMO_ORDERS, DEMO_LIKES, DEMO_CLAIMS } from '../components/user/data/mypageMocks';
 
 /**
  * buildNavSections Helper
@@ -122,11 +122,11 @@ const MyPage = () => {
       case 'withdrawal':
         return <MemberWithdrawal onCancel={handleShowDashboard} />;
       case 'order-history':
-        return <OrderHistory />;
+        return <OrderHistory orders={DEMO_ORDERS} />;
       case 'claim-history':
-        return <ClaimHistory />;
+        return <ClaimHistory claims={DEMO_CLAIMS} />;
       case 'like-list':
-        return <LikeList />;
+        return <LikeList likes={DEMO_LIKES} />;
       case 'dashboard':
       default:
         return (

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { DEMO_LIKES } from '../data/mypageMocks';
 import './LikeList.css';
 
-const LikeList = () => {
+const LikeList = ({ likes = DEMO_LIKES }) => {
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'brands'
 
-  const items = activeTab === 'products' ? DEMO_LIKES.products : DEMO_LIKES.brands;
+  const items = activeTab === 'products' ? likes.products || [] : likes.brands || [];
 
   return (
     <div className="like-list-container">
