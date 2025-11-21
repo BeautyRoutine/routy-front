@@ -1,63 +1,430 @@
-.mypage {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 24px 60px 90px 12px;
+/* =========================================
+   Password Change Modal Styles
+   비밀번호 변경 모달 관련 스타일 정의
+   ========================================= */
+
+/* 모달 컨테이너: 기본 프로필 모달 스타일을 상속받되, 너비를 약간 조정 */
+.password-modal {
+  max-width: 480px;
+  width: 100%;
+}
+
+/* 폼 내부 레이아웃 */
+.password-form-modal {
   display: flex;
-  gap: 48px;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+/* 입력 필드 유효성 검사 스타일 */
+/* 유효한 입력: 파란색 테두리 및 배경 */
+.valid-input {
+  border-color: #007bff !important;
+  background-color: #f0f7ff !important;
+}
+
+/* 유효하지 않은 입력: 빨간색 테두리 및 배경 */
+.invalid-input {
+  border-color: #dc3545 !important;
+  background-color: #fff5f5 !important;
+}
+
+/* 비밀번호 규칙 (대문자, 특수문자 등) 표시 영역 */
+.password-rules {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+/* 규칙 만족/불만족 상태에 따른 텍스트 색상 */
+.password-rules span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #999; /* 기본: 회색 */
+}
+
+.password-rules span.valid {
+  color: #007bff; /* 만족: 파란색 */
+  font-weight: 500;
+}
+
+.password-rules span.invalid {
+  color: #dc3545; /* 불만족: 빨간색 */
+}
+
+/* 메시지 박스 (에러/성공) 공통 스타일 */
+.message-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+/* 에러 메시지 박스 */
+.message-box.error {
+  background-color: #fff5f5;
+  color: #dc3545;
+  border: 1px solid #ffc9c9;
+}
+
+/* 성공 메시지 박스 */
+.message-box.success {
+  background-color: #f0f7ff;
+  color: #007bff;
+  border: 1px solid #cce5ff;
+}
+
+/* =========================================
+   Existing MyPage Styles
+   기존 마이페이지 스타일 (참고용)
+   ========================================= */
+.mypage {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  gap: 40px;
+  min-height: 80vh;
 }
 
 .mypage-sidebar {
-  width: 240px;
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 20px 40px rgba(108, 197, 255, 0.12);
-  position: sticky;
-  top: 160px;
-  height: fit-content;
-  margin-top: 0;
+  width: 200px;
+  flex-shrink: 0;
 }
 
 .mypage-sidebar h1 {
-  font-size: 20px;
-  margin-bottom: 20px;
-  color: #4c4f6b;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #333;
 }
 
-.sidebar-section + .sidebar-section {
-  margin-top: 24px;
+.sidebar-section {
+  margin-bottom: 30px;
 }
 
 .sidebar-title {
-  margin: 0 0 10px;
+  font-size: 16px;
   font-weight: 700;
-  color: #6cc5ff;
+  margin-bottom: 15px;
+  color: #333;
 }
 
 .sidebar-section ul {
   list-style: none;
-  margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: #64748b;
-  font-size: 14px;
+  margin: 0;
 }
 
 .sidebar-section li {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
   cursor: pointer;
+  transition: color 0.2s;
+}
+
+.sidebar-section li:hover {
+  color: #333;
+  font-weight: 500;
 }
 
 .mypage-content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+  min-width: 0;
 }
 
-.mypage-content > section {
+/* Hero Section */
+.mypage-hero {
+  background-color: #333;
+  border-radius: 12px;
+  padding: 30px;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.hero-user-info {
+  display: flex;
+  gap: 20px;
+}
+
+.user-avatar-placeholder {
+  width: 60px;
+  height: 60px;
+  background-color: #555;
+  border-radius: 50%;
+}
+
+.hero-greeting {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.hero-tags-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.skin-tag {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.hero-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.hero-links button {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hero-settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  padding: 6px 12px !important;
+  border-radius: 4px;
+  color: white !important;
+}
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-label {
+  color: #999;
+  font-size: 14px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.stat-value.point {
+  color: #00c7ae;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 16px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 0 20px;
+}
+
+/* Status Section */
+.mypage-status {
+  margin-bottom: 50px;
+}
+
+.mypage-status header,
+.mypage-favorite header,
+.mypage-inquiry-grid header,
+.ingredients-header,
+.ingredient-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #333;
+}
+
+.mypage-status h3,
+.mypage-favorite h3,
+.mypage-inquiry-grid h3,
+.ingredients-header h3,
+.ingredient-block-header h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.sub-title {
+  font-size: 13px;
+  color: #999;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+header button,
+.ingredient-block-header button {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+
+.status-steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 0;
+}
+
+.status-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-step strong {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+}
+
+.status-step span {
+  font-size: 14px;
+  color: #666;
+}
+
+.step-arrow {
+  color: #ddd;
+  font-size: 20px;
+}
+
+/* Favorite Section */
+.mypage-favorite {
+  margin-bottom: 50px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #999;
+  border-bottom: 1px solid #eee;
+}
+
+.empty-icon {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ddd;
+  margin-bottom: 15px;
+}
+
+/* Ingredients Section */
+.mypage-ingredients {
+  margin-bottom: 50px;
+}
+
+.ingredient-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.ingredient-block-header {
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
+
+.ingredient-list {
+  list-style: none;
+  padding: 0;
   margin: 0;
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.ingredient-pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ingredient-pill.good {
+  background-color: #e6f7f5;
+  color: #00c7ae;
+}
+
+.ingredient-pill.bad {
+  background-color: #fff0f0;
+  color: #ff4d4f;
+}
+
+.ingredient-item p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Inquiry Grid */
+.mypage-inquiry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.inquiry-content {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #eee;
+}
+
+.empty-copy {
+  color: #999;
+  font-size: 14px;
 }
 
 /* ...existing code... */
@@ -477,6 +844,212 @@
   margin: 0;
   line-height: 1.5;
   padding-left: 4px;
+}
+
+/* Password Change Section */
+.mypage-password-change {
+  background: #fff;
+  border-radius: 28px;
+  padding: 28px 32px;
+  box-shadow: 0 18px 36px rgba(108, 197, 255, 0.12);
+}
+
+.mypage-password-change header {
+  border-bottom: 1px solid #e2e5f3;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.mypage-password-change h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2f315a;
+  margin: 0;
+}
+
+.password-form {
+  max-width: 100%;
+  background: #fcfdff;
+  padding: 32px;
+  border-radius: 20px;
+  border: 1px solid #f0f4f8;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  color: #4c4f6b;
+  font-weight: 700;
+}
+
+.form-group input {
+  background-color: #fff;
+  border: 1px solid #e2e5f3;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.form-group input:focus {
+  border-color: #6cc5ff;
+  box-shadow: 0 0 0 3px rgba(108, 197, 255, 0.15);
+}
+
+.error-message {
+  color: #d93025;
+  font-size: 14px;
+  margin: 0;
+}
+
+.success-message {
+  color: #5ab3ed;
+  font-size: 14px;
+  margin: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.form-actions button {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #6cc5ff;
+}
+
+.cancel-btn:hover {
+  background: #e0f2fe;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #6cc5ff, #5ab3ed);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(108, 197, 255, 0.3);
+}
+
+.submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(108, 197, 255, 0.4);
+}
+
+/* Password Validation Rules */
+.password-rules {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 13px;
+  padding-left: 4px;
+}
+
+.password-rules span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8a8fb2;
+  transition: color 0.2s;
+}
+
+.password-rules span.valid {
+  color: #5ab3ed;
+  font-weight: 600;
+}
+
+.password-rules span.invalid {
+  color: #d93025;
+}
+
+/* Password Modal Specifics */
+.password-modal {
+  max-width: 480px;
+  width: 100%;
+}
+
+.password-form-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e5f3;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: #6cc5ff;
+  box-shadow: 0 0 0 3px rgba(108, 197, 255, 0.15);
+}
+
+/* Validation Colors */
+.input-wrapper input.valid-input {
+  border-color: #5ab3ed;
+  background-color: #f0f9ff;
+}
+
+.input-wrapper input.invalid-input {
+  border-color: #d93025;
+  background-color: #fff5f5;
+}
+
+.input-wrapper input.valid-input:focus {
+  box-shadow: 0 0 0 3px rgba(90, 179, 237, 0.15);
+}
+
+.input-wrapper input.invalid-input:focus {
+  box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.15);
+}
+
+.message-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.message-box.error {
+  background-color: #fff5f5;
+  color: #d93025;
+  border: 1px solid #ffcdd2;
+}
+
+.message-box.success {
+  background-color: #f0f9ff;
+  color: #5ab3ed;
+  border: 1px solid #bae6fd;
 }
 
 @media (max-width: 1024px) {

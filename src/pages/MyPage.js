@@ -1,63 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { Settings } from 'lucide-react';
 import ProfileEditModal from '../components/user/mypage/ProfileEditModal';
 import ProfileDetail from '../components/user/mypage/ProfileDetail';
 import DeliveryAddress from '../components/user/mypage/DeliveryAddress';
 import MemberWithdrawal from '../components/user/mypage/MemberWithdrawal';
+import PasswordChange from '../components/user/mypage/PasswordChange';
+import { fetchMyPageData, updateUserProfile } from '../features/user/userSlice';
 import '../styles/MyPage.css';
-import {
-  MYPAGE_ENDPOINTS,
-  FALLBACK_USER_PROFILE,
-  FALLBACK_ORDER_STEPS,
-  FALLBACK_INGREDIENT_GROUPS,
-  FALLBACK_INGREDIENT_BLOCK_META,
-} from 'components/user/data/mypageConstants';
+import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConstants';
 
-// 사용자 데이터에 따라 사이드바 문구를 동적으로 만들어 주는 빌더.
+/**
+ * buildNavSections Helper
+ *
+ * 사용자 데이터에 따라 사이드바 네비게이션 메뉴 구조를 생성합니다.
+ * @param {Object} user - 사용자 프로필 데이터
+ * @returns {Array} 네비게이션 섹션 배열
+ */
 const buildNavSections = user => [
   {
     title: '마이 쇼핑',
-    items: ['주문/배송 조회', '취소·반품/교환 내역', '거래증빙서류 확인', '장바구니', '좋아요', '재입고 알림'],
+    items: ['주문/배송 조회', '취소·반품/교환 내역', '좋아요'],
   },
   {
     title: '마이 활동',
-    items: ['1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황', '체험단 리뷰'],
+    items: ['1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황'],
   },
   {
     title: '마이 정보',
-    items: ['회원정보 수정', '배송지/환불계좌', 'MY 환경설정', '회원탈퇴'],
+    items: ['회원정보 수정', '배송지/환불계좌', '비밀번호 수정', '회원탈퇴'],
   },
 ];
 
-// 주요 지표 카드를 생성한다. 숫자 포맷이나 항목 구성이 바뀌면 이 함수만 수정하면 된다.
-const buildActivityStats = user => [
-  { label: '주문/배송', value: user.orders, icon: '🚚' },
-  { label: '포인트', value: user.points.toLocaleString(), icon: '💎' },
-  { label: '쿠폰', value: 2, icon: '🎟️' },
-  { label: '찜한 상품', value: user.favorites, icon: '💗' },
-];
-
+/**
+ * MyPage Component
+ *
+ * 마이페이지의 메인 컨테이너 컴포넌트입니다.
+ * 좌측 사이드바와 우측 컨텐츠 영역으로 구성되며,
+ * 대시보드, 프로필 상세, 배송지 관리, 회원 탈퇴 등의 서브 페이지를 렌더링합니다.
+ * 비밀번호 변경 기능은 모달 형태로 제공됩니다.
+ */
 const MyPage = () => {
-  // ===== State scaffolding =====
-  // 각 state는 추후 API 응답으로 대체될 예정이며, 초기값만 더미 데이터로 채워둔다.
-  const [userProfile, setUserProfile] = useState(FALLBACK_USER_PROFILE);
-  const [activityStats, setActivityStats] = useState(buildActivityStats(FALLBACK_USER_PROFILE));
-  const [navSections, setNavSections] = useState(buildNavSections(FALLBACK_USER_PROFILE));
-  const [ingredients, setIngredients] = useState(FALLBACK_INGREDIENT_GROUPS);
-  const [orderSteps, setOrderSteps] = useState(FALLBACK_ORDER_STEPS);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('dashboard'); // 'dashboard' | 'profile' | 'delivery' | 'withdrawal'
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { profile: userProfile, orderSteps, ingredients, loading } = useSelector(state => state.user);
+
+  // UI State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 변경 모달 상태
+  const [viewMode, setViewMode] = useState('dashboard'); // 현재 보여줄 뷰 모드 ('dashboard' | 'profile' | 'delivery' | 'withdrawal')
+
+  // Derived State: 사용자 정보가 변경될 때마다 네비게이션 메뉴 재생성
+  const navSections = useMemo(() => buildNavSections(userProfile), [userProfile]);
 
   useEffect(() => {
-    // ===== Example API wiring =====
-    // axios.get(`${MYPAGE_ENDPOINTS.profile}/1`).then(({ data }) => {
-    //   setUserProfile(data.profile);
-    //   setActivityStats(buildActivityStats(data.profile));
-    //   setNavSections(buildNavSections(data.profile));
-    //   setOrderSteps(data.orderSteps);
-    //   setIngredients(data.favoriteIngredients);
-    // });
-  }, []);
+    dispatch(fetchMyPageData());
+  }, [dispatch]);
 
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
@@ -67,10 +66,12 @@ const MyPage = () => {
   const handleShowProfileDetail = () => setViewMode('profile');
   const handleShowDashboard = () => setViewMode('dashboard');
 
+  // Handler: 사이드바 메뉴 클릭 처리
   const handleNavClick = item => {
     if (item === '회원정보 수정') setViewMode('profile');
     else if (item === '배송지/환불계좌') setViewMode('delivery');
     else if (item === '회원탈퇴') setViewMode('withdrawal');
+    else if (item === '비밀번호 수정') setIsPasswordModalOpen(true); // 비밀번호 수정은 모달 오픈
     else {
       // For other items, maybe navigate or show placeholder
       console.log('Clicked:', item);
@@ -78,18 +79,11 @@ const MyPage = () => {
   };
 
   const handleSaveProfile = updatedData => {
-    // Here you would typically make an API call to update the user profile
-    console.log('Saving profile:', updatedData);
-
-    // Optimistically update local state for demo purposes
-    setUserProfile(prev => ({
-      ...prev,
-      name: updatedData.name,
-      tags: updatedData.skinType,
-      // Update other fields as needed
-    }));
+    // Redux Thunk를 통해 프로필 업데이트 요청
+    dispatch(updateUserProfile(updatedData));
   };
 
+  // 뷰 모드에 따른 메인 컨텐츠 렌더링
   const renderContent = () => {
     switch (viewMode) {
       case 'profile':
@@ -279,6 +273,8 @@ const MyPage = () => {
         userProfile={userProfile}
         onSave={handleSaveProfile}
       />
+      {/* 비밀번호 변경 모달 컴포넌트 */}
+      <PasswordChange isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} />
     </div>
   );
 };

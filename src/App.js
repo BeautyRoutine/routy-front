@@ -98,7 +98,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/mypage" element={isLoggedIn ? <MyPage /> : <Navigate to="/" replace />} />
+          {/* 개발 편의를 위해 로그인 체크 임시 해제 (추후 배포 시 아래 주석 해제 및 현재 라인 삭제 필요) */}
+          {/* <Route path="/mypage" element={isLoggedIn ? <MyPage /> : <Navigate to="/" replace />} /> */}
+          <Route path="/mypage" element={<MyPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
           {/* 로그인 */}
           <Route
