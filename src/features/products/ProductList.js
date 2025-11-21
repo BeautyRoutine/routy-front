@@ -103,9 +103,7 @@ const ProductList = () => {
       </div>
       {/* 상품 추가 */}
       <div className="text-end mb-3">
-        <button
-          className='btn btn-success'
-          onClick={() => navigate('/admin/products/add')}>
+        <button className="btn btn-success" onClick={() => navigate('/admin/product/add')}>
           ➕ 상품 추가
         </button>
       </div>
@@ -140,7 +138,7 @@ const ProductList = () => {
                 <tr key={p.prdNo}>
                   <td
                     style={{ cursor: 'pointer', color: '#0d6efd', fontWeight: '500' }}
-                    onClick={() => navigate(`/admin/products/detail/${p.prdNo}`)}
+                    onClick={() => navigate(`/admin/product/detail/${p.prdNo}`)}
                   >
                     {p.prdNo}
                   </td>
@@ -155,7 +153,7 @@ const ProductList = () => {
                   </td>
                   <td
                     style={{ cursor: 'pointer', color: '#0d6efd', fontWeight: '500' }}
-                    onClick={() => navigate(`/admin/products/detail/${p.prdNo}`)}
+                    onClick={() => navigate(`/admin/product/detail/${p.prdNo}`)}
                   >
                     {p.prdName}
                   </td>
