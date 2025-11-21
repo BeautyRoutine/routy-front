@@ -1,15 +1,16 @@
 {
   "files": {
-    "main.css": "/routy-front/static/css/main.f855e6bc.css",
-    "main.js": "/routy-front/static/js/main.a53bcbfe.js",
+    "main.css": "/routy-front/static/css/main.84d39e96.css",
+    "main.js": "/routy-front/static/js/main.88963dd1.js",
     "static/js/453.6d5606ae.chunk.js": "/routy-front/static/js/453.6d5606ae.chunk.js",
+    "static/media/logo.svg": "/routy-front/static/media/logo.adab1e9ea23d2593880c5df637a5cd47.svg",
     "index.html": "/routy-front/index.html",
-    "main.f855e6bc.css.map": "/routy-front/static/css/main.f855e6bc.css.map",
-    "main.a53bcbfe.js.map": "/routy-front/static/js/main.a53bcbfe.js.map",
+    "main.84d39e96.css.map": "/routy-front/static/css/main.84d39e96.css.map",
+    "main.88963dd1.js.map": "/routy-front/static/js/main.88963dd1.js.map",
     "453.6d5606ae.chunk.js.map": "/routy-front/static/js/453.6d5606ae.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f855e6bc.css",
-    "static/js/main.a53bcbfe.js"
+    "static/css/main.84d39e96.css",
+    "static/js/main.88963dd1.js"
   ]
 }
