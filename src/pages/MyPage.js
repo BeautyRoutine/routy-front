@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { Settings } from 'lucide-react';
 import ProfileEditModal from '../components/user/mypage/ProfileEditModal';
 import ProfileDetail from '../components/user/mypage/ProfileDetail';
