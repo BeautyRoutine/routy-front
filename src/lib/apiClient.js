@@ -1,36 +1,41 @@
-// -----------------------------------------------------------------------------
-// 공통 API 클라이언트 모듈
-// -----------------------------------------------------------------------------
+import axios from "axios";
 
-import axios from 'axios';
+// API 기본 설정
+const apiBaseURL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 
-// 기본 axios 인스턴스
-// REACT_APP_API_BASE_URL 사용, 없으면 로컬 서버로 요청합니다.
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080',
+  baseURL: apiBaseURL,
   timeout: 10000,
 });
 
-// 토큰 읽기
-// - localStorage / sessionStorage 에 저장된 auth 객체 또는 token 문자열에서 토큰을 꺼냅니다.
+// --------------------------
+// 토큰 꺼내오기
+// --------------------------
 function getToken() {
   try {
-    const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+    const auth =
+      localStorage.getItem("auth") || sessionStorage.getItem("auth");
 
     if (auth) {
       const parsed = JSON.parse(auth);
       if (parsed?.token) return parsed.token;
     }
 
-    return localStorage.getItem('token') || sessionStorage.getItem('token') || null;
+    return (
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token") ||
+      null
+    );
   } catch {
     return null;
   }
 }
 
+// --------------------------
 // 요청 인터셉터
-// - 매 요청마다 Authorization 헤더에 Bearer 토큰을 붙입니다.
-api.interceptors.request.use(config => {
+// --------------------------
+api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
     config.headers = config.headers || {};
@@ -39,64 +44,65 @@ api.interceptors.request.use(config => {
   return config;
 });
 
+// --------------------------
 // 응답 인터셉터
-// - 백엔드 공통 응답 규격 { resultCode, resultMsg, data } 기준으로 처리합니다.
-// - resultCode === 200 이면 그대로 body 반환, 아니면 Error 로 던집니다.
-// - 그 외 형식이면 axios 기본 응답(res)을 그대로 돌려줍니다.
+// --------------------------
 api.interceptors.response.use(
-  res => {
+  (res) => {
     const body = res.data;
 
-    // 공통 응답 포맷인 경우
-    if (body && typeof body === 'object' && 'resultCode' in body) {
+    // 백엔드에서 { resultCode, resultMsg, data } 형태로 줄 때 처리
+    if (body && typeof body === "object" && "resultCode" in body) {
       if (body.resultCode === 200) return body;
 
-      const err = new Error(body.resultMsg || '요청 오류');
+      const err = new Error(body.resultMsg || "요청 오류");
       err.body = body;
       throw err;
     }
 
-    // 공통 포맷이 아닌 경우에는 원래 axios 응답을 그대로 사용
     return res;
   },
-  err => {
-    const msg = err?.response?.data?.resultMsg || err?.response?.data?.message || err.message || '네트워크 오류';
+  (err) => {
+    const msg =
+      err?.response?.data?.resultMsg ||
+      err?.response?.data?.message ||
+      err.message ||
+      "네트워크 오류";
 
     const wrapped = new Error(msg);
     wrapped.original = err;
     return Promise.reject(wrapped);
-  },
+  }
 );
 
-// -----------------------------------------------------------------------------
+// -------------------------
 // 인증 관련 API
-// -----------------------------------------------------------------------------
+// -------------------------
 
 // 로그인
-// payload 예시: { userEmail, userPw }
-export const login = payload => api.post('/api/auth/login', payload);
+// payload: { userEmail, userPw, asAdmin(false 기본) }
+export const login = (payload) =>
+  api.post("/api/auth/login", payload);
 
 // 회원가입
-// payload 예시: { userEmail, userPw, userNick, ... }
-export const signUp = payload => api.post('/api/auth/signup', payload);
+export const signUp = (payload) =>
+  api.post("/api/auth/signup", payload);
 
-// 휴대폰 인증 요청
-// payload: { phone }
-export const requestPhoneVerify = payload => api.post('/api/auth/phone/verification-request', payload);
+// 휴대폰 인증번호 요청
+export const requestPhoneVerify = (payload) =>
+  api.post("/api/auth/phone/request", payload);
 
-// 휴대폰 인증 확인
-// payload: { phone, code }
-export const confirmPhoneVerify = payload => api.post('/api/auth/phone/verification-confirm', payload);
+// 휴대폰 인증번호 확인
+export const confirmPhoneVerify = (payload) =>
+  api.post("/api/auth/phone/verify", payload);
 
-// 카카오 로그인 URL 생성
-// redirectUri: 로그인 후 돌아올 경로 (기본값: /)
-export const getKakaoLoginUrl = (redirectUri = '/') => {
-  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
-  // 백엔드에서 카카오 로그인 URL을 리다이렉트 해주는 엔드포인트라고 가정
-  // 혹은 프론트에서 직접 카카오 URL을 구성할 수도 있음.
-  // 여기서는 백엔드 엔드포인트로 유도하거나, 백엔드 설정을 따름.
-  // 임시로 백엔드 /api/auth/kakao/login?redirect_uri=... 형태로 가정
-  return `${baseUrl}/api/auth/kakao/login?redirect_uri=${encodeURIComponent(redirectUri)}`;
-};
+// -------------------------
+// 카카오 로그인 URL (단순 문자열)
+// -------------------------
+export function getKakaoUrl() {
+  const base = apiBaseURL.replace(/\/+$/, ""); // 끝 / 제거
+  // 백엔드의 /auth/kakao/login 으로 보내면, 거기서 카카오로 redirect 해줌
+  return `${base}/auth/kakao/login`;
+}
 
 export default api;
