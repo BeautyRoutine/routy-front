@@ -1,0 +1,230 @@
+/* --- 상단 요약 섹션 (별점 + 그래프) --- */
+.review-list-summary {
+  display: flex;
+  background-color: #fff; /* 깔끔한 흰색 배경 */
+  padding-bottom: 30px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 30px;
+  gap: 40px;
+}
+
+/* 왼쪽: 큰 점수 */
+.summary-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 150px;
+}
+.big-score-text {
+  font-size: 48px;
+  font-weight: bold;
+  color: #0d6efd;
+  line-height: 1;
+}
+.total-stars-text {
+  font-size: 20px;
+  color: #ffc107;
+  margin: 8px 0;
+}
+.total-count-label {
+  color: #999;
+  font-size: 14px;
+}
+
+/* 오른쪽: 막대 그래프 */
+.summary-right {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.graph-row {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.graph-label {
+  width: 30px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.graph-bar-bg {
+  flex-grow: 1;
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  margin: 0 12px;
+}
+.graph-bar-fill {
+  height: 100%;
+  background-color: #333;
+  border-radius: 3px;
+}
+.graph-count {
+  width: 30px;
+  text-align: right;
+  color: #999;
+}
+
+/* --- 정렬 탭 (상단 우측 등으로 이동 가능하지만 일단 리스트 위에 배치) --- */
+.sort-tab-area {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 10px;
+}
+.sort-btn {
+  cursor: pointer;
+}
+.sort-btn.active {
+  color: #333;
+  font-weight: bold;
+}
+
+/* --- 개별 리뷰 아이템 --- */
+.review-item {
+  padding: 30px 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+/* 1. 리뷰 헤더 (유저정보 + 신고) */
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.user-profile-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 프로필 원 */
+.profile-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #d0ebff; /* 하늘색 원 */
+}
+
+/* 유저 정보 텍스트들 */
+.user-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.user-rank-badge {
+  font-size: 11px;
+  color: white;
+  background-color: #ff922b; /* 주황색 배지 */
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+.user-name {
+  font-weight: bold;
+  font-size: 14px;
+}
+.stars-small {
+  color: #ffc107;
+  font-size: 20px;
+  margin-left: 4px;
+}
+.review-date-text {
+  font-size: 12px;
+  color: #adb5bd;
+  margin-left: 4px;
+}
+
+/* 신고하기 버튼 */
+.report-btn {
+  background: none;
+  border: none;
+  color: #adb5bd;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.report-btn:hover {
+  color: #868e96;
+}
+
+/* 2. 리뷰 본문 (사진 + 내용) */
+.review-body {
+  margin-bottom: 16px;
+  padding-left: 60px; /* 프로필 사진 너비만큼 들여쓰기 (선택사항) */
+}
+
+.review-attached-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.review-text-content {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  white-space: pre-line;
+}
+
+/* 3. 리뷰 푸터 (태그 + 좋아요) */
+.review-footer {
+  padding-left: 60px; /* 들여쓰기 */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tag-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tag-badge {
+  background-color: #e7f5ff;
+  color: #0c8599; /* 약간 청록빛 */
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.like-button-area {
+  display: flex;
+  align-items: center;
+}
+
+.like-btn-simple {
+  border: none;
+  background: none;
+  color: #868e96;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  cursor: pointer;
+}
+.like-btn-simple:hover {
+  color: #495057;
+}
+.like-btn-simple.active {
+  color: #0d6efd;
+  font-weight: bold;
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import './ProductDetailTabs.css';
+import ReviewList from './ReviewList';
 
 // 데이터 념겨받기
 function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientInfo }) {
@@ -98,10 +99,7 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
         {/* 리뷰*/}
         <Tab eventKey="review" title={`리뷰 (${reviewInfo.summary.totalCount})`}>
           <div className="tab-content-area">
-            {/* 추후 ReviewList 컴포넌트가 들어갈 자리 */}
-            <h4>리뷰 리스트 영역</h4>
-            <p>평균 별점: {reviewInfo.summary.averageRating}점</p>
-            <p>여기에는 나중에 리뷰 목록 컴포넌트를 import해서 넣을 것입니다.</p>
+            <ReviewList reviewInfo={reviewInfo} />
           </div>
         </Tab>
 
