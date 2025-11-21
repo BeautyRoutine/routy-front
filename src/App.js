@@ -14,6 +14,7 @@ import AdminHome from 'pages/admin/AdminHome';
 import Footer from 'components/user/layouts/footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import ProductDetailPage from 'pages/ProductDetailPage';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -23,7 +24,7 @@ function App() {
   // 공통 네비게이션 요청을 route key 기반으로 처리해 헤더/푸터에서 같은 매핑을 재사용할 수 있도록 함
   const handleLoginClick = async () => {
     //  로그인 버튼 클릭 시 로그인 페이지로 이동합니다.
-   // 실제 적용 시 HEADER_ENDPOINTS.login을 활용해 모달/로그인 API와 연동하도록 변경한다.
+    // 실제 적용 시 HEADER_ENDPOINTS.login을 활용해 모달/로그인 API와 연동하도록 변경한다.
     navigate('/login');
   };
 
@@ -92,34 +93,33 @@ function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
           {/* 로그인 */}
-        <Route
+          <Route
             path="/login"
             element={
-              isLoggedIn
-                ? <Navigate to="/" replace />
-                : <LoginPage onSuccess={(member) => {
-              setIsLoggedIn(true);
-              setUserRole(member?.role || 'user');
-            }}
-            />
+              isLoggedIn ? (
+                <Navigate to="/" replace />
+              ) : (
+                <LoginPage
+                  onSuccess={member => {
+                    setIsLoggedIn(true);
+                    setUserRole(member?.role || 'user');
+                  }}
+                />
+              )
             }
           />
 
-         {/* 회원가입 */}
-          <Route
-            path="/signup"
-            element={
-              isLoggedIn
-                ? <Navigate to="/" replace />
-                : <SignupPage />
-            }
-          />
+          {/* 회원가입 */}
+          <Route path="/signup" element={isLoggedIn ? <Navigate to="/" replace /> : <SignupPage />} />
 
-         {/* 로그아웃 */}
+          {/* 로그아웃 */}
           <Route path="/logout" element={<LogoutPage />} />
 
-         {/* 404 */}
+          {/* 404 */}
           <Route path="*" element={<div style={{ padding: 24 }}>페이지를 찾을 수 없습니다.</div>} />
+
+          {/*제품 상세정보 페이지 */}
+          <Route path="/products/:prdNo" element={<ProductDetailPage />} />
         </Routes>
       </main>
 
