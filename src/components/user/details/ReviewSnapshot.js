@@ -46,13 +46,6 @@ const ReviewSnapshot = ({ reviewInfo }) => {
     return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
   };
 
-  // 랭크 배지 클래스
-  const getRankBadgeClass = rank => {
-    if (rank === 'DIAMOND' || rank === 'A') return 'rank-diamond';
-    if (rank === 'PLATINUM' || rank === 'B') return 'rank-platinum';
-    return 'rank-general';
-  };
-
   return (
     <div className="snapshot-container my-5">
       <Row>
@@ -93,7 +86,6 @@ const ReviewSnapshot = ({ reviewInfo }) => {
         <Col md={8}>
           <div className="best-review-title">
             <span>베스트 리뷰</span>
-            <span style={{ fontSize: '12px', color: '#999', fontWeight: 'normal' }}>* 전문가 선정</span>
           </div>
 
           <Row className="g-3">
@@ -103,8 +95,6 @@ const ReviewSnapshot = ({ reviewInfo }) => {
                   <div className="reviewer-info">
                     <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#ddd' }}></div>
                     <div>
-                      {/* 유저 등급, 유저명,날짜. 이미지는 수정예정*/}
-                      <span className={`reviewer-rank ${getRankBadgeClass(review.revRank)}`}>{review.revRank}</span>
                       <span className="reviewer-name ms-2">{review.userName}</span>
                     </div>
                     <span className="review-date">{review.revDate}</span>

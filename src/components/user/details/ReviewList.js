@@ -87,10 +87,9 @@ const ReviewList = ({ reviewInfo }) => {
                 ) : (
                   <div className="profile-circle"></div>
                 )}
-                {/*랭크랑 이름, 별점, 날짜 */}
+                {/*이름, 별점, 날짜 */}
                 <div className="d-flex flex-column">
                   <div className="user-info-row">
-                    <span className="user-rank-badge">{review.revRank || 'A등급'}</span>
                     <span className="user-name">{review.userName}</span>
                   </div>
                   <div className="user-info-row">
