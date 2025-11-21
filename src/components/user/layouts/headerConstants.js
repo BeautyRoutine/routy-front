@@ -1,14 +1,15 @@
 // 더미/폴백 데이터 import
-import {
-  DEMO_TOP_CATEGORIES,
-  DEMO_CATEGORY_TREE,
-  DEMO_NOTIFICATIONS,
-  DEMO_COUNTS,
-  DEMO_RECENT_SEARCHES,
-  DEMO_SIMILAR_SKIN,
+// 경로 정리: 레이아웃에서 사용하는 목업 데이터를 data 폴더로 분리했다.
+export {
+  DEMO_TOP_CATEGORIES as FALLBACK_TOP,
+  DEMO_CATEGORY_TREE as FALLBACK_TREE,
+  DEMO_NOTIFICATIONS as FALLBACK_NOTIFICATIONS,
+  DEMO_COUNTS as FALLBACK_COUNTS,
+  DEMO_RECENT_SEARCHES as FALLBACK_RECENT_SEARCHES,
+  DEMO_SIMILAR_SKIN as FALLBACK_SIMILAR_SKIN,
   DEMO_RECENT_ITEMS,
   DEMO_CART_COUNT,
-} from './demoData';
+} from '../data/headerMocks';
 
 // 공통 API 루트: .env 없이 개발 시에도 동작하도록 기본값을 둔다.
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
@@ -34,12 +35,3 @@ export const ENDPOINTS = {
   notificationCount: '/api/users/me/notifications/count',
   cartCount: '/api/cart/count',
 };
-
-// API 실패 시 사용할 폴백 데이터 export
-export const FALLBACK_TOP = DEMO_TOP_CATEGORIES;
-export const FALLBACK_TREE = DEMO_CATEGORY_TREE;
-export const FALLBACK_NOTIFICATIONS = DEMO_NOTIFICATIONS;
-export const FALLBACK_COUNTS = DEMO_COUNTS;
-export const FALLBACK_RECENT_SEARCHES = DEMO_RECENT_SEARCHES;
-export const FALLBACK_SIMILAR_SKIN = DEMO_SIMILAR_SKIN;
-export { DEMO_RECENT_ITEMS, DEMO_CART_COUNT };

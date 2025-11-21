@@ -1,0 +1,268 @@
+.delivery-container {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 18px 36px rgba(86, 105, 173, 0.12);
+  width: 100%;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 32px;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  color: #6cc5ff;
+  background: #fff;
+  border-top: 2px solid #6cc5ff;
+  border-bottom: none;
+  border-left: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+}
+
+/* Refund Tab Specifics */
+.refund-header {
+  display: flex;
+  background: #f8fafc;
+  padding: 12px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+}
+
+.col-bank {
+  width: 20%;
+}
+.col-account {
+  width: 60%;
+}
+/* col-manage reused */
+
+.empty-state-refund {
+  padding: 80px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: #94a3b8;
+}
+
+.empty-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #cbd5e1;
+  font-weight: 300;
+}
+
+.refund-actions {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 40px;
+}
+
+.refund-notice {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.8;
+}
+
+.info-text {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.address-table-header {
+  display: flex;
+  background: #f8fafc;
+  padding: 12px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+}
+
+.col-name {
+  width: 15%;
+}
+.col-recipient {
+  width: 15%;
+}
+.col-address {
+  width: 40%;
+  text-align: left;
+  padding-left: 20px;
+}
+.col-phone {
+  width: 15%;
+}
+.col-manage {
+  width: 15%;
+}
+
+.address-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.address-item {
+  display: flex;
+  align-items: flex-start; /* Align top for multi-line address */
+  padding: 24px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #1e293b;
+  text-align: center;
+}
+
+.address-item .col-address {
+  text-align: left;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.badge.default {
+  background: #6cc5ff;
+  color: #fff;
+}
+
+.badge.tag {
+  background: #fff;
+  border: 1px solid #fb7185;
+  color: #fb7185;
+}
+
+.addr-text {
+  line-height: 1.5;
+}
+
+.addr-text.sub {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.access-method {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.access-method .label {
+  font-weight: 600;
+  margin-right: 8px;
+  color: #475569;
+}
+
+.col-manage {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.btn-outline {
+  padding: 6px 0;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  width: 100%;
+  text-align: center;
+}
+
+.btn-row .btn-outline {
+  flex: 1;
+}
+
+.btn-outline:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.action-area {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-primary-large {
+  padding: 14px 40px;
+  background: #6cc5ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary-large:hover {
+  background: #5ab3ed;
+}
+
+.empty-state {
+  padding: 60px 0;
+  text-align: center;
+  color: #94a3b8;
+}

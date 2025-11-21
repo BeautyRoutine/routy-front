@@ -16,7 +16,7 @@
 .header-inner {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 20px 32px 12px;
+  padding: 20px 32px 12px 60px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -59,14 +59,17 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #def6f6;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 999px;
-  padding: 12px 24px;
-  transition: box-shadow 0.2s ease;
+  padding: 11px 24px;
+  transition: all 0.2s ease;
 }
 
-.search-wrapper.open {
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+.search-wrapper:focus-within {
+  background: #ffffff;
+  border-color: #5ab3ed; /* Brand color focus */
+  box-shadow: 0 4px 12px rgba(90, 179, 237, 0.15);
 }
 
 .search-icon {
@@ -258,7 +261,7 @@
 }
 
 .search-panel__trend--down {
-  color: #3b82f6;
+  color: #5ab3ed;
 }
 
 .search-panel__trend--steady {
@@ -283,7 +286,7 @@
 }
 
 .auth-link:hover {
-  color: #2563eb;
+  color: #5ab3ed;
 }
 
 .auth-button--primary {
@@ -394,7 +397,7 @@
   background: transparent;
   font-size: 13px;
   font-weight: 600;
-  color: #2563eb;
+  color: #5ab3ed;
   cursor: pointer;
 }
 
@@ -464,7 +467,7 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: #2563eb;
+  background: #5ab3ed;
 }
 
 .notification-panel__footer {
@@ -558,13 +561,13 @@
 }
 
 .user-menu-item--highlight {
-  color: #2563eb;
+  color: #5ab3ed;
   font-weight: 600;
 }
 
 .user-menu-item--highlight:hover {
-  color: #1d4ed8;
-  background: rgba(37, 99, 235, 0.08);
+  color: #4fa0d8;
+  background: rgba(90, 179, 237, 0.08);
 }
 
 .user-menu-item--logout {
@@ -703,7 +706,7 @@
 }
 
 .category-title:hover {
-  color: #2563eb;
+  color: #5ab3ed;
 }
 
 .category-list {
