@@ -10,6 +10,7 @@ import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 import Home from 'pages/Home';
 import MyPage from './pages/MyPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import ProductListPage from './pages/ProductListPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import LogoutPage from './pages/LogoutPage';
@@ -98,8 +99,10 @@ function App() {
             element={isLoggedIn ? <MyPage /> : <Navigate to="/login" replace />}
           /> */}
           <Route path="/mypage" element={<MyPage />} />
-
+          {/* 상품 페이지*/}
           <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/products" element={<ProductListPage />} />
+          {/* 관리자 페이지*/}
           <Route path="/admin/*" element={<AdminHome />} />
 
           {/* 로그인 */}

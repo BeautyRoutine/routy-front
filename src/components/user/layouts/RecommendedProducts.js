@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './RecommendedProducts.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// 상수는 컴포넌트 외부에 선언
 const CATEGORIES = ['전체', '스킨', '로션', '에센스', '크림', '클렌징'];
 
 const RecommendedProducts = () => {
+  const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('전체');
@@ -35,14 +35,15 @@ const RecommendedProducts = () => {
         setProducts(converted);
       })
       .catch(err => console.error('상품 불러오기 실패:', err));
-  }, []); // ✅ 이제 경고 없음!
+  }, []);
 
-  const filterByCategory = cat => {
+  // 홈 내부 필터링 + 상품 전체 페이지 이동
+  const handleCategoryClick = cat => {
     setActiveCategory(cat);
     if (cat === '전체') {
-      setProducts(allProducts);
+      navigate(`/products`);
     } else {
-      setProducts(allProducts.filter(p => p.category === cat));
+      navigate(`/products?category=${cat}`);
     }
   };
 
@@ -50,16 +51,20 @@ const RecommendedProducts = () => {
 
   return (
     <div className="container my-5">
+      {/* 상단 타이틀 영역 */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h4 className="fw-bold mb-1">당신을 위한 맞춤 추천</h4>
           <p className="text-muted small mb-0">당신의 피부 타입에 맞는 제품을 찾아보세요</p>
         </div>
+
+        {/* 홈 → 전체 상품 페이지 이동 */}
         <Link to="/products" className="text-decoration-none small text-muted">
           전체보기 &gt;
         </Link>
       </div>
 
+      {/* 카테고리 버튼 영역 */}
       <div className="d-flex gap-2 flex-wrap mb-4">
         {CATEGORIES.map((cat, i) => (
           <button
@@ -67,13 +72,14 @@ const RecommendedProducts = () => {
             className={`btn btn-sm rounded-pill px-3 ${
               activeCategory === cat ? 'btn-dark text-white' : 'btn-outline-secondary'
             }`}
-            onClick={() => filterByCategory(cat)}
+            onClick={() => handleCategoryClick(cat)}
           >
             {cat}
           </button>
         ))}
       </div>
 
+      {/* 추천 상품 카드 */}
       <div className="row row-cols-1 row-cols-md-4 g-4">
         {filledProducts.map((p, index) => (
           <div key={index} className="col">
