@@ -16,6 +16,7 @@ import SignupPage from './pages/SignupPage';
 import LogoutPage from './pages/LogoutPage';
 import AdminHome from 'pages/admin/AdminHome';
 import Footer from 'components/user/layouts/footer';
+import ScrollToTop from 'components/common/ScrollToTop';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -72,6 +73,7 @@ function App() {
   return (
     <div className="App">
       {/* 사용자 영역에는 헤더를 유지하고, 관리자 화면에서는 중복 레이아웃을 피하기 위해 제거 */}
+      <ScrollToTop />
       {!isAdmin && (
         <UserGlobalLayout
           isLoggedIn={isLoggedIn}
