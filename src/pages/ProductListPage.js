@@ -2,27 +2,24 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import CategoryFilter from '../components/user/product/CategoryFilter';
+import ProductGrid from '../components/user/product/ProductGrid';
 import './ProductListPage.css';
 
 const ProductListPage = () => {
   const [products, setProducts] = useState([]);
-  const [searchParams] = useSearchParams();
 
+  const [searchParams] = useSearchParams();
   const limit = searchParams.get('limit') || 20;
   const skin = searchParams.get('skin') || null;
 
   const loadProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/products/list/skin_cate', {
-        params: {
-          limit: limit,
-          skin: skin,
-        },
-      });
+      const res = await axios.get('http://localhost:8080/api/products/list/skin_cate', { params: { limit, skin } });
 
-      setProducts(res.data.data);
+      const list = res.data.data || [];
+      setProducts(list);
     } catch (err) {
-      console.error('상품 불러오기 실패:', err);
+      console.error(err);
     }
   };
 
@@ -31,19 +28,23 @@ const ProductListPage = () => {
   }, [limit, skin]);
 
   return (
-    <div className="product-page-container container mt-4">
+    <div className="container mt-4 product-page-container">
+      {/* 🔥 전체 상품 개수 텍스트 — 이게 SortBar에서 분리된 부분 */}
+      <p className="fw-bold mb-3 text-muted">전체 {products.length}개 상품</p>
+
       <div className="row">
-        {/* 왼쪽 필터 영역 */}
+        {/* 왼쪽 카테고리 필터 */}
         <div className="col-3">
           <CategoryFilter />
         </div>
-        {/* 오른쪽 상품 목록 영역 */}
-        
 
+        {/* 오른쪽 상품 */}
+        <div className="col-9">
+          <ProductGrid products={products} />
 
-        {/* 더보기 버튼 */}
-        <div className="text-center mt-4">
-          <button className="btn btn-outline-primary px-4 rounded-pill">상품 더보기</button>
+          <div className="text-center mt-4">
+            <button className="btn btn-outline-primary rounded-pill px-4">상품 더보기</button>
+          </div>
         </div>
       </div>
     </div>

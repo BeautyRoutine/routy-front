@@ -15,9 +15,7 @@ const ProductGrid = ({ products }) => {
           <div className="product-info">
             <p className="brand">{p.prdCompany}</p>
             <p className="name">{p.prdName}</p>
-            <p className="price">
-              {p.prdPrice.toLocaleString()}원
-            </p>
+            <p className="price">{p.prdPrice.toLocaleString()}원</p>
           </div>
         </div>
       ))}
