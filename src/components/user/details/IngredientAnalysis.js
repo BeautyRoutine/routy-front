@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { Row, Col, Modal } from 'react-bootstrap';
 import './IngredientAnalysis.css';
 
+/////////
+/////////
+/////////
+/////////
+/////////
+// /사고 발생으로 혹시 모를 추가 피해를 대비해 남겨놓음. 추후 문제 없으면 삭제 예정
+/////////
+/////////
+/////////
+/////////
+/////////
+
 //ingredientInfo 받아옴
 const IngredientAnalysis = ({ ingredientInfo }) => {
   //전체 성분표 모달 상태

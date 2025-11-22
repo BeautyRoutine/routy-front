@@ -5,7 +5,7 @@ import ProductImageGallery from 'components/user/details/ProductImageGallery';
 import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
 import ReviewSnapshot from 'components/user/details/ReviewSnapshot';
-import IngredientAnalysis from 'components/user/details/IngredientAnalysis';
+import ProductIngredientAnalysis from 'components/user/details/ProductIngredientAnalysis';
 
 // 더미데이터 받아오기
 import { dummyProductData } from './demoProductData';
@@ -40,7 +40,7 @@ const ProductDetailPage = () => {
       {/*성분 분석 */}
       <Row className="mt-5">
         <Col>
-          <IngredientAnalysis ingredientInfo={ingredientInfo} />
+          <ProductIngredientAnalysis ingredientInfo={ingredientInfo} />
         </Col>
       </Row>
 
