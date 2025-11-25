@@ -1,23 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'react-bootstrap';
 import ReviewDetailModal from './ReviewDetailModal';
-import './ReviewSnapshot.css';
+import './ReviewSummary.css';
 
 const ReviewSnapshot = ({ reviewInfo }) => {
-  //리뷰는 1,2번만, 좋아요 작동시키려고 state 사용.
+  // 베스트 리뷰 선정 기준
+  const MIN_TOTAL_REVIEWS = 5; // 리뷰가 최소 5개 수정가능
+  const MIN_LIKES = 5; // 좋아요가 최소 5개 수정 가능
 
-  //베스트 리뷰 선정에 조건 달기
-  const getBestReviews = reviews => {
-    if (!reviews || reviews.length === 0) return []; //없으면 여전히 []
+  // 베스트 리뷰 선정 로직
+  const getBestReviews = (reviews, totalCount) => {
+    // 데이터 없거나, 전체 리뷰 수가 기준 미만이면 []
+    if (!reviews || reviews.length === 0 || totalCount < MIN_TOTAL_REVIEWS) {
+      return [];
+    }
 
-    return reviews //리뷰를 return 할때
-      .filter(review => review.revStar >= 4) // 4점 이상인 것만
-      .sort((a, b) => b.likeCount - a.likeCount) // 좋아요 많은 순으로 정렬 (내림차순) --sort가 알아서 알고리즘 적용
-      .slice(0, 2); // 상위 2개
+    return (
+      reviews
+        // 좋아요가 기준
+        .filter(review => review.likeCount >= MIN_LIKES)
+        // 좋아요 수 정렬
+        .sort((a, b) => b.likeCount - a.likeCount)
+        // 상위 2개
+        .slice(0, 2)
+    );
   };
 
-  //reveiwInfo가 있으면 reviews 받기
-  const [bestReviews, setBestReviews] = useState(reviewInfo ? getBestReviews(reviewInfo.reviews) : []);
+  const { summary } = reviewInfo || {};
+
+  //reveiwInfo가 있으면 reviews랑 리뷰수 받기
+  const [bestReviews, setBestReviews] = useState(
+    reviewInfo ? getBestReviews(reviewInfo.reviews, reviewInfo.summary.totalCount) : [],
+  );
 
   //  모달 상태 on off, 모달 담을 state
   const [showModal, setShowModal] = useState(false);
@@ -26,14 +40,14 @@ const ReviewSnapshot = ({ reviewInfo }) => {
   //초기값때 못받아오는 경우 여기서 리뷰 2개 받아옴
   useEffect(() => {
     if (reviewInfo && reviewInfo.reviews) {
-      const best = getBestReviews(reviewInfo.reviews);
+      // 여기서도 totalCount 같이 넘겨줌
+      const best = getBestReviews(reviewInfo.reviews, reviewInfo.summary.totalCount);
       setBestReviews(best);
     }
   }, [reviewInfo]);
+
   //만약 reviewinfo가 없으면 null 반환
   if (!reviewInfo) return null;
-
-  const { summary } = reviewInfo;
 
   // 리뷰 카드 클릭하면 실행되는 함수
   const handleReviewClick = review => {
@@ -113,7 +127,7 @@ const ReviewSnapshot = ({ reviewInfo }) => {
           {/*베스트 리뷰 없을 때 안내 문구 */}
           {bestReviews.length === 0 ? (
             <div className="text-center py-5 text-muted" style={{ backgroundColor: '#f8f9fa', borderRadius: '12px' }}>
-              아직 베스트 리뷰가 선정되지 않았습니다. <br />첫 5점 리뷰의 주인공이 되어보세요!
+              아직 베스트 리뷰가 선정되지 않았습니다.
             </div>
           ) : (
             <Row className="g-3">

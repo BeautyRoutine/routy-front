@@ -4,7 +4,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import ProductImageGallery from 'components/user/details/ProductImageGallery';
 import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
-import ReviewSnapshot from 'components/user/details/ReviewSnapshot';
+import ReviewSummary from 'components/user/details/ReviewSummary';
 import ProductIngredientAnalysis from 'components/user/details/ProductIngredientAnalysis';
 
 // 더미데이터 받아오기
@@ -30,17 +30,14 @@ const ProductDetailPage = () => {
           <ProductInfo product={productInfo} reviewSummary={reviewInfo.summary} />
         </Col>
       </Row>
-      {/*별점, 우수리뷰- 리뷰 없으면 표시 안함 */}
-      {reviewInfo.summary.totalCount > 0 && (
-        <>
-          <Row className="mt-5">
-            <Col>
-              <ReviewSnapshot reviewInfo={reviewInfo} />
-            </Col>
-          </Row>
-          <hr className="my-5" />
-        </>
-      )}
+
+      {/*별점, 우수리뷰 */}
+      <Row className="mt-5">
+        <Col>
+          <ReviewSummary reviewInfo={reviewInfo} />
+        </Col>
+      </Row>
+      <hr className="my-5" />
 
       {/*성분 분석 */}
       <Row className="mt-5">
