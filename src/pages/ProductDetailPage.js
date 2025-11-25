@@ -46,8 +46,6 @@ const ProductDetailPage = () => {
         </Col>
       </Row>
 
-      <hr className="my-5" />
-
       <Row>
         <Col>
           {/* 분해한 데이터 전달 */}
