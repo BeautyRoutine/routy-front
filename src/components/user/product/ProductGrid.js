@@ -29,7 +29,7 @@ const ProductGrid = ({ products }) => {
                 <p className="text-muted small mb-1">{p.prdCompany}</p>
 
                 <h6 className="fw-bold text-dark">{p.prdPrice.toLocaleString()}원</h6>
-
+                {/* 장바구니 버튼 */}
                 <button className="btn cart-btn w-100 mt-2">장바구니</button>
               </div>
             </div>

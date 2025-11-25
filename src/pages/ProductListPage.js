@@ -8,6 +8,7 @@ import './ProductListPage.css';
 
 const ProductListPage = () => {
   const [products, setProducts] = useState([]);
+  const [sort, setSort] = useState('popular');
 
   const [searchParams] = useSearchParams();
   const limit = searchParams.get('limit') || 20;
@@ -43,7 +44,7 @@ const ProductListPage = () => {
         <div className="col-9">
           {/* 정렬바 */}
           <div className="mb-3">
-            <SortBar total={products.length} sort="popular" onSortChange={() => {}} />
+            <SortBar total={products.length} sort={sort} onSortChange={value => setSort(value)} />
           </div>
 
           {/* 상품 목록 */}
