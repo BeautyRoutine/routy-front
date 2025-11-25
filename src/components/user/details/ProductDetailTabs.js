@@ -23,7 +23,10 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
         <Tab eventKey="desc" title="상품설명">
           <div className="tab-content-area p-0">
             {/* 프로모션용 긴 상세 이미지, 접힘표시 */}
+            {/* ${} 사용해서 적용되는 css(잘려서, 전체 보여주기) 변경 */}
+            {/*복습용 : {} 자바 스크립트 문법 사용, `` 특수 문자열, ${} 플레이스 홀더, ? : 삼항연산자 */}
             <div className={`detail-image-wrapper ${isExpanded ? 'expanded' : 'collapsed'}`}>
+              {/* 이미지가 있으면 map 사용해서 전부 출력(아마 이미지는 1개일듯)*/}
               {productInfo.images.detail && productInfo.images.detail.length > 0 ? (
                 productInfo.images.detail.map((imgSrc, index) => (
                   <img key={index} src={imgSrc} alt={`상세 이미지 ${index + 1}`} className="detail-image" />
@@ -33,6 +36,7 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
               )}
 
               {/* 가림막  */}
+              {/* 접혀있으면 가림막 보여주기(기본값이 부정이니 ! 해서 true일때 가림막 보여줘(&&) */}
               {!isExpanded && <div className="fade-overlay"></div>}
             </div>
 
@@ -44,8 +48,9 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
             </div>
 
             {/* 접이식 정보 (아코디언) */}
+            {/*기본값은 0 열려있기, 테두리 지우고 alwaysOpen으로 동시에 펼칠 수 있게. */}
             <Accordion defaultActiveKey={['0']} flush alwaysOpen className="mt-5 product-info-accordion">
-              {/* 상품정보 제공고시 */}
+              {/* 상품정보 제공고시, 아코디언 넘버 0 */}
               <Accordion.Item eventKey="0">
                 <Accordion.Header>상품정보 제공고시</Accordion.Header>
                 <Accordion.Body>
