@@ -449,6 +449,7 @@ export function Header({
   const effectiveCartCount = typeof cartCount === 'number' ? cartCount : autoCartCount;
 
   // Spring Boot API에서 카테고리 데이터 로드
+  // eslint-disable-next-line no-unused-vars
   const loadCategories = useCallback(() => {
     const controller = new AbortController();
     setCategoryLoading(true);

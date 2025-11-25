@@ -8,6 +8,7 @@ const CATEGORIES = ['전체', '스킨', '로션', '에센스', '크림', '클렌
 
 const RecommendedProducts = () => {
   const navigate = useNavigate();
+  // eslint-disable-next-line no-unused-vars
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('전체');

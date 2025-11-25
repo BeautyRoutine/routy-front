@@ -14,18 +14,18 @@ const ProductListPage = () => {
   const limit = searchParams.get('limit') || 20;
   const skin = searchParams.get('skin') || null;
 
-  const loadProducts = async () => {
-    try {
-      const res = await axios.get('http://localhost:8080/api/products/list/skin_cate', { params: { limit, skin } });
-
-      const list = res.data.data || [];
-      setProducts(list);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const res = await axios.get('http://localhost:8080/api/products/list/skin_cate', { params: { limit, skin } });
+
+        const list = res.data.data || [];
+        setProducts(list);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     loadProducts();
   }, [limit, skin]);
 
