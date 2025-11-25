@@ -476,10 +476,10 @@ export function Header({
   }, []);
 
   // 마운트 시 카테고리 데이터 초기화
-  useEffect(() => {
-    const abort = loadCategories();
-    return () => abort && abort();
-  }, [loadCategories]);
+  // useEffect(() => {
+  //   const abort = loadCategories();
+  //   return () => abort && abort();
+  // }, [loadCategories]);
 
   // UI 버튼에서 호출: 알림 모두 읽음 처리 및 배지 초기화.
   const markAllNotificationsRead = () => {

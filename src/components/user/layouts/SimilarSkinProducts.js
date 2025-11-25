@@ -36,6 +36,11 @@ const SimilarSkinProducts = ({ userSkin }) => {
       .catch(err => console.error(err));
   }, []);
 
+  // 상품 상세로 이동
+  const goDetail = prdNo => {
+    navigate(`/products/${prdNo}`);
+  };
+
   // 버튼 클릭 시 이동
   const handleMoreClick = () => {
     if (userSkin) {
@@ -53,7 +58,11 @@ const SimilarSkinProducts = ({ userSkin }) => {
       <div className="row row-cols-1 row-cols-md-4 g-4">
         {products.map(p => (
           <div key={p.id} className="col">
-            <div className="card h-100 border-0 shadow-sm product-card position-relative">
+            <div
+              className="card h-100 border-0 shadow-sm product-card position-relative"
+              style={{ cursor: 'pointer' }}
+              onClick={() => goDetail(p.id)} // 카드 클릭 → 상세 페이지 이동
+            >
               {p.discount && (
                 <span className="badge bg-danger position-absolute top-0 start-0 m-2">{p.discount} OFF</span>
               )}
@@ -78,7 +87,16 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
                 <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
 
-                <button className="btn cart-btn w-100 mt-2">장바구니</button>
+                {/* 장바구니 버튼: 카드 클릭 이벤트 막기 */}
+                <button
+                  className="btn cart-btn w-100 mt-2"
+                  onClick={e => {
+                    e.stopPropagation(); // 카드 클릭과 분리
+                    alert('장바구니에 추가되었습니다.');
+                  }}
+                >
+                  장바구니
+                </button>
               </div>
             </div>
           </div>

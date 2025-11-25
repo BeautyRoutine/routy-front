@@ -8,8 +8,9 @@ const ProductGrid = ({ products, isLoggedIn }) => {
 
   const handleCardClick = prdNo => {
     if (!isLoggedIn) {
+      navigate(`/products/${prdNo}`); // 제품 상세 페이지 확인용 코드
       // 비로그인 → 로그인 페이지로 이동
-      window.location.href = 'http://localhost:3000/routy-front#/login';
+      // window.location.href = 'http://localhost:3000/routy-front#/login';
       return;
     }
 
