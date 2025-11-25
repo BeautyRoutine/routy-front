@@ -83,7 +83,11 @@ const RecommendedProducts = () => {
       <div className="row row-cols-1 row-cols-md-4 g-4">
         {filledProducts.map((p, index) => (
           <div key={index} className="col">
-            <div className="card h-100 border-0 shadow-sm product-card">
+            <div
+              className="card h-100 border-0 shadow-sm product-card"
+              style={{ cursor: p ? 'pointer' : 'default' }}
+              onClick={() => p && navigate(`/products/${p.id}`)}
+            >
               {p ? (
                 <>
                   <img src={p.img} className="card-img-top" alt={p.name} />

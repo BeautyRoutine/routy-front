@@ -102,7 +102,7 @@ function App() {
           /> */}
           <Route path="/mypage" element={<MyPage />} />
           {/* 상품 페이지*/}
-          <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />
           {/* 관리자 페이지*/}
           <Route path="/admin/*" element={<AdminHome />} />
