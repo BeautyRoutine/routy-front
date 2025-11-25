@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import './ReviewDetailModal.css';
 
 //show, onHide, review 받아옴? 이게 뭐길래 받아옴
