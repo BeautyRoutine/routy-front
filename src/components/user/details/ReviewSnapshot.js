@@ -5,10 +5,19 @@ import './ReviewSnapshot.css';
 
 const ReviewSnapshot = ({ reviewInfo }) => {
   //리뷰는 1,2번만, 좋아요 작동시키려고 state 사용.
-  const [bestReviews, setBestReviews] = useState(
-    //리뷰인포도 리뷰 목록도 있으면 초기값 2개, 없으면 []
-    reviewInfo && reviewInfo.reviews ? reviewInfo.reviews.slice(0, 2) : [],
-  );
+
+  //베스트 리뷰 선정에 조건 달기
+  const getBestReviews = reviews => {
+    if (!reviews || reviews.length === 0) return []; //없으면 여전히 []
+
+    return reviews //리뷰를 return 할때
+      .filter(review => review.revStar >= 4) // 4점 이상인 것만
+      .sort((a, b) => b.likeCount - a.likeCount) // 좋아요 많은 순으로 정렬 (내림차순) --sort가 알아서 알고리즘 적용
+      .slice(0, 2); // 상위 2개
+  };
+
+  //reveiwInfo가 있으면 reviews 받기
+  const [bestReviews, setBestReviews] = useState(reviewInfo ? getBestReviews(reviewInfo.reviews) : []);
 
   //  모달 상태 on off, 모달 담을 state
   const [showModal, setShowModal] = useState(false);
@@ -17,7 +26,8 @@ const ReviewSnapshot = ({ reviewInfo }) => {
   //초기값때 못받아오는 경우 여기서 리뷰 2개 받아옴
   useEffect(() => {
     if (reviewInfo && reviewInfo.reviews) {
-      setBestReviews(reviewInfo.reviews.slice(0, 2));
+      const best = getBestReviews(reviewInfo.reviews);
+      setBestReviews(best);
     }
   }, [reviewInfo]);
   //만약 reviewinfo가 없으면 null 반환
@@ -100,76 +110,83 @@ const ReviewSnapshot = ({ reviewInfo }) => {
             <span>베스트 리뷰</span>
           </div>
 
-          <Row className="g-3">
-            {bestReviews.map(review => (
-              <Col md={6} key={review.revNo}>
-                <div
-                  className="review-card-compact"
-                  onClick={() => handleReviewClick(review)} // 클릭하면 모달창 추가
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="reviewer-info">
-                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#ddd' }}></div>
-                    <span className="reviewer-name ms-2">{review.userName}</span>
-                    <span className="review-date">{review.revDate}</span>
-                  </div>
-
-                  {/*내용, 썸네일 가로 배치*/}
-                  <div className="d-flex justify-content-between" style={{ height: '80px', marginBottom: '10px' }}>
-                    {/* 왼쪽: 별점 + 텍스트 */}
-                    <div style={{ flex: 1, overflow: 'hidden', paddingRight: '10px' }}>
-                      <div style={{ color: '#ffc107', fontSize: '13px', marginBottom: '4px' }}>
-                        {'★'.repeat(review.revStar)}
-                        {'☆'.repeat(5 - review.revStar)}
-                      </div>
-                      <div className="review-content-compact" style={{ fontSize: '13px' }}>
-                        {review.revGood || review.revContent}
-                      </div>
+          {/*베스트 리뷰 없을 때 안내 문구 */}
+          {bestReviews.length === 0 ? (
+            <div className="text-center py-5 text-muted" style={{ backgroundColor: '#f8f9fa', borderRadius: '12px' }}>
+              아직 베스트 리뷰가 선정되지 않았습니다. <br />첫 5점 리뷰의 주인공이 되어보세요!
+            </div>
+          ) : (
+            <Row className="g-3">
+              {bestReviews.map(review => (
+                <Col md={6} key={review.revNo}>
+                  <div
+                    className="review-card-compact"
+                    onClick={() => handleReviewClick(review)} // 클릭하면 모달창 추가
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="reviewer-info">
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#ddd' }}></div>
+                      <span className="reviewer-name ms-2">{review.userName}</span>
+                      <span className="review-date">{review.revDate}</span>
                     </div>
 
-                    {/* 오른쪽: 썸네일 */}
-                    {review.revImg && (
-                      <div style={{ width: '80px', height: '80px', flexShrink: 0 }}>
-                        <img
-                          src={review.revImg}
-                          alt="리뷰"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            borderRadius: '8px',
-                            border: '1px solid #eee',
-                          }}
-                        />
+                    {/*내용, 썸네일 가로 배치*/}
+                    <div className="d-flex justify-content-between" style={{ height: '80px', marginBottom: '10px' }}>
+                      {/* 왼쪽: 별점 + 텍스트 */}
+                      <div style={{ flex: 1, overflow: 'hidden', paddingRight: '10px' }}>
+                        <div style={{ color: '#ffc107', fontSize: '13px', marginBottom: '4px' }}>
+                          {'★'.repeat(review.revStar)}
+                          {'☆'.repeat(5 - review.revStar)}
+                        </div>
+                        <div className="review-content-compact" style={{ fontSize: '13px' }}>
+                          {review.revGood || review.revContent}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  {/* 하단: 태그*/}
-                  <div>
-                    <div className="review-tags mb-2" style={{ height: '24px', overflow: 'hidden' }}>
-                      {review.feedback &&
-                        review.feedback.map((tag, idx) => (
-                          <span key={idx} className="review-tag">
-                            #{tag}
-                          </span>
-                        ))}
+
+                      {/* 오른쪽: 썸네일 */}
+                      {review.revImg && (
+                        <div style={{ width: '80px', height: '80px', flexShrink: 0 }}>
+                          <img
+                            src={review.revImg}
+                            alt="리뷰"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              borderRadius: '8px',
+                              border: '1px solid #eee',
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
-                    {/* 하단: 좋아요*/}
-                    <div className="like-btn-area">
-                      <button
-                        className={`like-toggle-btn ${review.isLiked ? 'liked' : ''}`}
-                        // e 받아서 모달도 켜지는거 방지
-                        onClick={e => toggleLike(e, review.revNo)}
-                      >
-                        <span>👍</span>
-                        <span>{review.likeCount}</span>
-                      </button>
+                    {/* 하단: 태그*/}
+                    <div>
+                      <div className="review-tags mb-2" style={{ height: '24px', overflow: 'hidden' }}>
+                        {review.feedback &&
+                          review.feedback.map((tag, idx) => (
+                            <span key={idx} className="review-tag">
+                              #{tag}
+                            </span>
+                          ))}
+                      </div>
+                      {/* 하단: 좋아요*/}
+                      <div className="like-btn-area">
+                        <button
+                          className={`like-toggle-btn ${review.isLiked ? 'liked' : ''}`}
+                          // e 받아서 모달도 켜지는거 방지
+                          onClick={e => toggleLike(e, review.revNo)}
+                        >
+                          <span>👍</span>
+                          <span>{review.likeCount}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Col>
-            ))}
-          </Row>
+                </Col>
+              ))}
+            </Row>
+          )}
         </Col>
       </Row>
 

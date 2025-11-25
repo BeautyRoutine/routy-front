@@ -30,12 +30,17 @@ const ProductDetailPage = () => {
           <ProductInfo product={productInfo} reviewSummary={reviewInfo.summary} />
         </Col>
       </Row>
-      {/*별점, 우수리뷰 */}
-      <Row className="mt-5">
-        <Col>
-          <ReviewSnapshot reviewInfo={reviewInfo} />
-        </Col>
-      </Row>
+      {/*별점, 우수리뷰- 리뷰 없으면 표시 안함 */}
+      {reviewInfo.summary.totalCount > 0 && (
+        <>
+          <Row className="mt-5">
+            <Col>
+              <ReviewSnapshot reviewInfo={reviewInfo} />
+            </Col>
+          </Row>
+          <hr className="my-5" />
+        </>
+      )}
 
       {/*성분 분석 */}
       <Row className="mt-5">
