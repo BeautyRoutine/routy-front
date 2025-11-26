@@ -1,43 +1,47 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import api from '../../lib/apiClient';
+import api from '../../lib/apiClient';
 import {
   FALLBACK_USER_PROFILE,
   FALLBACK_ORDER_STEPS,
   FALLBACK_INGREDIENT_GROUPS,
-  // MYPAGE_ENDPOINTS,
 } from '../../components/user/data/mypageConstants';
+
+// API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
+const getEndpoints = (userId = 'me') => ({
+  profile: `/api/users/${userId}/profile`,
+  orders: `/api/users/${userId}/orders/status-summary`,
+  ingredients: `/api/users/${userId}/ingredients`,
+  password: `/api/users/${userId}/password`,
+});
 
 /**
  * Async Thunk: 마이페이지 데이터 전체 로드
  *
  * 사용자 프로필, 주문 진행 상황, 선호 성분 등 마이페이지에 필요한 모든 데이터를 가져옵니다.
- * 실제로는 여러 API를 병렬로 호출하거나, 하나의 집계 API를 호출할 수 있습니다.
+ * @param {string} userId - 조회할 사용자 ID (기본값: 'me')
  */
-export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (_, { rejectWithValue }) => {
+export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (userId = 'me', { rejectWithValue }) => {
+  const endpoints = getEndpoints(userId);
   try {
-    // TODO: 백엔드 API가 준비되면 아래 주석을 해제하고 실제 호출로 변경하세요.
-    // const [profileRes, ordersRes, ingredientsRes] = await Promise.all([
-    //   api.get(MYPAGE_ENDPOINTS.profile),
-    //   api.get(MYPAGE_ENDPOINTS.orders),
-    //   api.get(MYPAGE_ENDPOINTS.favoriteIngredients),
-    // ]);
+    // API 호출 시도
+    const [profileRes, ordersRes, ingredientsRes] = await Promise.all([
+      api.get(endpoints.profile).catch(() => ({ data: FALLBACK_USER_PROFILE })),
+      api.get(endpoints.orders).catch(() => ({ data: FALLBACK_ORDER_STEPS })),
+      api.get(endpoints.ingredients).catch(() => ({ data: FALLBACK_INGREDIENT_GROUPS })),
+    ]);
 
-    // return {
-    //   profile: profileRes.data,
-    //   orderSteps: ordersRes.data,
-    //   ingredients: ingredientsRes.data,
-    // };
-
-    // 현재는 더미 데이터를 반환하여 UI 개발을 진행합니다.
-    // API 연동 시 이 부분을 제거하고 위 코드를 활성화하면 됩니다.
-    await new Promise(resolve => setTimeout(resolve, 500)); // 네트워크 지연 시뮬레이션
+    return {
+      profile: profileRes.data || FALLBACK_USER_PROFILE,
+      orderSteps: ordersRes.data || FALLBACK_ORDER_STEPS,
+      ingredients: ingredientsRes.data || FALLBACK_INGREDIENT_GROUPS,
+    };
+  } catch (error) {
+    console.error('데이터 로드 실패, 폴백 데이터 사용', error);
     return {
       profile: FALLBACK_USER_PROFILE,
       orderSteps: FALLBACK_ORDER_STEPS,
       ingredients: FALLBACK_INGREDIENT_GROUPS,
     };
-  } catch (error) {
-    return rejectWithValue(error.response?.data || '데이터를 불러오는데 실패했습니다.');
   }
 });
 
@@ -48,13 +52,10 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (_
  */
 export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
-  async (updatedData, { rejectWithValue }) => {
+  async ({ userId = 'me', data }, { rejectWithValue }) => {
     try {
-      // const response = await api.put(MYPAGE_ENDPOINTS.profile, updatedData);
-      // return response.data;
-
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return updatedData;
+      const response = await api.put(getEndpoints(userId).profile, data);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || '프로필 수정에 실패했습니다.');
     }
@@ -65,19 +66,55 @@ export const updateUserProfile = createAsyncThunk(
  * Async Thunk: 비밀번호 변경
  *
  * 현재 비밀번호와 새 비밀번호를 받아 서버에 변경 요청을 보냅니다.
- * @param {Object} payload - { currentPassword, newPassword }
+ * @param {Object} payload - { userId, currentPassword, newPassword }
  */
 export const changePassword = createAsyncThunk(
   'user/changePassword',
-  async ({ currentPassword, newPassword }, { rejectWithValue }) => {
+  async ({ userId = 'me', currentPassword, newPassword }, { rejectWithValue }) => {
     try {
-      // const response = await api.put(MYPAGE_ENDPOINTS.password, { currentPassword, newPassword });
-      // return response.data;
-
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return { success: true };
+      const response = await api.put(getEndpoints(userId).password, { currentPassword, newPassword });
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || '비밀번호 변경에 실패했습니다.');
+    }
+  },
+);
+
+/**
+ * Async Thunk: 성분 추가 (선호/기피)
+ *
+ * @param {Object} payload - { userId, ingredientId, type: 'FOCUS' | 'AVOID' }
+ */
+export const addIngredient = createAsyncThunk(
+  'user/addIngredient',
+  async ({ userId = 'me', ingredientId, type }, { rejectWithValue }) => {
+    try {
+      await api.post(getEndpoints(userId).ingredients, { ingredientId, type });
+      // 성공 시 최신 목록 다시 조회
+      const response = await api.get(getEndpoints(userId).ingredients);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || '성분 추가에 실패했습니다.');
+    }
+  },
+);
+
+/**
+ * Async Thunk: 성분 삭제
+ *
+ * @param {Object} payload - { userId, ingredientId, type }
+ */
+export const removeIngredient = createAsyncThunk(
+  'user/removeIngredient',
+  async ({ userId = 'me', ingredientId, type }, { rejectWithValue }) => {
+    try {
+      // DELETE /api/users/{userId}/ingredients/{ingredientId}
+      await api.delete(`${getEndpoints(userId).ingredients}/${ingredientId}`, { params: { type } });
+      // 성공 시 최신 목록 다시 조회
+      const response = await api.get(getEndpoints(userId).ingredients);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || '성분 삭제에 실패했습니다.');
     }
   },
 );
@@ -94,7 +131,6 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    // 필요한 동기 액션이 있다면 여기에 추가
     clearError: state => {
       state.error = null;
     },
@@ -122,14 +158,13 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        // 부분 업데이트라고 가정하고 병합
         state.profile = { ...state.profile, ...action.payload };
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // changePassword 처리
+      // changePassword
       .addCase(changePassword.pending, state => {
         state.loading = true;
       })
@@ -139,6 +174,14 @@ const userSlice = createSlice({
       .addCase(changePassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // addIngredient
+      .addCase(addIngredient.fulfilled, (state, action) => {
+        state.ingredients = action.payload;
+      })
+      // removeIngredient
+      .addCase(removeIngredient.fulfilled, (state, action) => {
+        state.ingredients = action.payload;
       });
   },
 });

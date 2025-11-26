@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './Header';
 import SideSticky from './SideSticky';
-import { DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from '../data/headerMocks';
+import api from '../../../lib/apiClient';
+import { ENDPOINTS, DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from './headerConstants';
 
 /**
  * 사용자용 전역 레이아웃. Header와 사이드 스티키를 묶어 렌더링하며,
@@ -19,12 +20,35 @@ const UserGlobalLayout = ({
   onRequireLogin,
   onCartClick,
 }) => {
+  const [recentItems, setRecentItems] = useState([]);
+
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 로그인한 경우에만 더미 최근 목록을 넘겨 UI를 시연한다.
-  const recentItems = isLoggedIn ? DEMO_RECENT_ITEMS : [];
+  // 로그인 상태 변경 시 최근 본 상품 API 호출
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setRecentItems([]);
+      return;
+    }
+
+    api
+      .get(ENDPOINTS.recentProducts)
+      .then(response => {
+        // API 응답이 배열이라고 가정
+        if (Array.isArray(response.data)) {
+          setRecentItems(response.data);
+        } else {
+          setRecentItems([]);
+        }
+      })
+      .catch(error => {
+        console.error('최근 본 상품 로드 실패:', error);
+        // API 실패 시 데모 데이터 폴백 (개발 편의용)
+        setRecentItems(DEMO_RECENT_ITEMS);
+      });
+  }, [isLoggedIn]);
 
   return (
     <>

@@ -24,3 +24,5 @@ yarn-error.log*
 
 # 백업 파일 무시
 *.bak
+
+API_SPECS.md
