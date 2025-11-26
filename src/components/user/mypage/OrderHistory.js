@@ -42,16 +42,17 @@ const OrderHistory = ({ orders = DEMO_ORDERS }) => {
           setPage(prev => prev + 1);
         }
       },
-      { threshold: 1.0 }
+      { threshold: 1.0 },
     );
 
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+    const currentTarget = observerRef.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
     }
 
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
     };
   }, [hasMore]);
@@ -142,7 +143,11 @@ const OrderHistory = ({ orders = DEMO_ORDERS }) => {
             </div>
           ))
         )}
-        {hasMore && <div ref={observerRef} style={{ padding: '20px', textAlign: 'center', color: '#999' }}>불러오는 중...</div>}
+        {hasMore && (
+          <div ref={observerRef} style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+            불러오는 중...
+          </div>
+        )}
       </div>
     </div>
   );
