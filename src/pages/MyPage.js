@@ -11,6 +11,7 @@ import OrderHistory from '../components/user/mypage/OrderHistory';
 import ClaimHistory from '../components/user/mypage/ClaimHistory';
 import LikeList from '../components/user/mypage/LikeList';
 import IngredientModal from '../components/user/mypage/IngredientModal';
+import IngredientAddModal from '../components/user/mypage/IngredientAddModal';
 import { fetchMyPageData, updateUserProfile } from '../features/user/userSlice';
 import '../styles/MyPage.css';
 import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConstants';
@@ -34,7 +35,7 @@ const buildNavSections = user => [
   },
   {
     title: '마이 정보',
-    items: ['회원정보 수정', '배송지/환불계좌', '비밀번호 수정', '회원탈퇴'],
+    items: ['배송지/환불계좌', '비밀번호 수정', '회원탈퇴'],
   },
 ];
 
@@ -55,6 +56,8 @@ const MyPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 변경 모달 상태
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false); // 성분 관리 모달 상태
+  const [isIngredientAddModalOpen, setIsIngredientAddModalOpen] = useState(false); // 성분 추가 모달 상태
+  const [ingredientModalTab, setIngredientModalTab] = useState('all'); // 성분 모달 초기 탭
   const [viewMode, setViewMode] = useState('dashboard'); // 현재 보여줄 뷰 모드 ('dashboard' | 'profile' | 'delivery' | 'withdrawal')
   const [likeTab, setLikeTab] = useState('products'); // 'products' | 'brands'
 
@@ -92,14 +95,20 @@ const MyPage = () => {
 
   // Handler: 사이드바 메뉴 클릭 처리
   const handleNavClick = item => {
-    if (item === '회원정보 수정') setViewMode('profile');
-    else if (item === '배송지/환불계좌') setViewMode('delivery');
-    else if (item === '회원탈퇴') setViewMode('withdrawal');
-    else if (item === '비밀번호 수정') setIsPasswordModalOpen(true); // 비밀번호 수정은 모달 오픈
-    else if (item === '주문/배송 조회') setViewMode('order-history');
-    else if (item === '취소·반품/교환 내역') setViewMode('claim-history');
-    else if (item === '좋아요') setViewMode('like-list');
-    else {
+    if (item === '배송지/환불계좌') {
+      setViewMode('delivery');
+    } else if (item === '회원탈퇴') {
+      setViewMode('withdrawal');
+    } else if (item === '비밀번호 수정') {
+      setIsPasswordModalOpen(true);
+    } // 비밀번호 수정은 모달 오픈
+    else if (item === '주문/배송 조회') {
+      setViewMode('order-history');
+    } else if (item === '취소·반품/교환 내역') {
+      setViewMode('claim-history');
+    } else if (item === '좋아요') {
+      setViewMode('like-list');
+    } else {
       // For other items, maybe navigate or show placeholder
       console.log('Clicked:', item);
     }
@@ -217,7 +226,13 @@ const MyPage = () => {
             {/* 찜한 상품/브랜드 탭 뷰 */}
             <section className="mypage-favorite">
               <header>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '12px',
+                  }}
+                >
                   <h3>좋아요</h3>
                   <div style={{ display: 'flex', gap: '8px', fontSize: '14px' }}>
                     <span
@@ -257,7 +272,12 @@ const MyPage = () => {
                 ) : (
                   <div
                     className="favorite-preview-list"
-                    style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}
+                    style={{
+                      display: 'flex',
+                      gap: '15px',
+                      overflowX: 'auto',
+                      paddingBottom: '10px',
+                    }}
                   >
                     {DEMO_LIKES.products.slice(0, 5).map(item => (
                       <div
@@ -332,13 +352,22 @@ const MyPage = () => {
               ) : (
                 <div
                   className="favorite-preview-list"
-                  style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}
+                  style={{
+                    display: 'flex',
+                    gap: '15px',
+                    overflowX: 'auto',
+                    paddingBottom: '10px',
+                  }}
                 >
                   {DEMO_LIKES.brands.slice(0, 5).map(brand => (
                     <div
                       key={brand.id}
                       className="favorite-item"
-                      style={{ width: '120px', flexShrink: 0, textAlign: 'center' }}
+                      style={{
+                        width: '120px',
+                        flexShrink: 0,
+                        textAlign: 'center',
+                      }}
                     >
                       <div
                         style={{
@@ -394,8 +423,8 @@ const MyPage = () => {
             <section className="mypage-ingredients">
               <div className="ingredients-header">
                 <h3>즐겨 찾는 성분</h3>
-                <button type="button" onClick={() => setIsIngredientModalOpen(true)}>
-                  전체 보기 &gt;
+                <button type="button" onClick={() => setIsIngredientAddModalOpen(true)}>
+                  + 추가
                 </button>
               </div>
               <div className="ingredient-groups">
@@ -403,7 +432,13 @@ const MyPage = () => {
                   <article key={block.key} className={`ingredient-block ${block.key}`}>
                     <div className="ingredient-block-header">
                       <h4>{block.label}</h4>
-                      <button type="button" onClick={() => setIsIngredientModalOpen(true)}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIngredientModalTab(block.key);
+                          setIsIngredientModalOpen(true);
+                        }}
+                      >
                         더보기
                       </button>
                     </div>
@@ -484,6 +519,18 @@ const MyPage = () => {
         isOpen={isIngredientModalOpen}
         onClose={() => setIsIngredientModalOpen(false)}
         ingredients={ingredients}
+        initialTab={ingredientModalTab}
+        onAddClick={() => setIsIngredientAddModalOpen(true)}
+      />
+
+      {/* 성분 추가 모달 */}
+      <IngredientAddModal
+        isOpen={isIngredientAddModalOpen}
+        onClose={() => setIsIngredientAddModalOpen(false)}
+        onAdd={(ingredient, listType) => {
+          console.log('Added:', ingredient, 'to', listType);
+          // TODO: Dispatch action to add ingredient
+        }}
       />
     </div>
   );
