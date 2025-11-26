@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form } from 'react-bootstrap';
+
 import './ProductInfo.css';
 
 // product, reviewSummary props로 받기
