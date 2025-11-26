@@ -2,8 +2,15 @@ import React, { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import '../../../styles/MyPage.css'; // Re-use existing modal styles or add new ones
 
-const IngredientModal = ({ isOpen, onClose, ingredients }) => {
-  const [activeTab, setActiveTab] = useState('all');
+const IngredientModal = ({ isOpen, onClose, ingredients, initialTab = 'all', onAddClick }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Reset tab when modal opens with a new initialTab
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
 
   if (!isOpen) return null;
 
@@ -95,7 +102,7 @@ const IngredientModal = ({ isOpen, onClose, ingredients }) => {
         <header className="modal-header">
           <h2>즐겨 찾는 성분</h2>
           <div className="header-actions">
-            <button className="add-btn">
+            <button className="add-btn" onClick={onAddClick}>
               <Plus size={16} />
               <span>추가</span>
             </button>
