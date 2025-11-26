@@ -136,3 +136,37 @@ export const DEMO_LIKES = {
     },
   ],
 };
+
+export const DEMO_MY_REVIEWS = [
+  {
+    id: 1,
+    productName: '퓨어 히알루론산 앰플 50ml',
+    productImage: 'https://via.placeholder.com/80',
+    rating: 5,
+    date: '2025.11.25',
+    content: '촉촉하고 너무 좋아요. 재구매 의사 있습니다!',
+    images: ['https://via.placeholder.com/150'],
+    likes: 12,
+  },
+  {
+    id: 2,
+    productName: '시카 카밍 토너 200ml',
+    productImage: 'https://via.placeholder.com/80',
+    rating: 4,
+    date: '2025.10.20',
+    content: '진정 효과가 있는 것 같아요. 향도 무난합니다.',
+    images: [],
+    likes: 5,
+  },
+  // ... 무한 스크롤 테스트를 위한 추가 데이터 생성
+  ...Array.from({ length: 20 }).map((_, i) => ({
+    id: 3 + i,
+    productName: `테스트 상품 ${i + 1}`,
+    productImage: 'https://via.placeholder.com/80',
+    rating: 3 + (i % 3),
+    date: '2025.09.15',
+    content: `무한 스크롤 테스트용 리뷰 내용입니다. 번호: ${i + 1}`,
+    images: [],
+    likes: i,
+  })),
+];

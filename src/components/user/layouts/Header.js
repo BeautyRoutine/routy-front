@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import api from '../../../lib/apiClient';
 import {
   Menu,
   ChevronRight,
@@ -15,7 +16,6 @@ import {
 import './Header.css';
 import logoImage from 'logo.svg';
 import {
-  API_BASE_URL,
   ENDPOINTS,
   FALLBACK_TOP,
   FALLBACK_TREE,
@@ -24,28 +24,6 @@ import {
   FALLBACK_RECENT_SEARCHES,
   FALLBACK_SIMILAR_SKIN,
 } from './headerConstants';
-
-// API 루트 + 상대 경로를 안전하게 붙이기 위한 헬퍼
-function buildUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${API_BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
-}
-
-// 공통 fetch 래퍼: 인증 포함, 204 처리
-async function fetchJson(path, signal) {
-  const response = await fetch(buildUrl(path), {
-    signal,
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  });
-
-  if (!response.ok) {
-    throw new Error(`status ${response.status}`);
-  }
-  if (response.status === 204) return null;
-  return response.json();
-}
 
 // 최상위 카테고리 응답을 문자열 배열로 정규화
 function normalizeTopCategories(data) {
@@ -146,14 +124,6 @@ export function Header({
   notificationCount,
   cartCount,
 }) {
-  // 로그인 관련 prop 설명
-  // isLoggedIn      : Spring Boot 인증 결과(세션/토큰 검사)를 부모가 내려줌
-  // onLoginChange   : 로그아웃 같은 상태 변경 시 부모가 다시 Spring Boot와 동기화할 수 있게 호출
-  // onLoginClick    : Spring Boot 로그인 API 연동을 위한 다이얼로그/폼 오픈 콜백
-  // onSignupClick   : Spring Boot 회원가입 API에 연결될 다이얼로그 오픈 콜백
-  // onMyPageClick   : 필요 시 Spring Boot에서 사용자 정보를 불러오는 페이지로 이동시키는 콜백
-  // onLogoutClick   : Spring Boot 로그아웃 API 호출 후 정리하는 커스텀 콜백
-
   // ------------------------------
   // UI 상태(state) & DOM 참조(ref)
   // ------------------------------
@@ -199,7 +169,6 @@ export function Header({
 
   // 스크롤 위치에 따라 헤더 그림자 토글
   useEffect(() => {
-    // 검색창이 열려 있는 동안에만 자동완성을 요청 (디바운스 포함)
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -239,7 +208,6 @@ export function Header({
   }, [isLoggedIn]);
 
   useEffect(() => {
-    // 로그인 해제 시 더미 알림으로 리셋하고 패널을 닫는다.
     if (!isLoggedIn) {
       setNotificationPanelOpen(false);
       setNotifications(FALLBACK_NOTIFICATIONS);
@@ -248,7 +216,6 @@ export function Header({
 
   useEffect(() => {
     if (!notificationPanelOpen) return undefined;
-    // 패널이 열린 동안 외부 클릭을 감지해 닫아준다.
     const handleClickOutside = event => {
       const insidePanel = notificationPanelRef.current && notificationPanelRef.current.contains(event.target);
       const onToggle = notificationButtonRef.current && notificationButtonRef.current.contains(event.target);
@@ -345,12 +312,17 @@ export function Header({
       }
       const controller = new AbortController();
       suggestionFetchController.current = controller;
-      fetchJson(`${ENDPOINTS.searchSuggestions}?q=${encodeURIComponent(trimmed)}`, controller.signal)
-        .then(result => {
-          setSearchSuggestions(normalizeSearchSuggestions(result));
+
+      api
+        .get(ENDPOINTS.searchSuggestions, {
+          params: { keyword: trimmed },
+          signal: controller.signal,
+        })
+        .then(response => {
+          setSearchSuggestions(normalizeSearchSuggestions(response.data));
         })
         .catch(error => {
-          if (error.name === 'AbortError') return;
+          if (error.name === 'CanceledError') return;
           console.error('검색 자동완성 불러오기 실패:', error);
           setSearchSuggestions([]);
         });
@@ -365,7 +337,6 @@ export function Header({
   }, [searchQuery, searchOpen]);
 
   useEffect(
-    // 컴포넌트 언마운트 시 진행 중인 네트워크 요청/타이머 정리
     () => () => {
       if (recentFetchController.current) recentFetchController.current.abort();
       if (similarFetchController.current) similarFetchController.current.abort();
@@ -376,13 +347,12 @@ export function Header({
   );
 
   useEffect(() => {
-    // 메뉴 버튼과 알림 패널이 겹치지 않도록 상호 배타 처리.
     if (userMenuOpen) {
       setNotificationPanelOpen(false);
     }
   }, [userMenuOpen]);
 
-  // 로그인 이후 알림/장바구니 카운트를 API에서 읽어온다 (상위에서 내려주지 않은 경우에 한해)
+  // 로그인 이후 알림/장바구니 카운트를 API에서 읽어온다
   useEffect(() => {
     if (!isLoggedIn) {
       setAutoNotificationCount(FALLBACK_COUNTS.notifications);
@@ -395,8 +365,11 @@ export function Header({
     if (typeof notificationCount !== 'number') {
       const controller = new AbortController();
       aborters.push(() => controller.abort());
-      fetchJson(ENDPOINTS.notificationCount, controller.signal)
-        .then(result => {
+
+      api
+        .get(ENDPOINTS.notificationCount, { signal: controller.signal })
+        .then(response => {
+          const result = response.data;
           const value =
             typeof result === 'number'
               ? result
@@ -416,8 +389,11 @@ export function Header({
     if (typeof cartCount !== 'number') {
       const controller = new AbortController();
       aborters.push(() => controller.abort());
-      fetchJson(ENDPOINTS.cartCount, controller.signal)
-        .then(result => {
+
+      api
+        .get(ENDPOINTS.cartCount, { signal: controller.signal })
+        .then(response => {
+          const result = response.data;
           const value =
             typeof result === 'number'
               ? result
@@ -455,14 +431,14 @@ export function Header({
     setCategoryError(null);
 
     Promise.all([
-      // topCategories: 문자열 리스트만 필요 ("/api/categories/top")
-      fetchJson(ENDPOINTS.topCategories, controller.signal).catch(() => null),
-      // categoryTree: title + items 배열을 가진 객체 리스트 필요 ("/api/categories/tree")
-      fetchJson(ENDPOINTS.categoryTree, controller.signal).catch(() => null),
+      // topCategories: 문자열 리스트만 필요
+      api.get(ENDPOINTS.topCategories, { signal: controller.signal }).catch(() => ({ data: null })),
+      // categoryTree: title + items 배열을 가진 객체 리스트 필요
+      api.get(ENDPOINTS.categoryTree, { signal: controller.signal }).catch(() => ({ data: null })),
     ])
       .then(([topRes, treeRes]) => {
-        if (topRes) setTopCategories(normalizeTopCategories(topRes));
-        if (treeRes) setCategoryTree(normalizeCategoryTree(treeRes));
+        if (topRes.data) setTopCategories(normalizeTopCategories(topRes.data));
+        if (treeRes.data) setCategoryTree(normalizeCategoryTree(treeRes.data));
       })
       .catch(error => {
         console.error('카테고리 불러오기 실패:', error);
@@ -475,13 +451,11 @@ export function Header({
     return () => controller.abort();
   }, []);
 
-  // 마운트 시 카테고리 데이터 초기화
   useEffect(() => {
     const abort = loadCategories();
     return () => abort && abort();
   }, [loadCategories]);
 
-  // UI 버튼에서 호출: 알림 모두 읽음 처리 및 배지 초기화.
   const markAllNotificationsRead = () => {
     setNotifications(prev => prev.map(item => ({ ...item, unread: false })));
     if (typeof notificationCount !== 'number') {
@@ -492,7 +466,6 @@ export function Header({
   // ---------------------------------
   // 검색 패널 관련 헬퍼 및 핸들러
   // ---------------------------------
-  // 백엔드가 지원하면 최근 검색어/유사 피부 추천 목록을 API로 갱신
   const fetchRecentSearches = useCallback(() => {
     if (!ENDPOINTS.searchRecent) return;
     if (recentFetchController.current) {
@@ -500,15 +473,17 @@ export function Header({
     }
     const controller = new AbortController();
     recentFetchController.current = controller;
-    fetchJson(ENDPOINTS.searchRecent, controller.signal)
-      .then(result => {
-        const normalized = normalizeRecentSearches(result);
+
+    api
+      .get(ENDPOINTS.searchRecent, { signal: controller.signal })
+      .then(response => {
+        const normalized = normalizeRecentSearches(response.data);
         if (Array.isArray(normalized) && normalized.length) {
           setRecentSearches(normalized);
         }
       })
       .catch(error => {
-        if (error.name === 'AbortError') return;
+        if (error.name === 'CanceledError') return;
         console.error('최근 검색어 불러오기 실패:', error);
       });
   }, []);
@@ -520,21 +495,22 @@ export function Header({
     }
     const controller = new AbortController();
     similarFetchController.current = controller;
-    fetchJson(ENDPOINTS.searchSimilarSkin, controller.signal)
-      .then(result => {
-        const normalized = normalizeSimilarSkinSearches(result);
+
+    api
+      .get(ENDPOINTS.searchSimilarSkin, { signal: controller.signal })
+      .then(response => {
+        const normalized = normalizeSimilarSkinSearches(response.data);
         if (Array.isArray(normalized) && normalized.length) {
           setSimilarSkinSearches(normalized);
         }
       })
       .catch(error => {
-        if (error.name === 'AbortError') return;
+        if (error.name === 'CanceledError') return;
         console.error('비슷한 피부 검색어 불러오기 실패:', error);
         setSimilarSkinSearches(FALLBACK_SIMILAR_SKIN);
       });
   }, []);
 
-  // 사용자가 검색할 때마다 중복을 제거하고 최신순으로 갱신
   const addRecentSearch = useCallback(
     keyword => {
       if (!keyword || !searchSavingEnabled) return;
@@ -567,7 +543,6 @@ export function Header({
   );
 
   const handleSearchFocus = () => {
-    // 포커스 시 최초 한 번만 서버에서 패널 데이터를 당겨옴
     setSearchOpen(true);
     if (!recentFetchedRef.current) {
       recentFetchedRef.current = true;
@@ -618,7 +593,6 @@ export function Header({
   };
 
   const preventMouseDownBlur = event => {
-    // 검색 패널 안에서 클릭해도 인풋 포커스가 유지되도록 기본 동작 취소
     event.preventDefault();
   };
 
@@ -626,7 +600,6 @@ export function Header({
   const hasSimilarSearches = similarSkinSearches.length > 0;
   const hasSuggestions = searchQuery.trim().length > 0 && searchSuggestions.length > 0;
 
-  // 알림 유형별 라벨링을 한 곳에서 관리.
   const notificationTypeMeta = type => {
     switch (type) {
       case 'delivery':
@@ -647,13 +620,11 @@ export function Header({
       <header ref={headerRef} className={`routy-header ${scrolled ? 'scrolled' : ''}`}>
         <div className="header-inner">
           <div className="header-top">
-            {/* 로고와 홈 이동 버튼 */}
             <button type="button" className="logo-button" onClick={() => onNavigate?.('home')} aria-label="홈으로 이동">
               <img src={logoImage} alt="Routy" className="logo-mark" width={52} height={52} />
               <span className="logo-text">Routy</span>
             </button>
 
-            {/* 검색 입력 영역: 최근/추천/연관 검색어 패널 포함 */}
             <div ref={searchWrapperRef} className={`search-wrapper ${searchOpen ? 'open' : ''}`}>
               <Search className="search-icon" size={18} strokeWidth={2.4} />
               <input
@@ -669,7 +640,6 @@ export function Header({
               />
               {searchOpen && (
                 <div className="search-panel" role="listbox" aria-label="검색 추천" onMouseDown={preventMouseDownBlur}>
-                  {/* 최근 검색어 목록 */}
                   <div className="search-panel__section search-panel__section--recent">
                     <div className="search-panel__row">
                       <span className="search-panel__title">최근 검색어</span>
@@ -701,7 +671,6 @@ export function Header({
                     </div>
                   </div>
 
-                  {/* 실시간 입력으로 생성되는 연관 검색어 */}
                   {hasSuggestions && (
                     <>
                       <div className="search-panel__divider" />
@@ -724,7 +693,6 @@ export function Header({
                     </>
                   )}
 
-                  {/* 유사 피부 고객 추천 검색어 랭킹 */}
                   {hasSimilarSearches && (
                     <>
                       <div className="search-panel__divider" />
@@ -761,12 +729,8 @@ export function Header({
 
             <div className="auth-area">
               {isLoggedIn ? (
-                // ------------------------------
-                // 로그인 상태: 알림/장바구니 아이콘 + 사용자 메뉴
-                // ------------------------------
                 <div className="user-actions">
                   <div className="icon-button-wrapper">
-                    {/* 알림 벨 + 드롭다운 */}
                     <button
                       type="button"
                       ref={notificationButtonRef}
@@ -829,7 +793,6 @@ export function Header({
                       </div>
                     )}
                   </div>
-                  {/* 장바구니 바로가기 */}
                   <button
                     type="button"
                     className="icon-button"
@@ -850,7 +813,6 @@ export function Header({
                     )}
                   </button>
                   <div className="user-menu-wrapper" ref={userMenuRef}>
-                    {/* 사용자 메뉴 토글 */}
                     <button
                       type="button"
                       ref={userMenuButtonRef}
@@ -863,7 +825,6 @@ export function Header({
                       <ChevronDown size={16} className="user-menu-chevron" />
                     </button>
                     {userMenuOpen && (
-                      // 사용자 드롭다운 메뉴
                       <div className="user-menu-dropdown">
                         <div className="user-menu-section-title">내 계정</div>
                         <button
@@ -944,20 +905,15 @@ export function Header({
                   </div>
                 </div>
               ) : (
-                // ------------------------------
-                // 비로그인 상태: 로그인 / 회원가입 CTA
-                // ------------------------------
                 <>
                   <button
                     type="button"
                     className="auth-link"
                     onClick={() => {
-                      // 추후 실제 로그인 다이얼로그를 연결할 수 있도록 콜백 우선 호출
                       if (onLoginClick) {
                         onLoginClick();
                         return;
                       }
-                      // 임시 로그인 로직: 버튼만 눌러도 로그인 상태 전환 (알림 영역 테스트용)
                       onLoginChange?.(true);
                     }}
                   >
@@ -989,17 +945,14 @@ export function Header({
 
             <div className="nav-separator" />
 
-            {/* 상단 네비게이션: 인기 카테고리 바로가기 */}
             <div className="nav-scroll">
               {(categoryError ? FALLBACK_TOP : topCategories).map(item => (
                 <button
                   type="button"
                   key={item}
                   className="nav-item"
-                  // 상단 네비에서 별도 라우팅이 필요한 항목만 조건 처리
                   onClick={() => {
                     if (item === '랭킹') onNavigate?.('ranking');
-                    // if (item == '마이루틴') onNavigate?.('myrouty'); // 추후 구현
                   }}
                 >
                   {item}
@@ -1011,12 +964,10 @@ export function Header({
       </header>
 
       {categoryOpen && (
-        // 카테고리 드롭다운 패널
         <div ref={dropdownRef} className="category-panel" style={{ top: `${headerHeight}px` }}>
           <div className="category-inner">
             {categoryLoading && <div className="category-loading">카테고리를 불러오는 중...</div>}
             {!categoryLoading && (
-              // 카테고리 2단 구조 (대분류 + 소분류)
               <div className="category-grid">
                 {(categoryError ? FALLBACK_TREE : categoryTree).map(category => (
                   <div key={category.title} className="category-column">
@@ -1036,7 +987,6 @@ export function Header({
                         <li key={name}>
                           <button
                             type="button"
-                            // 개별 카테고리는 모두 동일 페이지로 진입하므로 공통 처리
                             onClick={() => {
                               setCategoryOpen(false);
                               onNavigate?.('category');

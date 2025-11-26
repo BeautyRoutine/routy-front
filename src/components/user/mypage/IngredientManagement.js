@@ -122,6 +122,18 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
               </div>
             </div>
           </div>
+
+          <div className="detail-footer">
+            <p>성분 정보는 성분의 함량과 배합방식, 개개인의 피부 타입과 환경에 따라 다르게 적용될 수 있습니다.</p>
+            <div className="source-box" style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px' }}>
+              <h4 style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>성분 정보 출처</h4>
+              <ul style={{ paddingLeft: '16px', margin: 0, fontSize: '11px', color: '#999', lineHeight: '1.6' }}>
+                <li>배합목적, 배합한도, 배합금지, 알레르기 유발 주의 성분, 기능성 성분: 식품 의약품 안전처</li>
+                <li>20가지 주의성분: 도서 '대한민국 화장품의 비밀'</li>
+                <li>피부타입별 특이성분: 대한피부과의사회발표자료</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     );
