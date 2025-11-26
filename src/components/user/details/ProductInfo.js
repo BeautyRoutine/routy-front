@@ -35,13 +35,7 @@ function ProductInfo({ product, reviewSummary }) {
       <p className="text-muted" style={{ fontSize: '14px', margin: '4px 0 8px 0' }}>
         5가지 분자 크기의 히알루론산으로 깊은 보습을 선사하는 프리미엄 세럼
       </p>
-      {/* 별점, 리뷰 */}
-      <div className="review-summary">
-        <span className="stars">{renderStars(reviewSummary.averageRating)}</span>
-        <span className="rating-number">{reviewSummary.averageRating}</span>
-        <span className="review-count">{reviewSummary.totalCount}개 리뷰</span>
-      </div>
-      <hr />
+
       {/* 가격 */}
       <div className="product-price">
         {/* toLocaleString() 사용해서 3자리마다 , 넣기*/}
@@ -49,14 +43,14 @@ function ProductInfo({ product, reviewSummary }) {
         <span className="won">원</span>
       </div>
 
-      {/* 옵션 ui만 <-----------수정/삭제 가능 */}
-      <Form.Group>
-        <Form.Label>용량 선택</Form.Label>
-        <Form.Select>
-          <option>{product.prdVolume}ml</option>
-          {/* 일단 임시용 하나, 아예 이부분 뺄수도 있음 */}
-        </Form.Select>
-      </Form.Group>
+      {/* 별점, 리뷰 */}
+      <div className="review-summary">
+        <span className="stars">{renderStars(reviewSummary.averageRating)}</span>
+        <span className="rating-number">{reviewSummary.averageRating}</span>
+        <span className="review-count">{reviewSummary.totalCount}개 리뷰</span>
+      </div>
+      <hr />
+
       {/*수량 선택 */}
       <div className="quantity-selector">
         <button className="quantity-btn" onClick={() => handleQuantityChange(-1)}>
