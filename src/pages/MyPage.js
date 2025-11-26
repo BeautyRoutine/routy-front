@@ -10,7 +10,7 @@ import PasswordChange from '../components/user/mypage/PasswordChange';
 import OrderHistory from '../components/user/mypage/OrderHistory';
 import ClaimHistory from '../components/user/mypage/ClaimHistory';
 import LikeList from '../components/user/mypage/LikeList';
-import IngredientModal from '../components/user/mypage/IngredientModal';
+import IngredientManagement from '../components/user/mypage/IngredientManagement';
 import IngredientAddModal from '../components/user/mypage/IngredientAddModal';
 import { fetchMyPageData, updateUserProfile } from '../features/user/userSlice';
 import '../styles/MyPage.css';
@@ -31,7 +31,7 @@ const buildNavSections = user => [
   },
   {
     title: '마이 활동',
-    items: ['1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황'],
+    items: ['성분 관리', '1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황'],
   },
   {
     title: '마이 정보',
@@ -55,10 +55,10 @@ const MyPage = () => {
   // UI State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 변경 모달 상태
-  const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false); // 성분 관리 모달 상태
+  // const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false); // 성분 관리 모달 상태 (제거됨)
   const [isIngredientAddModalOpen, setIsIngredientAddModalOpen] = useState(false); // 성분 추가 모달 상태
-  const [ingredientModalTab, setIngredientModalTab] = useState('all'); // 성분 모달 초기 탭
-  const [viewMode, setViewMode] = useState('dashboard'); // 현재 보여줄 뷰 모드 ('dashboard' | 'profile' | 'delivery' | 'withdrawal')
+  // const [ingredientModalTab, setIngredientModalTab] = useState('all'); // 성분 모달 초기 탭 (제거됨)
+  const [viewMode, setViewMode] = useState('dashboard'); // 현재 보여줄 뷰 모드 ('dashboard' | 'profile' | 'delivery' | 'withdrawal' | 'ingredient-management')
   const [likeTab, setLikeTab] = useState('products'); // 'products' | 'brands'
 
   // Derived State: 사용자 정보가 변경될 때마다 네비게이션 메뉴 재생성
@@ -108,6 +108,8 @@ const MyPage = () => {
       setViewMode('claim-history');
     } else if (item === '좋아요') {
       setViewMode('like-list');
+    } else if (item === '성분 관리') {
+      setViewMode('ingredient-management');
     } else {
       // For other items, maybe navigate or show placeholder
       console.log('Clicked:', item);
@@ -136,6 +138,8 @@ const MyPage = () => {
         return <ClaimHistory claims={DEMO_CLAIMS} />;
       case 'like-list':
         return <LikeList likes={DEMO_LIKES} />;
+      case 'ingredient-management':
+        return <IngredientManagement ingredients={ingredients} onAddClick={() => setIsIngredientAddModalOpen(true)} />;
       case 'dashboard':
       default:
         return (
@@ -435,8 +439,7 @@ const MyPage = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          setIngredientModalTab(block.key);
-                          setIsIngredientModalOpen(true);
+                          setViewMode('ingredient-management');
                         }}
                       >
                         더보기
@@ -514,7 +517,7 @@ const MyPage = () => {
       {/* 비밀번호 변경 모달 컴포넌트 */}
       <PasswordChange isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} />
 
-      {/* 성분 관리 모달 */}
+      {/* 성분 관리 모달 (제거됨, 페이지로 전환)
       <IngredientModal
         isOpen={isIngredientModalOpen}
         onClose={() => setIsIngredientModalOpen(false)}
@@ -522,6 +525,7 @@ const MyPage = () => {
         initialTab={ingredientModalTab}
         onAddClick={() => setIsIngredientAddModalOpen(true)}
       />
+      */}
 
       {/* 성분 추가 모달 */}
       <IngredientAddModal

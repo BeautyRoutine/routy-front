@@ -49,9 +49,11 @@ const DeliveryAddress = () => {
 
       {activeTab === 'delivery' && (
         <div className="tab-content">
-          <p className="info-text">
-            ▪ 배송지는 최대 <strong>20개</strong>까지 등록 가능합니다.
-          </p>
+          <div className="info-text-row">
+            <span>배송지는 최대</span>
+            <span className="highlight">20개</span>
+            <span>까지 등록 가능합니다.</span>
+          </div>
 
           <div className="address-table-header">
             <span className="col-name">배송지명</span>

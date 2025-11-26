@@ -20,14 +20,12 @@ const IngredientModal = ({ isOpen, onClose, ingredients, initialTab = 'all', onA
 
     if (activeTab === 'focus') {
       return (
-        <section className="ingredient-section focus full-width">
-          <div className="ingredient-grid">
+        <section className="ingredient-block focus full-width" style={{ padding: 0, background: 'transparent' }}>
+          <div className="ingredient-list">
             {focusList.map((item, index) => (
-              <div key={index} className="ingredient-card focus">
-                <div className="card-header">
-                  <span className="ingredient-name">{item.name}</span>
-                </div>
-                <p className="ingredient-desc">{item.desc}</p>
+              <div key={index} className="ingredient-item">
+                <span className="ingredient-pill">{item.name}</span>
+                <p>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -37,14 +35,12 @@ const IngredientModal = ({ isOpen, onClose, ingredients, initialTab = 'all', onA
 
     if (activeTab === 'avoid') {
       return (
-        <section className="ingredient-section avoid full-width">
-          <div className="ingredient-grid">
+        <section className="ingredient-block avoid full-width" style={{ padding: 0, background: 'transparent' }}>
+          <div className="ingredient-list">
             {avoidList.map((item, index) => (
-              <div key={index} className="ingredient-card avoid">
-                <div className="card-header">
-                  <span className="ingredient-name">{item.name}</span>
-                </div>
-                <p className="ingredient-desc">{item.desc}</p>
+              <div key={index} className="ingredient-item">
+                <span className="ingredient-pill">{item.name}</span>
+                <p>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -54,19 +50,17 @@ const IngredientModal = ({ isOpen, onClose, ingredients, initialTab = 'all', onA
 
     // 'all' tab
     return (
-      <div className="all-ingredients-view">
+      <div className="all-ingredients-view" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {focusList.length > 0 && (
-          <section className="ingredient-section focus">
-            <h3>
+          <section className="ingredient-block focus" style={{ padding: 0, background: 'transparent' }}>
+            <h3 style={{ marginBottom: '12px' }}>
               관심 성분 <span className="count">{focusList.length}</span>
             </h3>
-            <div className="ingredient-grid">
+            <div className="ingredient-list">
               {focusList.map((item, index) => (
-                <div key={index} className="ingredient-card focus">
-                  <div className="card-header">
-                    <span className="ingredient-name">{item.name}</span>
-                  </div>
-                  <p className="ingredient-desc">{item.desc}</p>
+                <div key={index} className="ingredient-item">
+                  <span className="ingredient-pill">{item.name}</span>
+                  <p>{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -76,17 +70,15 @@ const IngredientModal = ({ isOpen, onClose, ingredients, initialTab = 'all', onA
         {focusList.length > 0 && avoidList.length > 0 && <div className="section-divider" />}
 
         {avoidList.length > 0 && (
-          <section className="ingredient-section avoid">
-            <h3>
+          <section className="ingredient-block avoid" style={{ padding: 0, background: 'transparent' }}>
+            <h3 style={{ marginBottom: '12px' }}>
               피할 성분 <span className="count">{avoidList.length}</span>
             </h3>
-            <div className="ingredient-grid">
+            <div className="ingredient-list">
               {avoidList.map((item, index) => (
-                <div key={index} className="ingredient-card avoid">
-                  <div className="card-header">
-                    <span className="ingredient-name">{item.name}</span>
-                  </div>
-                  <p className="ingredient-desc">{item.desc}</p>
+                <div key={index} className="ingredient-item">
+                  <span className="ingredient-pill">{item.name}</span>
+                  <p>{item.desc}</p>
                 </div>
               ))}
             </div>
