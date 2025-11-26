@@ -5,7 +5,7 @@ export const dummyProductData = {
     prdName: '히알루론산 앰플 세럼',
     prdPrice: 45000,
     prdVolume: 50,
-    prdCompany: '베스트셀러',
+    prdCompany: '이니스프리',
     prdMainCate: '스킨/케어',
     prdSubCate: '세럼',
     prdDesc:

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import { Tabs, Tab, Button, Accordion } from 'react-bootstrap';
 import './ProductDetailTabs.css';
 import ReviewList from './ReviewList';
 
@@ -7,6 +7,8 @@ import ReviewList from './ReviewList';
 function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientInfo }) {
   // 기본값은 상품설명창, 현재 탭 기억용 state
   const [key, setKey] = useState('desc');
+  //이미지 더보기
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div className="detail-tabs-container">
@@ -19,80 +21,106 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
       >
         {/*상품설명창 */}
         <Tab eventKey="desc" title="상품설명">
-          <div className="tab-content-area">
-            <h4>제품 특징</h4>
-            {/* HTML로 된 상품 설명을 렌더링 */}
-            <div dangerouslySetInnerHTML={{ __html: productInfo.prdDesc }} />
+          <div className="tab-content-area p-0">
+            {/* 프로모션용 긴 상세 이미지, 접힘표시 */}
+            {/* ${} 사용해서 적용되는 css(잘려서, 전체 보여주기) 변경 */}
+            {/*복습용 : {} 자바 스크립트 문법 사용, `` 특수 문자열, ${} 플레이스 홀더, ? : 삼항연산자 */}
+            <div className={`detail-image-wrapper ${isExpanded ? 'expanded' : 'collapsed'}`}>
+              {/* 이미지가 있으면 map 사용해서 전부 출력(아마 이미지는 1개일듯)*/}
+              {productInfo.images.detail && productInfo.images.detail.length > 0 ? (
+                productInfo.images.detail.map((imgSrc, index) => (
+                  <img key={index} src={imgSrc} alt={`상세 이미지 ${index + 1}`} className="detail-image" />
+                ))
+              ) : (
+                <div className="py-5 text-muted bg-light text-center">상세 이미지가 없습니다.</div>
+              )}
 
-            {/* 사용방법, 주요설명 추가 */}
-          </div>
-        </Tab>
-
-        {/* 구매정보 -현재 전부 하드코딩임*/}
-        <Tab eventKey="purchase" title="구매정보">
-          <div className="tab-content-area">
-            {/* 배송 및 교환/반품 안내 (2단 레이아웃) */}
-            <div className="row mb-5">
-              <div className="col-md-6">
-                <h5 className="text-primary fw-bold mb-3">배송 안내</h5>
-                <ul className="text-muted small" style={{ lineHeight: '1.8', paddingLeft: '20px' }}>
-                  <li>평균 배송 기간: 2-3일 (주말/공휴일 제외)</li>
-                  <li>배송비: 3,000원 (50,000원 이상 무료)</li>
-                  <li>제주/도서산간 지역은 추가 배송비가 발생할 수 있습니다.</li>
-                </ul>
-              </div>
-              <div className="col-md-6">
-                <h5 className="text-primary fw-bold mb-3">교환/반품 안내</h5>
-                <ul className="text-muted small" style={{ lineHeight: '1.8', paddingLeft: '20px' }}>
-                  <li>상품 수령 후 7일 이내 교환/반품 가능</li>
-                  <li>단, 제품 포장을 개봉하였거나 훼손된 경우 불가</li>
-                  <li>단순 변심으로 인한 반품 시 왕복 배송비 고객 부담</li>
-                </ul>
-              </div>
+              {/* 가림막  */}
+              {/* 접혀있으면 가림막 보여주기(기본값이 부정이니 ! 해서 true일때 가림막 보여줘(&&) */}
+              {!isExpanded && <div className="fade-overlay"></div>}
             </div>
 
-            {/* 2. 제품 정보 제공 고시 (테이블 스타일) */}
-            <h5 className="fw-bold mb-3">제품 정보</h5>
-            <table className="table table-bordered" style={{ fontSize: '14px' }}>
-              <colgroup>
-                <col style={{ width: '20%', backgroundColor: '#f8f9fa' }} />
-                <col style={{ width: '80%' }} />
-              </colgroup>
-              <tbody>
-                <tr>
-                  <th className="bg-light align-middle">용량 또는 중량</th>
-                  <td>{productInfo.prdVolume}ml</td>
-                </tr>
-                <tr>
-                  <th className="bg-light align-middle">제품 주요 사양</th>
-                  <td>모든 피부용</td>
-                </tr>
-                <tr>
-                  <th className="bg-light align-middle">사용기한</th>
-                  <td>제조일로부터 36개월 / 개봉 후 12개월</td>
-                </tr>
-                <tr>
-                  <th className="bg-light align-middle">사용방법</th>
-                  <td>상품 상세페이지 참조</td>
-                </tr>
-                <tr>
-                  <th className="bg-light align-middle">제조국</th>
-                  <td>대한민국</td>
-                </tr>
-                <tr>
-                  <th className="bg-light align-middle">제조사</th>
-                  <td>{productInfo.prdCompany}</td>
-                </tr>
-                <tr>
-                  <th className="bg-light align-middle">주요성분</th>
-                  <td>정제수, 부틸렌글라이콜, 나이아신아마이드</td>
-                </tr>
-                <tr>
-                  <th className="bg-light align-middle">사용 시 주의사항</th>
-                  <td>상품 상세페이지 참조</td>
-                </tr>
-              </tbody>
-            </table>
+            {/* 더보기 버튼 */}
+            <div className="text-center my-4">
+              <Button variant="outline-secondary" className="w-100 py-3" onClick={() => setIsExpanded(!isExpanded)}>
+                {isExpanded ? '상품설명 접기 ∧' : '상품설명 더보기 ∨'}
+              </Button>
+            </div>
+
+            {/* 접이식 정보 (아코디언) */}
+            {/*기본값은 0 열려있기, 테두리 지우고 alwaysOpen으로 동시에 펼칠 수 있게. */}
+            <Accordion defaultActiveKey={['0']} flush alwaysOpen className="mt-5 product-info-accordion">
+              {/* 상품정보 제공고시, 아코디언 넘버 0 */}
+              <Accordion.Item eventKey="0">
+                <Accordion.Header>상품정보 제공고시</Accordion.Header>
+                <Accordion.Body>
+                  <table className="table table-bordered" style={{ fontSize: '13px', marginBottom: 0 }}>
+                    <colgroup>
+                      <col style={{ width: '30%', backgroundColor: '#f8f9fa' }} />
+                      <col style={{ width: '70%' }} />
+                    </colgroup>
+                    <tbody>
+                      <tr>
+                        <th>용량 또는 중량</th>
+                        <td>{productInfo.prdVolume}ml</td>
+                      </tr>
+                      <tr>
+                        <th>제품 주요 사양</th>
+                        <td>모든 피부용</td>
+                      </tr>
+                      <tr>
+                        <th>사용기한</th>
+                        <td>제조일로부터 36개월</td>
+                      </tr>
+                      <tr>
+                        <th>사용방법</th>
+                        <td>상세페이지 참조</td>
+                      </tr>
+                      <tr>
+                        <th>제조국</th>
+                        <td>대한민국</td>
+                      </tr>
+                      <tr>
+                        <th>제조사</th>
+                        <td>{productInfo.prdCompany}</td>
+                      </tr>
+                      <tr>
+                        <th>주요성분</th>
+                        <td>상세페이지 참조</td>
+                      </tr>
+                      <tr>
+                        <th>품질보증기준</th>
+                        <td>공정거래위원회 고시 소비자분쟁해결기준에 의거 보상</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </Accordion.Body>
+              </Accordion.Item>
+
+              {/* 배송 안내 */}
+              <Accordion.Item eventKey="1">
+                <Accordion.Header>배송 안내</Accordion.Header>
+                <Accordion.Body>
+                  <ul className="text-muted small" style={{ lineHeight: '1.8', paddingLeft: '20px', marginBottom: 0 }}>
+                    <li>평균 배송 기간: 2-3일 (주말/공휴일 제외)</li>
+                    <li>배송비: 3,000원 (50,000원 이상 무료)</li>
+                    <li>제주/도서산간 지역은 추가 배송비가 발생할 수 있습니다.</li>
+                  </ul>
+                </Accordion.Body>
+              </Accordion.Item>
+
+              {/* 교환/반품 안내 */}
+              <Accordion.Item eventKey="2">
+                <Accordion.Header>교환/반품/환불 안내</Accordion.Header>
+                <Accordion.Body>
+                  <ul className="text-muted small" style={{ lineHeight: '1.8', paddingLeft: '20px', marginBottom: 0 }}>
+                    <li>상품 수령 후 7일 이내 교환/반품 가능</li>
+                    <li>단, 제품 포장을 개봉하였거나 훼손된 경우 불가</li>
+                    <li>단순 변심으로 인한 반품 시 왕복 배송비 고객 부담</li>
+                  </ul>
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
           </div>
         </Tab>
 
@@ -111,20 +139,6 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
               <button className="btn btn-dark btn-sm">문의하기</button>
             </div>
             <p className="text-muted text-center py-5">등록된 문의가 없습니다.</p>
-          </div>
-        </Tab>
-
-        {/* 상세이미지 */}
-        <Tab eventKey="detailImg" title="상세이미지">
-          <div className="tab-content-area text-center">
-            {/* detailImages 배열 있으면 map 사용*/}
-            {productInfo.images.detail && productInfo.images.detail.length > 0 ? (
-              productInfo.images.detail.map((imgSrc, index) => (
-                <img key={index} src={imgSrc} alt={`상세 설명 이미지 ${index + 1}`} className="detail-image" />
-              ))
-            ) : (
-              <p>상세 이미지가 없습니다.</p>
-            )}
           </div>
         </Tab>
       </Tabs>

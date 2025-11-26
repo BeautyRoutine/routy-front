@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
+import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
 
 const ReviewList = ({ reviewInfo }) => {
   // 정렬 상태 (latest: 최신순, rating: 평점순, like: 좋아요순)
   const [sortOption, setSortOption] = useState('latest');
+
+  //  모달 상태 on off, 모달 담을 state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
 
   // 현재 페이지 번호 -작동 안됨 현재
   //const [activePage, setActivePage] = useState(1);
@@ -22,10 +27,29 @@ const ReviewList = ({ reviewInfo }) => {
   };
 
   // 좋아요 클릭 핸들러 (여기서는 UI만 변경하는 척)
-  const handleLikeClick = revNo => {
-    console.log(`리뷰 ${revNo}번 좋아요 클릭됨 (API 호출 필요)`);
-    // 실제로는 여기서 API 호출 후 데이터를 다시 받아오거나 state를 업데이트해야 함
+  const handleLikeClick = (e, revNo) => {
+    e.stopPropagation(); // 중요! 모달 안 뜨게 막기
+    console.log(`리뷰 ${revNo} 좋아요! (API 연결 필요)`);
+    // 실제 구현 시에는 여기서 state를 업데이트하거나 API를 호출해야 함
   };
+
+  // 리뷰 카드 클릭하면 실행되는 함수
+  const handleReviewClick = review => {
+    setSelectedReview(review); // 선택된 리뷰 저장
+    setShowModal(true); // 모달 열기
+  };
+
+  //만약 리뷰가 0개면 보여줄 return
+  if (summary.totalCount === 0) {
+    return (
+      <div className="text-center py-5" style={{ color: '#999' }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
+        <h4>아직 등록된 리뷰가 없습니다.</h4>
+        <p>첫 번째 리뷰를 작성하고 포인트를 받아보세요!</p>
+        <button className="btn btn-primary mt-3">리뷰 작성하기</button>
+      </div>
+    );
+  }
 
   return (
     <div className="review-list-container">
@@ -77,7 +101,12 @@ const ReviewList = ({ reviewInfo }) => {
       {/*리뷰 리스트 */}
       <div className="review-items-wrapper">
         {reviews.map(review => (
-          <div key={review.revNo} className="review-item">
+          <div
+            key={review.revNo}
+            className="review-item"
+            onClick={() => handleReviewClick(review)}
+            style={{ cursor: 'pointer' }}
+          >
             {/* 헤더: 유저 정보 & 신고 */}
             <div className="review-header">
               <div className="user-profile-area">
@@ -130,7 +159,7 @@ const ReviewList = ({ reviewInfo }) => {
               <div className="like-button-area">
                 <button
                   className={`like-btn-simple ${review.isLiked ? 'active' : ''}`}
-                  onClick={() => handleLikeClick(review.revNo)}
+                  onClick={e => handleLikeClick(e, review.revNo)}
                 >
                   <span style={{ fontSize: '16px' }}>👍</span>
                   도움이 되었어요
@@ -153,6 +182,8 @@ const ReviewList = ({ reviewInfo }) => {
           <Pagination.Last />
         </Pagination>
       </div>
+
+      <ReviewDetailModal show={showModal} onHide={() => setShowModal(false)} review={selectedReview} />
     </div>
   );
 };
