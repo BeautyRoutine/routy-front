@@ -1,6 +1,5 @@
 import React from 'react';
 import PromoCarousel from 'components/user/layouts/PromoCarousel';
-import CategoryCircleButtons from 'components/user/layouts/CategoryCircleButtons';
 import RecommendedProducts from 'components/user/layouts/RecommendedProducts';
 import SimilarSkinProducts from 'components/user/layouts/SimilarSkinProducts';
 
@@ -9,7 +8,6 @@ const Home = () => {
     <div className="container mt-5">
       <div className="text-center">
         <PromoCarousel />
-        <CategoryCircleButtons />
         <RecommendedProducts />
         <SimilarSkinProducts />
       </div>
