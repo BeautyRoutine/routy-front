@@ -118,7 +118,7 @@ const ProductDetail = () => {
               ← 목록으로
             </button>
 
-            <button className="btn btn-primary me-2" onClick={() => navigate(`/admin/product/edit/${prdNo}`)}>
+            <button className="btn btn-primary me-2" onClick={() => navigate(`/admin/product/list/edit/${prdNo}`)}>
               ✏ 수정하기
             </button>
 

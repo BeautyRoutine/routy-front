@@ -17,6 +17,7 @@ const ProductAdd = () => {
     prdDesc: '',
     prdStock: '',
     prdStatus: '정상',
+    ingredients: '',
   });
 
   const [previewImg, setPreviewImg] = useState('');
@@ -47,7 +48,7 @@ const ProductAdd = () => {
       await axios.post(apiBaseUrl, product);
 
       alert('상품이 등록되었습니다!');
-      navigate('/admin/productList');
+      navigate('/admin/product/list');
     } catch (err) {
       console.error(err);
       alert('상품 등록 중 오류가 발생했습니다.');
@@ -194,6 +195,13 @@ const ProductAdd = () => {
                     value={product.prdDesc}
                     onChange={handleChange}
                   ></textarea>
+                </td>
+              </tr>
+
+              <tr>
+                <th>주요성분</th>
+                <td>
+                  <textarea name="ingredients" className="form-control" rows="4" onChange={handleChange}></textarea>
                 </td>
               </tr>
             </tbody>
