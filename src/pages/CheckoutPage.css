@@ -1,0 +1,80 @@
+.checkout-page {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 120px 20px; /* 헤더 고려해서 상단 여백 */
+}
+.checkout-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.checkout-layout {
+  display: flex;
+  gap: 2rem;
+  margin-top: 20px;
+}
+.checkout-main {
+  flex: 2;
+}
+.checkout-sidebar {
+  flex: 1;
+}
+
+/* 카드 스타일 */
+.section-card,
+.summary-card {
+  background: white;
+  border: 1px solid #e0e7ff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.section-card h2,
+.summary-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  color: #475569;
+}
+
+/* 결제 금액 및 버튼 */
+.total-price {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0284c7; /* 포인트 컬러 */
+  margin: 20px 0;
+}
+.btn-pay {
+  width: 100%;
+  padding: 16px;
+  background-color: #0284c7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.btn-pay:hover {
+  background-color: #0369a1;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .checkout-layout {
+    flex-direction: column;
+  }
+  .order-summary-sidebar {
+    display: none;
+  } /* 모바일 처리 필요시 수정 */
+}
