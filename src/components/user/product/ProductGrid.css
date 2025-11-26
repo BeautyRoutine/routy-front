@@ -1,0 +1,29 @@
+.product-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-img {
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body h6 {
+  min-height: 42px; /* 상품명 2줄 기준 고정 */
+}
+
+.card-body p {
+  margin-bottom: 0.25rem;
+}
+
+.cart-btn {
+  margin-top: auto; /* 장바구니 버튼 맨 아래 고정 */
+}

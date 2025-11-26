@@ -10,11 +10,13 @@ import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 import Home from 'pages/Home';
 import MyPage from './pages/MyPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import ProductListPage from './pages/ProductListPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import LogoutPage from './pages/LogoutPage';
 import AdminHome from 'pages/admin/AdminHome';
 import Footer from 'components/user/layouts/footer';
+import ScrollToTop from 'components/common/ScrollToTop';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -71,6 +73,7 @@ function App() {
   return (
     <div className="App">
       {/* 사용자 영역에는 헤더를 유지하고, 관리자 화면에서는 중복 레이아웃을 피하기 위해 제거 */}
+      <ScrollToTop />
       {!isAdmin && (
         <UserGlobalLayout
           isLoggedIn={isLoggedIn}
@@ -98,8 +101,10 @@ function App() {
             element={isLoggedIn ? <MyPage /> : <Navigate to="/login" replace />}
           /> */}
           <Route path="/mypage" element={<MyPage />} />
-
-          <Route path="/product/:id" element={<ProductDetailPage />} />
+          {/* 상품 페이지*/}
+          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/products" element={<ProductListPage />} />
+          {/* 관리자 페이지*/}
           <Route path="/admin/*" element={<AdminHome />} />
 
           {/* 로그인 */}
