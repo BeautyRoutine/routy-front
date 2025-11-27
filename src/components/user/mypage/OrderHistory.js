@@ -1,12 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DEMO_ORDERS } from '../data/mypageMocks';
 import './OrderHistory.css';
 
 const OrderHistory = ({ orders = DEMO_ORDERS }) => {
   const [period, setPeriod] = useState('3months'); // '1month', '3months', '6months', '12months'
+  const [visibleOrders, setVisibleOrders] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef();
+  const ITEMS_PER_PAGE = 5;
 
-  // In a real app, these would filter the data or trigger an API call
-  const filteredOrders = orders;
+  // 초기 데이터 로드 및 페이지네이션
+  useEffect(() => {
+    const loadMoreOrders = () => {
+      const start = (page - 1) * ITEMS_PER_PAGE;
+      const end = start + ITEMS_PER_PAGE;
+      // orders가 undefined일 경우 대비
+      const sourceData = orders || [];
+      const newOrders = sourceData.slice(start, end);
+
+      if (newOrders.length === 0) {
+        setHasMore(false);
+      } else {
+        setVisibleOrders(prev => [...prev, ...newOrders]);
+        if (end >= sourceData.length) {
+          setHasMore(false);
+        }
+      }
+    };
+
+    loadMoreOrders();
+  }, [page, orders]);
+
+  // IntersectionObserver
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 1.0 },
+    );
+
+    const currentTarget = observerRef.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore]);
 
   return (
     <div className="order-history-container">
@@ -52,13 +101,13 @@ const OrderHistory = ({ orders = DEMO_ORDERS }) => {
           <span className="col-status">상태</span>
         </div>
 
-        {filteredOrders.length === 0 ? (
+        {visibleOrders.length === 0 ? (
           <div className="empty-list">
             <p>주문 내역이 없습니다.</p>
           </div>
         ) : (
-          filteredOrders.map(order => (
-            <div key={order.id} className="order-table-row">
+          visibleOrders.map((order, idx) => (
+            <div key={`${order.id}-${idx}`} className="order-table-row">
               {/* Left Column: Order Info (Spans all items) */}
               <div className="order-left-col">
                 {/* Mock Tag - In real app, check order.tags */}
@@ -93,6 +142,11 @@ const OrderHistory = ({ orders = DEMO_ORDERS }) => {
               </div>
             </div>
           ))
+        )}
+        {hasMore && (
+          <div ref={observerRef} style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+            불러오는 중...
+          </div>
         )}
       </div>
     </div>

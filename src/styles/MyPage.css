@@ -96,6 +96,20 @@
 .mypage-sidebar {
   width: 200px;
   flex-shrink: 0;
+  position: sticky;
+  top: 160px; /* 헤더 높이(약 140~150px)를 고려하여 충분히 띄움 */
+  height: fit-content;
+  max-height: calc(100vh - 200px); /* 화면 높이에 맞춰 스크롤 가능하도록 제한 */
+  overflow-y: auto;
+  align-self: flex-start;
+
+  /* 스크롤바 숨기기 */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.mypage-sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .mypage-sidebar h1 {
@@ -236,7 +250,7 @@
 }
 
 .stat-value.point {
-  color: #00c7ae;
+  color: #5ab3ed;
 }
 
 .stat-divider {
@@ -395,8 +409,8 @@ header button,
 }
 
 .ingredient-pill.good {
-  background-color: #e6f7f5;
-  color: #00c7ae;
+  background-color: #e6f7ff;
+  color: #5ab3ed;
 }
 
 .ingredient-pill.bad {
@@ -449,7 +463,7 @@ header button,
 
 .hero-top {
   background: transparent;
-  padding: 30px 40px;
+  padding: 30px 40px 0px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -552,7 +566,7 @@ header button,
 .hero-stats {
   display: flex;
   align-items: center;
-  padding: 24px 0;
+  padding: 10px 0 24px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
 }
@@ -759,9 +773,11 @@ header button,
 }
 
 .ingredient-block {
-  padding: 20px;
-  border-radius: 20px;
-  height: 100%; /* Match height */
+  padding: 24px 28px;
+  border-radius: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Focus (Interested) - Blue Theme Background */
@@ -777,12 +793,14 @@ header button,
 .ingredient-block-header {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Push button to the right */
-  margin-bottom: 15px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .ingredient-block-header h4 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0;
 }
@@ -797,19 +815,19 @@ header button,
 
 .ingredient-block-header button {
   color: #666;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #e0e0e0;
   background: #fff;
   cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
   transition: all 0.2s;
 }
 
 .ingredient-block-header button:hover {
-  background: #fff;
-  border-color: #bbb;
+  background: #f9f9f9;
+  border-color: #ccc;
   color: #333;
 }
 
@@ -817,28 +835,45 @@ header button,
   padding-left: 0;
   margin: 0;
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .ingredient-item {
-  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  gap: 16px;
+  border-bottom: none;
+  margin-bottom: 0;
+  transition: transform 0.2s ease;
 }
 
-.ingredient-item:last-child {
-  margin-bottom: 0;
+.ingredient-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .ingredient-pill {
-  font-size: 13px;
-  font-weight: 700;
-  display: inline-block;
-  margin-bottom: 4px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  background: #fff; /* White background for items */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+  white-space: nowrap;
+  width: 110px; /* 너비 축소하여 설명 공간 확보 */
+  flex-shrink: 0; /* 너비 유지 */
 }
 
-/* Text colors inside the white pill */
+/* Text colors inside the item */
 .ingredient-block.focus .ingredient-pill {
   color: #5ab3ed;
 }
@@ -849,10 +884,17 @@ header button,
 
 .ingredient-item p {
   font-size: 14px;
-  color: #6f7591;
+  color: #555; /* 가독성 개선 */
   margin: 0;
   line-height: 1.5;
-  padding-left: 4px;
+  padding-left: 0;
+  flex: 1;
+  white-space: normal; /* 줄바꿈 허용 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* 1줄로 원복 */
+  -webkit-box-orient: vertical;
 }
 
 /* Password Change Section */
@@ -1108,6 +1150,85 @@ header button,
   }
 }
 
+/* Add Ingredient Button - Outline Style */
+.add-btn-outline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #5ab3ed;
+  color: #5ab3ed;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-btn-outline:hover {
+  background: #f0f9ff;
+}
+
+/* Edit Button - Secondary Style */
+.edit-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #666;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 8px;
+}
+
+.edit-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+  color: #333;
+  text-decoration: none;
+}
+
+/* Selected Item for Deletion */
+.ingredient-item.selected-for-delete {
+  background-color: #fff0f0 !important;
+  border: 1px solid #ffccc7 !important;
+}
+
+.ingredient-item.selected-for-delete .ingredient-pill {
+  color: #d93025;
+}
+
+.ingredient-item.selected-for-delete p {
+  color: #d93025;
+  opacity: 0.8;
+}
+
+.delete-confirm-btn {
+  background: #fff0f0;
+  color: #d93025;
+  border: 1px solid #ffccc7;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.delete-cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+  border: 1px solid #eee;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* =========================================
    Ingredient Management Modal Styles
    성분 관리 모달 관련 스타일
@@ -1119,35 +1240,36 @@ header button,
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4); /* 배경 조금 더 밝게 */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px); /* 블러 효과 강화 */
 }
 
 .modal-content {
   background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  border-radius: 32px; /* 더 둥글게 */
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.08); /* 부드러운 그림자 */
   position: relative;
-  animation: modalSlideUp 0.3s ease-out;
+  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* 부드러운 애니메이션 */
+  border: none;
 }
 
 @keyframes modalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(40px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 .ingredient-modal {
-  max-width: 600px; /* Reduced width for single column look */
+  max-width: 560px;
   width: 90%;
   max-height: 85vh;
   display: flex;
@@ -1157,90 +1279,51 @@ header button,
 }
 
 .ingredient-modal .modal-header {
-  padding: 20px 24px;
-  /* border-bottom: 1px solid #eee; Removed to merge with tabs visually */
+  padding: 36px 36px 20px; /* 여백 넉넉하게 */
+  border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #fff;
+  flex-shrink: 0;
 }
 
 .ingredient-modal .modal-header h2 {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 800;
   margin: 0;
-  color: #333;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.add-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.add-btn:hover {
-  background-color: #555;
+  color: #111;
+  letter-spacing: -0.5px;
 }
 
 .close-btn {
-  background: none;
+  background: #f5f5f5;
   border: none;
   cursor: pointer;
-  color: #999;
-  padding: 4px;
+  color: #666;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%; /* 원형 버튼 */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: all 0.2s;
 }
 
 .close-btn:hover {
+  background-color: #eee;
   color: #333;
+  transform: rotate(90deg);
 }
 
 /* Tabs */
 .modal-tabs {
   display: flex;
-  gap: 24px;
-  padding: 0 24px 16px;
-  border-bottom: none !important;
+  gap: 0;
+  padding: 0 36px;
+  border-bottom: 1px solid #eee !important;
   align-items: center;
-}
-
-.tab-btn {
-  padding: 8px 0;
-  border: none !important;
-  background: transparent;
-  color: #999;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.tab-btn.active {
-  background: transparent;
-  color: #333;
-  font-weight: 800;
-}
-
-.tab-btn:hover:not(.active) {
-  color: #666;
-  background: transparent;
+  justify-content: space-around;
 }
 
 .ingredient-modal .modal-body {
@@ -1248,34 +1331,38 @@ header button,
   flex-direction: column;
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 0 36px 36px; /* 상단 패딩 제거 (헤더/검색바와 연결) */
   gap: 24px;
+  background-color: #fff; /* 배경 흰색 통일 */
 }
 
 .ingredient-section h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 16px;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between; /* 양쪽 끝 정렬 */
+  gap: 6px;
+  color: #333;
 }
 
 .ingredient-section.focus h3 {
-  color: #5ab3ed;
+  color: #333; /* 타이틀은 검정색 유지 (원하면 #5ab3ed 사용) */
 }
 
 .ingredient-section.avoid h3 {
-  color: #d93025;
+  color: #333;
 }
 
 .ingredient-section .count {
-  background-color: #f5f5f5;
+  background-color: #f5f5f5; /* 연한 회색 배경 */
   color: #666;
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: 600;
+  font-size: 14px; /* 폰트 크기 축소 */
+  padding: 4px 12px; /* 여백 추가 */
+  border-radius: 20px; /* 둥근 알약 모양 */
+  font-weight: 700;
+  opacity: 1; /* 불투명도 원복 */
 }
 
 .ingredient-grid {
@@ -1288,11 +1375,24 @@ header button,
   background: #fff;
   border: 1px solid #eee;
   border-radius: 12px;
-  padding: 16px;
+  padding: 20px;
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ingredient-card::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 0;
+  width: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .ingredient-card:hover {
@@ -1301,30 +1401,40 @@ header button,
 }
 
 .ingredient-card.focus {
-  border-left: 4px solid #5ab3ed;
+  border-left: none;
+}
+
+.ingredient-card.focus::before {
+  background-color: #5ab3ed;
 }
 
 .ingredient-card.avoid {
-  border-left: 4px solid #d93025;
+  border-left: none;
+}
+
+.ingredient-card.avoid::before {
+  background-color: #d93025;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  padding-left: 12px;
 }
 
 .ingredient-name {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   color: #333;
 }
 
 .ingredient-desc {
-  font-size: 13px;
-  color: #666;
+  font-size: 14px;
+  color: #888;
   margin: 0;
   line-height: 1.4;
+  padding-left: 12px;
 }
 
 .section-divider {
@@ -1341,4 +1451,486 @@ header button,
     max-height: 100%;
     border-radius: 0;
   }
+}
+
+/* Add Ingredient Modal Styles */
+.ingredient-modal.add-mode {
+  max-width: 500px;
+}
+
+.target-selection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.target-selection .label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.radio-group {
+  display: flex;
+  gap: 12px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #f5f5f5;
+  transition: all 0.2s;
+}
+
+.radio-label input {
+  display: none;
+}
+
+.radio-label.active {
+  background-color: #333;
+  color: white;
+  font-weight: 600;
+}
+
+.search-bar-container {
+  margin-bottom: 24px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #999;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  font-size: 15px;
+  background-color: #f9f9f9;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  background-color: #fff;
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.1);
+}
+
+.search-results {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.action-btn.add {
+  background-color: #f0f9ff;
+  color: #007bff;
+}
+
+.action-btn.add:hover {
+  background-color: #e0f2fe;
+}
+
+.action-btn.added {
+  background-color: #e6f7ff;
+  color: #5ab3ed;
+  cursor: default;
+}
+
+/* Updated Search Result Card Styles */
+.ingredient-card.search-result {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px; /* 세로 패딩 축소 */
+  border: 1px solid #f5f5f5;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  margin-bottom: 12px; /* 간격 축소 */
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.ingredient-card.search-result:hover {
+  background-color: #fff;
+  border-color: #5ab3ed;
+  transform: translateY(-2px); /* 움직임 축소 */
+  box-shadow: 0 8px 24px rgba(90, 179, 237, 0.12);
+}
+
+.ingredient-card.search-result .card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 왼쪽 정렬 명시 */
+  gap: 4px; /* 텍스트 간격 축소 */
+  flex: 1;
+  padding-right: 16px;
+}
+
+.ingredient-card.search-result .ingredient-name {
+  font-size: 17px; /* 폰트 사이즈 미세 조정 */
+  font-weight: 700;
+  color: #222;
+  letter-spacing: -0.3px;
+  margin-bottom: 2px;
+}
+
+.ingredient-card.search-result .ingredient-desc {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 400;
+  text-align: left; /* 텍스트 왼쪽 정렬 */
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* 1줄로 원복 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Search Input Refinement */
+.search-bar-container {
+  margin-bottom: 32px;
+  padding: 0 36px;
+  flex-shrink: 0;
+}
+
+.search-input-wrapper {
+  position: relative; /* 상대 위치로 변경 */
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 2px solid #eee;
+  transition: border-color 0.3s;
+}
+
+.search-input-wrapper:focus-within {
+  border-bottom-color: #5ab3ed;
+}
+
+.search-icon {
+  position: absolute; /* 절대 위치로 겹침 방지 및 위치 고정 */
+  left: 0;
+  color: #bbb;
+  width: 24px;
+  height: 24px;
+  pointer-events: none; /* 입력 방해 방지 */
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 0 8px 36px; /* 왼쪽 패딩을 아이콘 크기만큼 확보 */
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  color: #333;
+  outline: none;
+  box-shadow: none;
+}
+
+.search-input::placeholder {
+  color: #d0d0d0;
+  font-weight: 400;
+}
+
+/* =========================================
+   Ingredient Detail View Styles
+   성분 상세 보기 (모달 내부) 스타일
+   ========================================= */
+
+.ingredient-detail-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.detail-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.detail-title-section {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.detail-title-section h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.detail-title-section .eng-name {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+}
+
+/* Large Action Buttons */
+.detail-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-toggle-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #999;
+}
+
+.action-toggle-btn span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.action-toggle-btn:hover {
+  background-color: #f9f9f9;
+}
+
+/* Active States */
+.action-toggle-btn.focus.active {
+  background-color: #e6f7ff;
+  border-color: #5ab3ed;
+  color: #5ab3ed;
+}
+
+.action-toggle-btn.avoid.active {
+  background-color: #fff0f0;
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+/* Find Product Banner */
+.find-product-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.banner-icon {
+  color: #666;
+  margin-right: 12px;
+}
+
+.banner-arrow {
+  color: #ccc;
+}
+
+/* Info List */
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-box.blue {
+  background-color: #e6f7ff;
+  color: #007bff;
+}
+
+.icon-box.gray {
+  background-color: #f5f5f5;
+  color: #999;
+}
+
+.ewg-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.ewg-badge.grade-1,
+.ewg-badge.grade-2 {
+  background-color: #4caf50; /* Green */
+}
+.ewg-badge.grade-3,
+.ewg-badge.grade-4,
+.ewg-badge.grade-5,
+.ewg-badge.grade-6 {
+  background-color: #ff9800; /* Orange */
+}
+.ewg-badge.grade-7,
+.ewg-badge.grade-8,
+.ewg-badge.grade-9,
+.ewg-badge.grade-10 {
+  background-color: #f44336; /* Red */
+}
+
+.info-text {
+  flex: 1;
+}
+
+.info-text strong {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.info-text p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.info-text .sub-text {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+
+/* Detail Footer */
+.detail-footer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.detail-footer p {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.source-box h4 {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.source-box ul {
+  padding-left: 16px;
+  margin: 0;
+}
+
+.source-box li {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+/* Clickable Search Result */
+.ingredient-card.search-result.clickable {
+  cursor: pointer;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.ingredient-card.search-result.clickable:hover {
+  background-color: #f9f9f9;
 }
