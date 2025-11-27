@@ -112,6 +112,8 @@ function App() {
       <main className="app-body" style={{ paddingTop: !isAdmin ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+
+          {/* 장바구니 & 결제 페이지 */}
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/payment/success" element={<PaymentSuccessPage />} />

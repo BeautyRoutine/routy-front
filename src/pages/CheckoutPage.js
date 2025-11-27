@@ -1,95 +1,99 @@
-import React, { useEffect, useRef } from 'react';
-import { loadPaymentWidget } from '@tosspayments/payment-widget-sdk';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { loadTossPayments } from '@tosspayments/payment-sdk';
 import './CheckoutPage.css';
 
-// 1. 토스 공용 테스트 키 (누구나 사용 가능)
-const widgetClientKey = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
-const customerKey = 'test_customer_key_1234';
+// Toss Payments 클라이언트 키 (환경 변수에서 로드)
+const CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY || 'test_ck_ZLKGPx4M3MP7W9RlGR678BaWypv1';
 
 export function CheckoutPage() {
-  // const location = useLocation(); // (사용 안 함)
-  // const navigate = useNavigate(); // (사용 안 함)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [tossPayments, setTossPayments] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // ▼▼▼ [핵심] 가짜 데이터 (DB 없이 테스트하기 위함) ▼▼▼
-  const mockData = {
-    orderItems: [
-      {
-        cartItemId: 999,
-        name: '[테스트] 하이드레이팅 세럼',
-        quantity: 2,
-        price: 25000,
-        brand: '글로우랩',
-      },
-      {
-        cartItemId: 888,
-        name: '[테스트] 비타민 C 토너',
-        quantity: 1,
-        price: 30000,
-        brand: '퓨어스킨',
-      },
-    ],
-    // 총액: (25000*2 + 30000) = 80000원
-    finalPaymentAmount: 80000,
+  // Redux에서 선택된 장바구니 아이템 가져오기
+  const { items, selectedItemIds } = useSelector(state => state.cart);
+  const selectedItems = items.filter(item => selectedItemIds[item.cartItemId]);
+
+  // CartPage에서 전달받은 계산된 금액
+  const summary = location.state?.summary || {
+    totalAmount: 0,
+    deliveryFee: 0,
+    finalPaymentAmount: 0,
   };
 
-  const { orderItems, finalPaymentAmount: price } = mockData;
-  const paymentWidgetRef = useRef(null);
+  const orderItems = selectedItems;
+  const amount = summary.finalPaymentAmount;
 
-  // 2. 결제 위젯 렌더링 (페이지 로드 시 1회)
+  // 선택된 상품이 없으면 장바구니로 리다이렉트
   useEffect(() => {
-    (async () => {
-      const paymentWidget = await loadPaymentWidget(widgetClientKey, customerKey);
+    if (orderItems.length === 0) {
+      alert('선택된 상품이 없습니다.');
+      navigate('/cart');
+    }
+  }, [orderItems, navigate]);
 
-      // 결제 수단 위젯 그리기
-      paymentWidget.renderPaymentMethods('#payment-widget', { value: price }, { variantKey: 'DEFAULT' });
+  // Toss Payments SDK 초기화
+  useEffect(() => {
+    async function initializeTossPayments() {
+      try {
+        const tossPaymentsInstance = await loadTossPayments(CLIENT_KEY);
+        setTossPayments(tossPaymentsInstance);
+      } catch (error) {
+        console.error('Toss Payments SDK 로드 실패:', error);
+      }
+    }
 
-      // 약관 동의 위젯 그리기
-      paymentWidget.renderAgreement('#agreement', { variantKey: 'AGREEMENT' });
+    initializeTossPayments();
+  }, []);
 
-      paymentWidgetRef.current = paymentWidget;
-    })();
-  }, [price]);
-
-  // 3. '결제하기' 버튼 핸들러
+  // 결제 요청 핸들러
   const handlePayment = async () => {
-    const paymentWidget = paymentWidgetRef.current;
+    if (!tossPayments) {
+      alert('결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
-      // ★ 토스 결제창 띄우기 (팝업/모달)
-      await paymentWidget.requestPayment({
-        orderId: 'ORDER_' + new Date().getTime(), // 고유 주문번호 생성
-        orderName: `${orderItems[0].name} 외 ${orderItems.length - 1}건`,
-        customerName: '김토스',
-        customerEmail: 'customer@example.com',
-        // (중요) 결제 성공/실패 시 이동할 URL (프론트엔드 주소)
-        successUrl: `${window.location.origin}/payment/success`,
-        failUrl: `${window.location.origin}/payment/fail`,
+      // 주문번호 생성 (실제로는 백엔드에서 생성해야 함)
+      const orderId = `ORDER_${Date.now()}`;
+      const orderName =
+        orderItems.length > 1 ? `${orderItems[0].name} 외 ${orderItems.length - 1}건` : orderItems[0].name;
+
+      await tossPayments.requestPayment('카드', {
+        amount,
+        orderId,
+        orderName,
+        customerName: '테스트',
+        customerEmail: 'test@example.com',
+        successUrl: `${window.location.origin}/routy-front#/payment/success`,
+        failUrl: `${window.location.origin}/routy-front#/payment/fail`,
       });
-    } catch (err) {
-      console.error('결제 에러:', err);
-      if (err.code === 'USER_CANCEL') {
-        // 사용자가 취소함 (에러 아님)
-      } else {
-        alert('결제 요청 중 오류가 발생했습니다.');
+    } catch (error) {
+      setIsLoading(false);
+
+      if (error.code === 'USER_CANCEL') {
+        // 사용자가 결제창을 닫은 경우
+        return;
       }
+
+      console.error('결제 요청 실패:', error);
+      alert(error.message || '결제 요청에 실패했습니다.');
     }
   };
 
   return (
     <div className="checkout-page">
       <div className="checkout-container">
-        <h1>주문/결제 (테스트 모드)</h1>
+        <h1>주문/결제</h1>
+        <p style={{ color: '#666', marginTop: '8px' }}>테스트 결제는 실제로 청구되지 않습니다</p>
 
         <div className="checkout-layout">
           <div className="checkout-main">
-            {/* 결제 위젯 영역 */}
-            <div className="section-card">
-              <h2>결제 수단</h2>
-              <div id="payment-widget" />
-              <div id="agreement" />
-            </div>
-
-            {/* 주문 상품 목록 (가짜 데이터) */}
             <div className="section-card">
               <h2>주문 상품 ({orderItems.length}개)</h2>
               {orderItems.map(item => (
@@ -104,13 +108,12 @@ export function CheckoutPage() {
             </div>
           </div>
 
-          {/* 결제 버튼 사이드바 */}
           <div className="checkout-sidebar">
             <div className="summary-card">
               <h3>최종 결제 금액</h3>
-              <p className="total-price">{price.toLocaleString()}원</p>
-              <button className="btn-pay" onClick={handlePayment}>
-                결제하기
+              <p className="total-price">{amount.toLocaleString()}원</p>
+              <button className="btn-pay" onClick={handlePayment} disabled={!tossPayments || isLoading}>
+                {isLoading ? '처리 중...' : '결제하기'}
               </button>
             </div>
           </div>
