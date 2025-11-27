@@ -9,27 +9,22 @@ const RecommendedProducts = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const prdNos = [101, 102, 103, 104];
+  axios.get("http://localhost:8080/api/products/recommend")
+    .then(res => {
+      const list = res.data.map((p) => ({
+        id: p.prdNo,
+        name: p.prdName,
+        brand: p.prdCompany,
+        rating: p.avgRating,
+        reviewText: `${p.reviewCount}개의 리뷰`,
+        img: `/images/${p.prdImg}` 
+      }));
 
-    Promise.all(prdNos.map(no => axios.get(`http://localhost:8080/api/products/${no}`)))
-      .then(responses => {
-        const list = responses.map((res, idx) => {
-          const p = res.data;
+      setProducts(list);
+    })
+    .catch(err => console.error("추천 상품 불러오기 실패:", err));
+}, []);
 
-          return {
-            id: p.prdNo,
-            name: p.prdName,
-            brand: p.prdCompany,
-            rating: p.prdRating || 4.7,
-            reviewText: p.prdDesc || '리뷰 없음',
-            img: `/images/product-${idx + 1}.jpg`,
-          };
-        });
-
-        setProducts(list);
-      })
-      .catch(err => console.error('추천 상품 불러오기 실패:', err));
-  }, []);
 
   const filledProducts = [...products, ...Array(4 - products.length).fill(null)].slice(0, 4);
 
