@@ -56,13 +56,9 @@ const RecentViewedRecommend = () => {
   return (
     <div className="container my-5">
       <div className="mb-3" style={{ textAlign: 'left' }}>
-        <h4 className="fw-bold mb-1">
-          {recentCate ? `이러한 “${recentCate}” 상품은 어떠세요?` : '당신을 위한 추천'}
-        </h4>
+        <h4 className="fw-bold mb-1">{recentCate ? `이러한 “${recentCate}” 상품은 어떠세요?` : '당신을 위한 추천'}</h4>
         <p className="text-muted small mb-0">
-          {recentCate
-            ? `최근에 본 ${recentCate} 제품을 기반으로 추천드려요`
-            : '최근 본 제품을 기반으로 추천드려요'}
+          {recentCate ? `최근에 본 ${recentCate} 제품을 기반으로 추천드려요` : '최근 본 제품을 기반으로 추천드려요'}
         </p>
       </div>
 
