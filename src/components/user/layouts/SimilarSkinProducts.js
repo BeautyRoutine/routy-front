@@ -15,17 +15,10 @@ const SimilarSkinProducts = ({ userSkin }) => {
     if (!isLoggedIn) return;
     if (!userSkin) return;
 
-    const loadRecommend = async () => {
-      try {
-        const res = await axios.get(
-          'http://localhost:8080/api/products/list/skin_type',
-          {
-            params: {
-              limit: 4,
-              skin: Number(userSkin)   // ★ 피부타입은 숫자 (1, 2)
-            }
-          }
-        );
+    Promise.all(prdNos.map(no => axios.get(`http://localhost:8080/api/products/${no}`)))
+      .then(responses => {
+        const converted = responses.map((res, index) => {
+          const p = res.data.data;
 
         const list = res.data.data || [];
 

@@ -20,7 +20,11 @@ function ProductImageGallery({ images }) {
   return (
     <div className="gallery-container">
       {/*메인 이미지, 기본값은 0, selectedIndex에 따라 바뀜 */}
-      <img src={`/images/${images.gallery[selectedIndex]}`} alt="상품 메인 이미지" className="main-image" />
+      <img
+        src={`${process.env.PUBLIC_URL}/images/product/${images.gallery[selectedIndex]}`}
+        alt="상품 메인 이미지"
+        className="main-image"
+      />
 
       {/* 썸네일 목록 */}
       <div className="thumbnail-list">
@@ -35,7 +39,7 @@ function ProductImageGallery({ images }) {
             onClick={() => handleThumbnailClick(index)}
           >
             {/*실제 사진 출력 코드, 대체 텍스트도. */}
-            <img src={`/images/${imageSrc}`} alt={`상품 썸네일 ${index + 1}`} />
+            <img src={`/images/product/${imageSrc}`} alt={`상품 썸네일 ${index + 1}`} />
           </div>
         ))}
       </div>

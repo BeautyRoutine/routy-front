@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-
+import { useSelector } from 'react-redux';
 import ProductImageGallery from 'components/user/details/ProductImageGallery';
 import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
@@ -12,6 +12,7 @@ import ProductIngredientAnalysis from 'components/user/details/ProductIngredient
 const ProductDetailPage = () => {
   const { prdNo } = useParams(); // URL의 :prdNo 값을 가져옴 (예: 101)
   console.log('현재 URL 파라미터 값:', prdNo); // <--- 이거 확인해보세요. undefined 뜰 겁니다.
+  const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl);
   // 1. 데이터를 담을 그릇 (처음엔 비어있음)
   const [productData, setProductData] = useState(null);
   const [loading, setLoading] = useState(true); // 로딩 중인지 체크
@@ -21,7 +22,7 @@ const ProductDetailPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const productRes = await axios.get(`/api/products/${prdNo}`);
+        const productRes = await axios.get(`${apiBaseUrl}/products/${prdNo}`);
 
         console.log('상품 데이터 도착:', productRes.data);
         // 백엔드 API 3개를 동시에 찌릅니다. (상품, 리뷰, 성분)
@@ -33,7 +34,7 @@ const ProductDetailPage = () => {
 
         // 3. 받아온 데이터를 하나로 합침 (더미 데이터 구조랑 똑같이 만듦)
         const combinedData = {
-          productInfo: productRes.data, // 백엔드 DTO가 여기 들어감
+          productInfo: productRes.data.data, // 백엔드 DTO가 여기 들어감
           // reviewInfo: reviewRes.data.data, // 리뷰 데이터
           // ingredientInfo: ingredientRes.data.data, // 성분 데이터
           reviewInfo: { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 임시 빈값
