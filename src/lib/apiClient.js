@@ -1,108 +1,88 @@
 import axios from "axios";
 
-// API 기본 설정
-const apiBaseURL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
-
+/**
+ * Axios 인스턴스 생성
+ * - baseURL: Spring Boot 서버 주소
+ * - withCredentials: 쿠키 전송 허용
+ */
 const api = axios.create({
-  baseURL: apiBaseURL,
-  timeout: 10000,
+  baseURL: "http://localhost:8080",  // /api 제거
+  withCredentials: true,
+  timeout: 10000,  // 10초 타임아웃
 });
 
-// --------------------------
-// 토큰 꺼내오기
-// --------------------------
-function getToken() {
-  try {
-    const auth =
-      localStorage.getItem("auth") || sessionStorage.getItem("auth");
-
-    if (auth) {
-      const parsed = JSON.parse(auth);
-      if (parsed?.token) return parsed.token;
+/**
+ * 요청 인터셉터
+ * - JWT 토큰을 자동으로 헤더에 추가
+ */
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-
-    return (
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("token") ||
-      null
-    );
-  } catch {
-    return null;
-  }
-}
-
-// --------------------------
-// 요청 인터셉터
-// --------------------------
-api.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) {
-    config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// --------------------------
-// 응답 인터셉터
-// --------------------------
-api.interceptors.response.use(
-  (res) => {
-    const body = res.data;
-
-    // 백엔드에서 { resultCode, resultMsg, data } 형태로 줄 때 처리
-    if (body && typeof body === "object" && "resultCode" in body) {
-      if (body.resultCode === 200) return body;
-
-      const err = new Error(body.resultMsg || "요청 오류");
-      err.body = body;
-      throw err;
-    }
-
-    return res;
+    return config;
   },
-  (err) => {
-    const msg =
-      err?.response?.data?.resultMsg ||
-      err?.response?.data?.message ||
-      err.message ||
-      "네트워크 오류";
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-    const wrapped = new Error(msg);
-    wrapped.original = err;
-    return Promise.reject(wrapped);
+/**
+ * 응답 인터셉터
+ * - 401 에러 시 로그인 페이지로 리다이렉트
+ * - 에러 메시지 통일
+ */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // 토큰 만료 또는 인증 실패
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    
+    // 에러 메시지 추출
+    const message = error.response?.data?.resultMsg || error.message || "알 수 없는 오류가 발생했습니다.";
+    return Promise.reject(new Error(message));
   }
 );
 
 // -------------------------
-// 인증 관련 API
+// AUTH API
 // -------------------------
 
-// 로그인
-// payload: { userEmail, userPw, asAdmin(false 기본) }
+/**
+ * 로그인
+ * @param {Object} payload - { email, password }
+ * @returns {Promise} ApiResponse
+ */
 export const login = (payload) =>
-  api.post("/api/auth/login", payload);
+  api.post("/api/auth/login", payload).then((res) => res.data);
 
-// 회원가입
+/**
+ * 회원가입
+ * @param {Object} payload - SignupRequest
+ * @returns {Promise} ApiResponse
+ */
 export const signUp = (payload) =>
-  api.post("/api/auth/signup", payload);
+  api.post("/api/auth/signup", payload).then((res) => res.data);
 
-// 휴대폰 인증번호 요청
+/**
+ * 휴대폰 인증 요청
+ * @param {Object} payload - { phone }
+ * @returns {Promise} ApiResponse
+ */
 export const requestPhoneVerify = (payload) =>
-  api.post("/api/auth/phone/request", payload);
+  api.post("/api/auth/phone/request", payload).then((res) => res.data);
 
-// 휴대폰 인증번호 확인
+/**
+ * 휴대폰 인증 확인
+ * @param {Object} payload - { phone, code }
+ * @returns {Promise} ApiResponse
+ */
 export const confirmPhoneVerify = (payload) =>
-  api.post("/api/auth/phone/verify", payload);
-
-// -------------------------
-// 카카오 로그인 URL (단순 문자열)
-// -------------------------
-export function getKakaoUrl() {
-  const base = apiBaseURL.replace(/\/+$/, ""); // 끝 / 제거
-  // 백엔드의 /auth/kakao/login 으로 보내면, 거기서 카카오로 redirect 해줌
-  return `${base}/auth/kakao/login`;
-}
+  api.post("/api/auth/phone/confirm", payload).then((res) => res.data);
 
 export default api;

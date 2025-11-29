@@ -125,6 +125,9 @@ const initialState = {
   ingredients: FALLBACK_INGREDIENT_GROUPS,
   loading: false,
   error: null,
+  // 회원가입/로그인 후 사용자 정보
+  currentUser: null,
+  isAuthenticated: false,
 };
 
 const userSlice = createSlice({
@@ -133,6 +136,17 @@ const userSlice = createSlice({
   reducers: {
     clearError: state => {
       state.error = null;
+    },
+    // 🔥 회원가입/로그인 후 사용자 정보 설정
+    setUser: (state, action) => {
+      state.currentUser = action.payload;
+      state.isAuthenticated = !!action.payload;
+    },
+    // 로그아웃
+    logout: state => {
+      state.currentUser = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('token');
     },
   },
   extraReducers: builder => {
@@ -186,5 +200,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearError } = userSlice.actions;
+export const { clearError, setUser, logout } = userSlice.actions;
 export default userSlice.reducer;
