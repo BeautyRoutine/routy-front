@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Search,
@@ -12,9 +12,10 @@ import {
   Ban,
   Check,
 } from 'lucide-react';
+import { searchIngredients } from '../../../lib/apiClient';
 import '../../../styles/MyPage.css';
 
-// Mock data for search results with detailed info
+// Mock data for search results with detailed info (Fallback)
 const MOCK_INGREDIENTS = [
   {
     id: 1,
@@ -105,9 +106,39 @@ const MOCK_INGREDIENTS = [
 const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
   const [view, setView] = useState('search'); // 'search' | 'detail'
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [addedFocusIds, setAddedFocusIds] = useState([]);
   const [addedAvoidIds, setAddedAvoidIds] = useState([]);
+
+  // 검색어가 변경될 때마다 API 호출 (Debounce 적용 권장)
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!searchTerm.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await searchIngredients(searchTerm);
+        // API 응답 구조에 따라 조정 필요 (여기서는 res.data가 배열이라고 가정)
+        setSearchResults(res.data || []);
+      } catch (error) {
+        console.error('성분 검색 실패:', error);
+        // API 실패 시 Mock 데이터로 폴백 (개발용)
+        const fallback = MOCK_INGREDIENTS.filter(
+          item => item.name.includes(searchTerm) || item.engName.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+        setSearchResults(fallback);
+      } finally {
+        setLoading(false);
+      }
+    }, 300); // 300ms Debounce
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   if (!isOpen) return null;
 
@@ -132,7 +163,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
     } else {
       setAddedFocusIds([...addedFocusIds, id]);
       setAddedAvoidIds(addedAvoidIds.filter(i => i !== id)); // Remove from avoid if adding to focus
-      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'focus');
+      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'FOCUS');
     }
   };
 
@@ -143,11 +174,9 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
     } else {
       setAddedAvoidIds([...addedAvoidIds, id]);
       setAddedFocusIds(addedFocusIds.filter(i => i !== id)); // Remove from focus if adding to avoid
-      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'avoid');
+      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'AVOID');
     }
   };
-
-  const filteredIngredients = MOCK_INGREDIENTS.filter(item => item.name.includes(searchTerm));
 
   // Detail View Component
   const DetailView = ({ ingredient }) => {
@@ -200,7 +229,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>배합목적</strong>
-                <p>{ingredient.purpose}</p>
+                <p>{ingredient.purpose || '정보 없음'}</p>
               </div>
             </div>
 
@@ -210,7 +239,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>배합한도</strong>
-                <p>{ingredient.limit}</p>
+                <p>{ingredient.limit || '해당 없음'}</p>
               </div>
             </div>
 
@@ -220,7 +249,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>배합금지</strong>
-                <p>{ingredient.ban}</p>
+                <p>{ingredient.ban || '해당 없음'}</p>
               </div>
             </div>
 
@@ -230,7 +259,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>20가지 주의성분</strong>
-                <p>{ingredient.caution20}</p>
+                <p>{ingredient.caution20 || '해당 없음'}</p>
               </div>
             </div>
 
@@ -240,7 +269,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>알레르기 유발 주의성분</strong>
-                <p>{ingredient.allergy}</p>
+                <p>{ingredient.allergy || '해당 없음'}</p>
               </div>
             </div>
 
@@ -250,7 +279,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>피부타입별 특이성분</strong>
-                <p>{ingredient.skinType}</p>
+                <p>{ingredient.skinType || '해당 없음'}</p>
               </div>
             </div>
 
@@ -260,7 +289,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>기능성 성분 여부</strong>
-                <p>{ingredient.functional}</p>
+                <p>{ingredient.functional || '해당 없음'}</p>
               </div>
             </div>
           </div>
@@ -309,9 +338,13 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
 
               <div className="search-results">
-                {filteredIngredients.length > 0 ? (
+                {loading ? (
+                  <div className="empty-search">
+                    <p>검색 중...</p>
+                  </div>
+                ) : searchResults.length > 0 ? (
                   <div className="ingredient-grid">
-                    {filteredIngredients.map(item => (
+                    {searchResults.map(item => (
                       <div
                         key={item.id}
                         className="ingredient-card search-result clickable"
@@ -327,7 +360,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
                   </div>
                 ) : (
                   <div className="empty-search">
-                    <p>검색 결과가 없습니다.</p>
+                    <p>{searchTerm ? '검색 결과가 없습니다.' : '성분을 검색해보세요.'}</p>
                   </div>
                 )}
               </div>
