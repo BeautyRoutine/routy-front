@@ -10,38 +10,48 @@ const SimilarSkinProducts = ({ userSkin }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 임시 더미 상품 → 필요하면 API로 변경 가능
-    const prdNos = [101, 102, 103, 104];
+    const loadRecommend = async () => {
+      try {
+        const res = await axios.get(
+          'http://localhost:8080/api/products/list/skin_cate',
+          {
+            params: {
+              limit: 4,        // 추천 4개 표시
+              skin: userSkin,  // 로그인 유저 피부 타입
+              sub_cate: ''     // 카테고리 없이 전체 인기 기준
+            }
+          }
+        );
 
-    Promise.all(prdNos.map(no => axios.get(`http://localhost:8080/api/products/${no}`)))
-      .then(responses => {
-        const converted = responses.map((res, index) => {
-          const p = res.data.data;
+        const list = res.data.data || [];
 
-          return {
-            id: p.prdNo,
-            name: p.prdName,
-            brand: p.prdCompany,
-            rating: 4.7,
-            tags: ['추천', '피부'],
-            discount: null,
-            price: p.prdPrice,
-            original: null,
-            img: `/images/product${index + 1}.jpg`,
-          };
-        });
+        const converted = list.map((p, index) => ({
+          id: p.prdNo,
+          name: p.prdName,
+          brand: p.prdCompany,
+          rating: 4.7,             // 백엔드에 없으니 UI용 기본값
+          tags: ['추천', '피부'],   // UI용
+          discount: null,
+          price: p.prdPrice,
+          original: null,
+          img: p.prdImg
+            ? `/images/${p.prdImg}`
+            : `/images/product${index + 1}.jpg`, // 기본 이미지 처리
+        }));
 
         setProducts(converted);
-      })
-      .catch(err => console.error(err));
-  }, []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  // 상품 상세로 이동
+    loadRecommend();
+  }, [userSkin]);
+
   const goDetail = prdNo => {
     navigate(`/products/${prdNo}`);
   };
 
-  // 버튼 클릭 시 이동
   const handleMoreClick = () => {
     if (userSkin) {
       navigate(`/products?limit=20&skin=${userSkin}`);
@@ -50,10 +60,12 @@ const SimilarSkinProducts = ({ userSkin }) => {
     }
   };
 
+  if (products.length === 0) return null;
+
   return (
     <div className="container my-5 text-center similar-skin-section">
       <h5 className="fw-bold text-primary mb-1">비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!</h5>
-      <p className="text-muted small mb-4">건성·민감성 피부 사용자 12,440명이 선택</p>
+      <p className="text-muted small mb-4">건성·민감성 피부 사용자들의 인기 상품</p>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
         {products.map(p => (
@@ -61,15 +73,22 @@ const SimilarSkinProducts = ({ userSkin }) => {
             <div
               className="card h-100 border-0 shadow-sm product-card position-relative"
               style={{ cursor: 'pointer' }}
-              onClick={() => goDetail(p.id)} // 카드 클릭 → 상세 페이지 이동
+              onClick={() => goDetail(p.id)}
             >
               {p.discount && (
-                <span className="badge bg-danger position-absolute top-0 start-0 m-2">{p.discount} OFF</span>
+                <span className="badge bg-danger position-absolute top-0 start-0 m-2">
+                  {p.discount} OFF
+                </span>
               )}
 
               <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
 
-              <img src={p.img} className="card-img-top" alt={p.name} style={{ borderRadius: '10px' }} />
+              <img
+                src={p.img}
+                className="card-img-top"
+                alt={p.name}
+                style={{ borderRadius: '10px' }}
+              />
 
               <div className="card-body text-start">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
@@ -87,11 +106,10 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
                 <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
 
-                {/* 장바구니 버튼: 카드 클릭 이벤트 막기 */}
                 <button
                   className="btn cart-btn w-100 mt-2"
                   onClick={e => {
-                    e.stopPropagation(); // 카드 클릭과 분리
+                    e.stopPropagation();
                     alert('장바구니에 추가되었습니다.');
                   }}
                 >
@@ -103,9 +121,11 @@ const SimilarSkinProducts = ({ userSkin }) => {
         ))}
       </div>
 
-      {/* 추천 상품 더보기 버튼 */}
       <div className="mt-4">
-        <button className="btn btn-outline-primary rounded-pill px-4" onClick={handleMoreClick}>
+        <button
+          className="btn btn-outline-primary rounded-pill px-4"
+          onClick={handleMoreClick}
+        >
           더 많은 추천 상품 보기
         </button>
       </div>
@@ -114,3 +134,4 @@ const SimilarSkinProducts = ({ userSkin }) => {
 };
 
 export default SimilarSkinProducts;
+
