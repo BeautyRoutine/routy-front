@@ -9,16 +9,22 @@ const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
+  const isLoggedIn = !!localStorage.getItem('accessToken');
+
+  // 항상 최상단에서 useEffect 호출
   useEffect(() => {
+    if (!isLoggedIn) return;       // 로그인 안했으면 API 호출 안함
+    if (!userSkin) return;         // userSkin 없으면 API 호출 안함
+
     const loadRecommend = async () => {
       try {
         const res = await axios.get(
           'http://localhost:8080/api/products/list/skin_cate',
           {
             params: {
-              limit: 4,        // 추천 4개 표시
-              skin: userSkin,  // 로그인 유저 피부 타입
-              sub_cate: ''     // 카테고리 없이 전체 인기 기준
+              limit: 4,
+              skin: userSkin,
+              sub_cate: ''
             }
           }
         );
@@ -29,14 +35,14 @@ const SimilarSkinProducts = ({ userSkin }) => {
           id: p.prdNo,
           name: p.prdName,
           brand: p.prdCompany,
-          rating: 4.7,             // 백엔드에 없으니 UI용 기본값
-          tags: ['추천', '피부'],   // UI용
+          rating: 4.7,
+          tags: ['추천', '피부'],
           discount: null,
           price: p.prdPrice,
           original: null,
           img: p.prdImg
             ? `/images/${p.prdImg}`
-            : `/images/product${index + 1}.jpg`, // 기본 이미지 처리
+            : `/images/product${index + 1}.jpg`,
         }));
 
         setProducts(converted);
@@ -46,26 +52,43 @@ const SimilarSkinProducts = ({ userSkin }) => {
     };
 
     loadRecommend();
-  }, [userSkin]);
+  }, [isLoggedIn, userSkin]);
 
-  const goDetail = prdNo => {
-    navigate(`/products/${prdNo}`);
-  };
+  // 로그인 안했으면 로그인 유도 UI 출력
+  if (!isLoggedIn) {
+    return (
+      <div className="container my-5 text-center similar-skin-section">
+        <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
+        <p className="text-muted small mb-4">
+          로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
+        </p>
 
-  const handleMoreClick = () => {
-    if (userSkin) {
-      navigate(`/products?limit=20&skin=${userSkin}`);
-    } else {
-      navigate(`/products?limit=20`);
-    }
-  };
+        <button
+          className="btn btn-primary rounded-pill px-4 me-2"
+          onClick={() => navigate('/login')}
+        >
+          로그인
+        </button>
+        <button
+          className="btn btn-outline-primary rounded-pill px-4"
+          onClick={() => navigate('/signup')}
+        >
+          회원가입
+        </button>
+      </div>
+    );
+  }
 
   if (products.length === 0) return null;
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-      <h5 className="fw-bold text-primary mb-1">비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!</h5>
-      <p className="text-muted small mb-4">건성·민감성 피부 사용자들의 인기 상품</p>
+      <h5 className="fw-bold text-primary mb-1">
+        비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!
+      </h5>
+      <p className="text-muted small mb-4">
+        {userSkin || '피부 타입'} 사용자들의 인기 상품
+      </p>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
         {products.map(p => (
@@ -73,7 +96,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
             <div
               className="card h-100 border-0 shadow-sm product-card position-relative"
               style={{ cursor: 'pointer' }}
-              onClick={() => goDetail(p.id)}
+              onClick={() => navigate(`/products/${p.id}`)}
             >
               {p.discount && (
                 <span className="badge bg-danger position-absolute top-0 start-0 m-2">
@@ -124,7 +147,9 @@ const SimilarSkinProducts = ({ userSkin }) => {
       <div className="mt-4">
         <button
           className="btn btn-outline-primary rounded-pill px-4"
-          onClick={handleMoreClick}
+          onClick={() =>
+            navigate(`/products?limit=20&skin=${userSkin || ''}`)
+          }
         >
           더 많은 추천 상품 보기
         </button>
@@ -134,4 +159,3 @@ const SimilarSkinProducts = ({ userSkin }) => {
 };
 
 export default SimilarSkinProducts;
-

@@ -1,41 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './RecommendedProducts.css';
+import './PopularProducts.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const RecommendedProducts = () => {
+const PopularProducts = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
+    const userNo = localStorage.getItem('userNo'); // 로그인 여부 확인
+    const params = { limit: 4 };
+
+    if (userNo) params.user_no = userNo;
+
     axios
-      .get('http://localhost:8080/api/products')
+      .get('http://localhost:8080/api/products/list/skin_cate', { params })
       .then(res => {
-        const list = res.data || [];
+        const list = res.data.data || [];
 
-        // -------------------------------
-        // 1) 평가 기준 필터링
-        // -------------------------------
-        const highRated = list.filter(
-          p =>
-            p.avgRating >= 4.0 || // 별점 기준
-            p.reviewCount >= 10, // 리뷰 수 기준
-        );
-
-        // -------------------------------
-        // 2) 랜덤으로 섞은 뒤 3개만 선택
-        // -------------------------------
-        const shuffled = highRated.sort(() => Math.random() - 0.5);
-        const selected = shuffled.slice(0, 3);
-
-        const converted = selected.map(p => ({
+        const converted = list.map(p => ({
           id: p.prdNo,
           name: p.prdName,
           brand: p.prdCompany,
-          rating: p.avgRating,
-          reviewText: `${p.reviewCount}개의 리뷰`,
-          img: `/images/${p.prdImg}`,
+          rating: p.avgRating || 4.5, // 백엔드에 별점 없으면 기본값
+          reviewText: p.reviewCount ? `${p.reviewCount}개의 리뷰` : '',
+          img: p.prdImg ? `/images/${p.prdImg}` : '/images/no-img.png',
         }));
 
         setProducts(converted);
@@ -43,18 +33,19 @@ const RecommendedProducts = () => {
       .catch(err => console.error('추천 상품 불러오기 실패:', err));
   }, []);
 
-  // 항상 4칸 유지 → 3개 + 빈칸 1개
   const filledProducts = [...products, ...Array(4 - products.length).fill(null)].slice(0, 4);
 
   return (
     <div className="container my-5">
-      {/* 타이틀 */}
       <div className="mb-3" style={{ textAlign: 'left' }}>
         <h4 className="fw-bold mb-1">당신을 위한 추천</h4>
-        <p className="text-muted small mb-0">평가가 높은 인기 상품을 모아봤어요</p>
+        <p className="text-muted small mb-0">
+          {localStorage.getItem('userNo')
+            ? '당신의 피부타입과 행동을 기반으로 추천해드려요'
+            : '인기 순위 기반으로 추천해드려요'}
+        </p>
       </div>
 
-      {/* 추천 상품 카드 */}
       <div className="row row-cols-1 row-cols-md-4 g-4">
         {filledProducts.map((p, index) => (
           <div key={index} className="col">
@@ -70,7 +61,7 @@ const RecommendedProducts = () => {
                     <h6 className="fw-semibold mb-1">{p.name}</h6>
                     <p className="text-muted small mb-1">{p.brand}</p>
                     <p className="text-warning small mb-0">
-                      ★ {p.rating} <span className="text-muted"> | {p.reviewText}</span>
+                      ★ {p.rating} <span className="text-muted"> {p.reviewText}</span>
                     </p>
                   </div>
                 </>
@@ -91,4 +82,4 @@ const RecommendedProducts = () => {
   );
 };
 
-export default RecommendedProducts;
+export default PopularProducts;
