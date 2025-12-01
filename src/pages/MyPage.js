@@ -50,7 +50,7 @@ const buildNavSections = user => [
 const MyPage = () => {
   const dispatch = useDispatch();
   // const navigate = useNavigate();
-  const { profile: userProfile, ingredients } = useSelector(state => state.user);
+  const { profile: userProfile, ingredients, likes } = useSelector(state => state.user);
 
   // UI State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
@@ -80,7 +80,8 @@ const MyPage = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(fetchMyPageData());
+    // 테스트를 위해 1번 회원 데이터 조회
+    dispatch(fetchMyPageData('1'));
   }, [dispatch]);
 
   const handleOpenEditModal = () => {
@@ -133,7 +134,7 @@ const MyPage = () => {
       case 'claim-history':
         return <ClaimHistory claims={DEMO_CLAIMS} />;
       case 'like-list':
-        return <LikeList likes={DEMO_LIKES} />;
+        return <LikeList likes={likes} />;
       case 'ingredient-management':
         return <IngredientManagement ingredients={ingredients} onAddClick={() => setIsIngredientAddModalOpen(true)} />;
       case 'reviews':
@@ -149,7 +150,15 @@ const MyPage = () => {
                   <div className="user-avatar-placeholder"></div>
                   <div className="hero-text-group">
                     <p className="hero-greeting">
-                      <strong>{userProfile.name}</strong>님 반갑습니다.
+                      <strong>
+                        {userProfile.name}
+                        {userProfile.nickname && (
+                          <span style={{ fontWeight: 'normal', fontSize: '0.9em', marginLeft: '4px' }}>
+                            ({userProfile.nickname})
+                          </span>
+                        )}
+                      </strong>
+                      님 반갑습니다.
                     </p>
                     <div className="hero-tags-row">
                       {userProfile.tags &&
@@ -265,7 +274,7 @@ const MyPage = () => {
               </header>
 
               {likeTab === 'products' ? (
-                DEMO_LIKES.products.length === 0 ? (
+                likes.products.length === 0 ? (
                   <div className="empty-state">
                     <div className="empty-icon">!</div>
                     <p>좋아요 상품이 없습니다.</p>
@@ -280,7 +289,7 @@ const MyPage = () => {
                       paddingBottom: '10px',
                     }}
                   >
-                    {DEMO_LIKES.products.slice(0, 5).map(item => (
+                    {likes.products.slice(0, 5).map(item => (
                       <div
                         key={item.id}
                         className="favorite-item"
@@ -345,7 +354,7 @@ const MyPage = () => {
                   </div>
                 )
               ) : /* 브랜드 탭 컨텐츠 */
-              DEMO_LIKES.brands.length === 0 ? (
+              likes.brands.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon">!</div>
                   <p>좋아요 브랜드가 없습니다.</p>
@@ -360,7 +369,7 @@ const MyPage = () => {
                     paddingBottom: '10px',
                   }}
                 >
-                  {DEMO_LIKES.brands.slice(0, 5).map(brand => (
+                  {likes.brands.slice(0, 5).map(brand => (
                     <div
                       key={brand.id}
                       className="favorite-item"
