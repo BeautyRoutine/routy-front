@@ -1,12 +1,10 @@
-// src/App.js-수정예정
-import React, { useState } from 'react';
+// src/App.js - 로그인 상태 동기화 버전
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { CartPage } from './pages/CartPage';
 
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 
-// TODO: 로그인/회원가입 API 연동 시 ENDPOINTS import를 복원하시면 됩니다.
-// import { Header, ENDPOINTS as HEADER_ENDPOINTS } from './components/user/layouts/Header';
 import Home from 'pages/Home';
 import MyPage from './pages/MyPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -27,19 +25,27 @@ function App() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
 
-  // 공통 네비게이션 요청을 route key 기반으로 처리해 헤더/푸터에서 같은 매핑을 재사용할 수 있도록 함
+  // 추가: 컴포넌트 마운트 시 로그인 상태 체크
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  // 추가: 현재 경로가 변경될 때마다 로그인 상태 체크
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, [location.pathname]);
+
   const handleLoginClick = () => {
-    // 로그인 버튼 클릭 시 로그인 페이지로 이동
     navigate('/login');
   };
 
   const handleSignupClick = () => {
-    // 회원가입 페이지로 이동
     navigate('/signup');
   };
 
   const handleLogoutClick = () => {
-    // 실제 로그아웃 시에는 토큰/회원정보 제거 로직을 추가해야 함
     setIsLoggedIn(false);
     navigate('/logout');
   };
@@ -72,7 +78,6 @@ function App() {
 
   return (
     <div className="App">
-      {/* 사용자 영역에는 헤더를 유지하고, 관리자 화면에서는 중복 레이아웃을 피하기 위해 제거 */}
       <ScrollToTop />
       {!isAdmin && (
         <UserGlobalLayout
@@ -89,39 +94,21 @@ function App() {
         />
       )}
 
-      {/* 메인 콘텐츠 */}
       <main className="app-body" style={{ paddingTop: !isAdmin ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<CartPage />} />
-
-          {/* TODO: 로그인 체크 로직 (테스트를 위해 주석 처리됨). 배포 시 주석 해제 및 아래 Route 삭제 필요 */}
-          {/* <Route
-            path="/mypage"
-            element={isLoggedIn ? <MyPage /> : <Navigate to="/login" replace />}
-          /> */}
           <Route path="/mypage" element={<MyPage />} />
-          {/* 상품 페이지*/}
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />
-          {/* 관리자 페이지*/}
           <Route path="/admin/*" element={<AdminHome />} />
-
-          {/* 로그인 */}
           <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
-
-          {/* 회원가입 */}
           <Route path="/signup" element={isLoggedIn ? <Navigate to="/" replace /> : <SignupPage />} />
-
-          {/* 로그아웃 */}
           <Route path="/logout" element={<LogoutPage />} />
-
-          {/* 404 */}
           <Route path="*" element={<div style={{ padding: 24 }}>페이지를 찾을 수 없습니다.</div>} />
         </Routes>
       </main>
 
-      {/* 관리자 페이지는 별도의 레이아웃을 갖기 때문에 푸터도 사용자 페이지에서만 노출 */}
       {!isAdmin && <Footer />}
     </div>
   );
