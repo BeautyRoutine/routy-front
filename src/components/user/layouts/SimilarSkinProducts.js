@@ -16,7 +16,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
     Promise.all(prdNos.map(no => axios.get(`http://localhost:8080/api/products/${no}`)))
       .then(responses => {
         const converted = responses.map((res, index) => {
-          const p = res.data;
+          const p = res.data.data;
 
           return {
             id: p.prdNo,
