@@ -11,20 +11,18 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
-  // 항상 최상단에서 useEffect 호출
   useEffect(() => {
-    if (!isLoggedIn) return;       // 로그인 안했으면 API 호출 안함
-    if (!userSkin) return;         // userSkin 없으면 API 호출 안함
+    if (!isLoggedIn) return;
+    if (!userSkin) return;
 
     const loadRecommend = async () => {
       try {
         const res = await axios.get(
-          'http://localhost:8080/api/products/list/skin_cate',
+          'http://localhost:8080/api/products/list/skin_type',
           {
             params: {
               limit: 4,
-              skin: userSkin,
-              sub_cate: ''
+              skin: Number(userSkin)   // ★ 피부타입은 숫자 (1, 2)
             }
           }
         );
@@ -54,7 +52,6 @@ const SimilarSkinProducts = ({ userSkin }) => {
     loadRecommend();
   }, [isLoggedIn, userSkin]);
 
-  // 로그인 안했으면 로그인 유도 UI 출력
   if (!isLoggedIn) {
     return (
       <div className="container my-5 text-center similar-skin-section">
@@ -87,7 +84,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
         비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!
       </h5>
       <p className="text-muted small mb-4">
-        {userSkin || '피부 타입'} 사용자들의 인기 상품
+        {userSkin === '1' ? '지성' : userSkin === '2' ? '건성' : '피부 타입'} 사용자들의 인기 상품
       </p>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
@@ -127,7 +124,9 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
                 <p className="small mb-2">⭐ {p.rating}</p>
 
-                <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
+                <h6 className="fw-bold text-dark">
+                  {p.price.toLocaleString()}원
+                </h6>
 
                 <button
                   className="btn cart-btn w-100 mt-2"
@@ -147,9 +146,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
       <div className="mt-4">
         <button
           className="btn btn-outline-primary rounded-pill px-4"
-          onClick={() =>
-            navigate(`/products?limit=20&skin=${userSkin || ''}`)
-          }
+          onClick={() => navigate(`/products?limit=20&skin=${userSkin}`)}
         >
           더 많은 추천 상품 보기
         </button>
