@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const ProductEdit = () => {
   const { prdNo } = useParams();
   const navigate = useNavigate();
 
-  const apiBaseUrl = 'http://localhost:8085/api/admin/products';
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   const [product, setProduct] = useState({
     prdName: '',
@@ -26,13 +27,13 @@ const ProductEdit = () => {
   // 기존 상품 정보 로딩
   useEffect(() => {
     axios
-      .get(`${apiBaseUrl}/${prdNo}`)
+      .get(`${apiBaseUrl}/products/${prdNo}`)
       .then(res => {
         setProduct(res.data);
         setPreviewImg(`/images/${res.data.prdImg}`);
       })
       .catch(() => alert('상품 정보를 불러올 수 없습니다.'));
-  }, [prdNo]);
+  }, [prdNo, apiBaseUrl]);
 
   // 인풋 핸들링
   const handleChange = e => {
@@ -63,7 +64,7 @@ const ProductEdit = () => {
         }
       });
 
-      await axios.put(`${apiBaseUrl}/${prdNo}`, formData, {
+      await axios.put(`${apiBaseUrl}/products/${prdNo}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

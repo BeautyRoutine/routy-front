@@ -33,11 +33,9 @@ const OrderDetail = () => {
       setLoading(true);
       try {
         if (existence) {
-          console.log(existence);
           dispatch(selectItem(existence));
           return;
         } else {
-          console.log(`${apiBaseUrl}/orders/detail/${odNo}`);
           const response = await axios.get(`${apiBaseUrl}/orders/detail/${odNo}`);
           dispatch(selectItem(response.data.data));
         }

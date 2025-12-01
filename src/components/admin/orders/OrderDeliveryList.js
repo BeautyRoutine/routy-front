@@ -78,12 +78,12 @@ const OrderDeliveryList = () => {
         delv_e_end_day: endEndDate,
       };
 
-      // console.log(`${apiBaseUrl}/order_delivery/list`);
+      // console.log(`${apiBaseUrl}/orders/delivery/list`);
       // console.log(params);
       setLoading(true);
       setError('');
       try {
-        const result = await axios.get(`${apiBaseUrl}/order_delivery/list`, { params });
+        const result = await axios.get(`${apiBaseUrl}/orders/delivery/list`, { params });
         // console.log(result);
         dispatch(setItems(result.data.data.list));
         dispatch(setItemsCount(result.data.data.total));

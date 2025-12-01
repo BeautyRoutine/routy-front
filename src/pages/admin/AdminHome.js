@@ -9,11 +9,11 @@ import OrderDetail from 'components/admin/orders/OrderDetail';
 import OrderDeliveryList from 'components/admin/orders/OrderDeliveryList';
 import OrderDeliveryDetail from 'components/admin/orders/OrderDeliveryDetail';
 
-import ProductList from 'features/adminProducts/ProductList';
-import ProductDetail from 'features/adminProducts/ProductDetail';
-import ProductAdd from 'features/adminProducts/ProductAdd';
-import ProductEdit from 'features/adminProducts/ProductEdit';
-import IngredientList from 'features/adminProducts/IngredientList';
+import ProductList from 'components/admin/products/ProductList';
+import ProductDetail from 'components/admin/products/ProductDetail';
+import ProductAdd from 'components/admin/products/ProductAdd';
+import ProductEdit from 'components/admin/products/ProductEdit';
+import IngredientList from 'components/admin/products/IngredientList';
 
 const AdminHome = () => {
   return (

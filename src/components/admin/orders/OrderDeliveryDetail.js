@@ -50,8 +50,8 @@ const OrderDeliveryListDetail = () => {
           dispatch(selectItem(existence));
           return;
         } else {
-          console.log(`${apiBaseUrl}/order_delivery/detail/${delvNo}`);
-          const response = await axios.get(`${apiBaseUrl}/order_delivery/detail/${delvNo}`);
+          console.log(`${apiBaseUrl}/orders/delivery/detail/${delvNo}`);
+          const response = await axios.get(`${apiBaseUrl}/orders/delivery/detail/${delvNo}`);
           dispatch(selectItem(response.data.data));
         }
       } catch (err) {

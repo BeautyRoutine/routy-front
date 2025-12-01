@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import axios from 'axios';
 
@@ -9,7 +9,7 @@ const ProductList = () => {
   const navigate = useNavigate();
 
   // API Base URL (관리자)
-  const apiBaseUrl = 'http://localhost:8085/api/admin/products';
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   // paging
   const page = Number(searchParams.get('page')) || 1;
@@ -46,7 +46,7 @@ const ProductList = () => {
       };
 
       try {
-        const result = await axios.get(apiBaseUrl, { params });
+        const result = await axios.get(`${apiBaseUrl}/products`, { params });
 
         // 목록 + 총 개수 들어온다고 가정
         setProducts(result.data.list || []);
@@ -56,7 +56,7 @@ const ProductList = () => {
       }
     };
     loadData();
-  }, [page, pageGap, prdName, prdCompany]);
+  }, [page, pageGap, prdName, prdCompany, apiBaseUrl]);
 
   return (
     <div className="container-fluid">

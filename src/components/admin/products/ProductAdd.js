@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const ProductAdd = () => {
   const navigate = useNavigate();
-  const apiBaseUrl = 'http://localhost:8085/api/admin/products';
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   const [product, setProduct] = useState({
     prdName: '',
@@ -45,7 +46,7 @@ const ProductAdd = () => {
   const handleSave = async () => {
     try {
       // 파일을 보내지 않으므로 JSON 전송
-      await axios.post(apiBaseUrl, product);
+      await axios.post(`${apiBaseUrl}/products`, product);
 
       alert('상품이 등록되었습니다!');
       navigate('/admin/product/list');

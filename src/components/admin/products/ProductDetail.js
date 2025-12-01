@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const ProductDetail = () => {
   const { prdNo } = useParams();
@@ -9,13 +10,13 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const apiBaseUrl = 'http://localhost:8085/api/admin/products';
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   // 상품 정보 로드
   useEffect(() => {
     const loadProduct = async () => {
       try {
-        const result = await axios.get(`${apiBaseUrl}/${prdNo}`);
+        const result = await axios.get(`${apiBaseUrl}/products/${prdNo}`);
         setProduct(result.data);
       } catch (err) {
         console.error('상품 정보 불러오기 실패:', err);
@@ -25,7 +26,7 @@ const ProductDetail = () => {
     };
 
     loadProduct();
-  }, [prdNo]);
+  }, [prdNo, apiBaseUrl]);
 
   // 삭제 기능
   const handleDelete = async () => {
@@ -33,7 +34,7 @@ const ProductDetail = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`${apiBaseUrl}/${prdNo}`);
+      await axios.delete(`${apiBaseUrl}/products/${prdNo}`);
       alert('상품이 삭제되었습니다.');
       navigate('/admin/product/list');
     } catch (err) {

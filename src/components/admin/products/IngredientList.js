@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const IngredientList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   // 나중에 사용 예정
   //const navigate = useNavigate();
 
-  const apiBaseUrl = 'http://localhost:8085/api/admin/ingredients';
+  const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
 
   // paging
   const page = Number(searchParams.get('page')) || 1;
@@ -45,7 +46,7 @@ const IngredientList = () => {
       };
 
       try {
-        const result = await axios.get(apiBaseUrl, { params });
+        const result = await axios.get(`${apiBaseUrl}/ingredients`, { params });
 
         setIngredients(result.data.list || []);
         setRowTotal(result.data.total || 0);
@@ -55,7 +56,7 @@ const IngredientList = () => {
     };
 
     loadData();
-  }, [page, pageGap, ingName, ingAllergen]);
+  }, [page, pageGap, ingName, ingAllergen, apiBaseUrl]);
 
   return (
     <div className="container-fluid">

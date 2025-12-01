@@ -28,7 +28,7 @@ function Sidebar() {
   };
 
   return (
-    <div className="sidebar bg-dark text-white vh-100 pt-3 text-center" style={{ width: '250px' }}>
+    <div className="sidebar bg-dark text-white vh-100 pt-3 text-center" style={{ width: '250px', minWidth: '180px' }}>
       <h5 className="mb-4">관리자 페이지</h5>
 
       <div className="menu-group pl-3">
