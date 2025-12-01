@@ -9,14 +9,15 @@ const RecentViewedRecommend = () => {
   const [products, setProducts] = useState([]);
   const [recentCate, setRecentCate] = useState(null);
 
-  // 로그인 여부 체크
+  // 로그인 여부
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
-  // 최근 본 카테고리 + API 호출
-  useEffect(() => {
-    if (!isLoggedIn) return; // 로그인 안되어있으면 실행 중단
+  // 최근 본 상품
+  const viewed = JSON.parse(localStorage.getItem('recentViewed') || '[]');
 
-    const viewed = JSON.parse(localStorage.getItem('recentViewed') || '[]');
+  // useEffect는 항상 컴포넌트 최상단에서 호출되어야 함
+  useEffect(() => {
+    if (!isLoggedIn) return;
     if (viewed.length === 0) return;
 
     const recentItem = viewed[0];
@@ -41,24 +42,28 @@ const RecentViewedRecommend = () => {
           reviewText: `${p.reviewCount || 0}개의 리뷰`,
           img: `/images/${p.prdImg}`,
         }));
-
         setProducts(list);
       })
       .catch(err => console.error('추천 상품 불러오기 실패:', err));
-  }, [isLoggedIn]);
+  }, [isLoggedIn, viewed]);
 
-  // 로그인 안 되어 있으면 렌더 자체를 숨김
+  // 렌더링 조건은 useEffect 아래에 있어야 ESLint가 불만 없음
   if (!isLoggedIn) return null;
+  if (viewed.length === 0) return null;
 
-  // 카드 4개 맞춰서 채우기
+  // 카드 채우기
   const filledProducts = [...products, ...Array(4 - products.length).fill(null)].slice(0, 4);
 
   return (
     <div className="container my-5">
       <div className="mb-3" style={{ textAlign: 'left' }}>
-        <h4 className="fw-bold mb-1">{recentCate ? `이러한 “${recentCate}” 상품은 어떠세요?` : '당신을 위한 추천'}</h4>
+        <h4 className="fw-bold mb-1">
+          {recentCate ? `이러한 “${recentCate}” 상품은 어떠세요?` : '당신을 위한 추천'}
+        </h4>
         <p className="text-muted small mb-0">
-          {recentCate ? `최근에 본 ${recentCate} 제품을 기반으로 추천드려요` : '최근 본 제품을 기반으로 추천드려요'}
+          {recentCate
+            ? `최근에 본 ${recentCate} 제품을 기반으로 추천드려요`
+            : '최근 본 제품을 기반으로 추천드려요'}
         </p>
       </div>
 

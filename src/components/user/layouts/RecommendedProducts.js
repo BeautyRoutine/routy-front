@@ -33,7 +33,7 @@ const RecommendedProducts = () => {
       {/* 타이틀 영역 */}
       <div className="mb-3" style={{ textAlign: 'left' }}>
         <h4 className="fw-bold mb-1">당신을 위한 추천</h4>
-        <p className="text-muted small mb-0">최근 본 제품을 기반으로 추천드려요</p>
+        <p className="text-muted small mb-0">인기 있는 핫 꿀탬</p>
       </div>
 
       {/* 추천 상품 카드 */}
