@@ -1,8 +1,9 @@
 import axios from "axios";
 
 // API 기본 설정
-const apiBaseURL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+// 개발 환경(proxy 사용)에서는 상대 경로를 사용해야 CORS 문제를 우회할 수 있습니다.
+// 배포 시에는 환경 변수로 설정된 URL을 사용하거나, 같은 도메인이라면 빈 문자열을 사용합니다.
+const apiBaseURL = process.env.REACT_APP_API_BASE_URL || "";
 
 const api = axios.create({
   baseURL: apiBaseURL,
