@@ -4,7 +4,11 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectItem, clearSelectedItem } from 'features/orders/admOrdersSlice';
 
+import { getDeliveryKeyText } from 'components/common/orderUtils';
+
 import LoadingSpinner from 'components/common/LoadingSpinner';
+import OrderPrdTable from './OrderPrdTable';
+import OrderDelvTable from './OrderDelvTable';
 
 const OrderDetail = () => {
   const navigate = useNavigate();
@@ -19,11 +23,6 @@ const OrderDetail = () => {
 
   const handleBack = () => {
     navigate(-1);
-  };
-  const getDeliveryKeyText = () => {
-    if (selectedItem.ODDELVKEYTYPE === 2) return '자유출입가능';
-    if (selectedItem.ODDELVKEYTYPE === 1 && selectedItem.ODDELVKEY === null) return '없음';
-    return `공동현관번호: ${selectedItem.ODDELVKEY}`;
   };
 
   useEffect(() => {
@@ -75,10 +74,11 @@ const OrderDetail = () => {
             <tr>
               <th className="bg-light">상품가격 / 택배비</th>
               <td>
-                {selectedItem.ODPRDPRICE} 원 / {selectedItem.ODDELVPRICE} 원
+                {Number(selectedItem.ODPRDPRICE).toLocaleString()} 원 /{' '}
+                {Number(selectedItem.ODDELVPRICE).toLocaleString()} 원
               </td>
               <th className="bg-light">총 결제금액</th>
-              <td>{selectedItem.ODPRDPRICE + selectedItem.ODDELVPRICE} 원</td>
+              <td>{Number(selectedItem.ODPRDPRICE + selectedItem.ODDELVPRICE).toLocaleString()} 원</td>
             </tr>
             <tr>
               <th className="bg-light">결제자 성명(ID) / 닉네임</th>
@@ -92,6 +92,9 @@ const OrderDetail = () => {
             </tr>
           </tbody>
         </table>
+
+        <OrderPrdTable odInfo={selectedItem} apiBaseUrl={apiBaseUrl} />
+
         <h5 className="fw-bold border-bottom pb-2 mb-3 text-primary">배송 정보</h5>
         <table className="table table-hover table-bordered align-middle">
           <colgroup>
@@ -125,15 +128,17 @@ const OrderDetail = () => {
             </tr>
             <tr>
               <th className="bg-light">택배 출입방법</th>
-              <td>{getDeliveryKeyText()}</td>
+              <td>{getDeliveryKeyText(selectedItem.ODDELVKEYTYPE, selectedItem.ODDELVKEY)}</td>
               <th className="bg-light">택배 요청사항</th>
               <td>{selectedItem.ODDELVMSG}</td>
             </tr>
           </tbody>
         </table>
+
+        <OrderDelvTable odInfo={selectedItem} apiBaseUrl={apiBaseUrl} />
       </fieldset>
-      <div className="text-center mt-4">
-        <button className="btn btn-outline-secondary px-4" onClick={handleBack}>
+      <div className="text-center mt-3 mb-5">
+        <button className="btn btn-outline-secondary px-3" onClick={handleBack}>
           ← 돌아가기
         </button>
       </div>

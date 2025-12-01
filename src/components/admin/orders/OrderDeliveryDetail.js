@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectItem, clearSelectedItem } from 'features/orders/admDeliveriesSlice';
 
 import LoadingSpinner from 'components/common/LoadingSpinner';
+import { getTypeText, getStatusText } from 'components/common/orderUtils';
 
 const OrderDeliveryListDetail = () => {
   const navigate = useNavigate();
@@ -19,24 +20,6 @@ const OrderDeliveryListDetail = () => {
 
   const handleBack = () => {
     navigate(-1);
-  };
-  const getTypeText = value => {
-    if (value === 11) return '배송';
-    if (value === 12) return '재배송';
-    if (value === 13) return '취소';
-    if (value === 21) return '교환회수';
-    if (value === 22) return '교환재발송';
-    if (value === 31) return '반품회수';
-    return '';
-  };
-  const getStatusText = value => {
-    if (value === 1) return '배송준비중';
-    if (value === 2) return '집화완료';
-    if (value === 3) return '배송중';
-    if (value === 4) return '지점 도착';
-    if (value === 5) return '배송출발';
-    if (value === 6) return '배송 완료';
-    return '';
   };
 
   useEffect(() => {
@@ -151,8 +134,8 @@ const OrderDeliveryListDetail = () => {
           </tbody>
         </table>
       </fieldset>
-      <div className="text-center mt-4">
-        <button className="btn btn-outline-secondary px-4" onClick={handleBack}>
+      <div className="text-center mt-3 mb-5">
+        <button className="btn btn-outline-secondary px-3" onClick={handleBack}>
           ← 돌아가기
         </button>
       </div>
