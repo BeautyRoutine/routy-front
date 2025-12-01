@@ -9,10 +9,11 @@ import PasswordChange from '../components/user/mypage/PasswordChange';
 import OrderHistory from '../components/user/mypage/OrderHistory';
 import ClaimHistory from '../components/user/mypage/ClaimHistory';
 import LikeList from '../components/user/mypage/LikeList';
+import RecentViewedProducts from '../components/user/mypage/RecentViewedProducts';
 import IngredientManagement from '../components/user/mypage/IngredientManagement';
 import IngredientAddModal from '../components/user/mypage/IngredientAddModal';
 import MyReviewList from '../components/user/mypage/MyReviewList';
-import { fetchMyPageData, updateUserProfile } from '../features/user/userSlice';
+import { fetchMyPageData, updateUserProfile, addIngredient } from '../features/user/userSlice';
 import '../styles/MyPage.css';
 import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConstants';
 import { DEMO_ORDERS, DEMO_LIKES, DEMO_CLAIMS } from '../components/user/data/mypageMocks';
@@ -27,7 +28,7 @@ import { DEMO_ORDERS, DEMO_LIKES, DEMO_CLAIMS } from '../components/user/data/my
 const buildNavSections = user => [
   {
     title: '마이 쇼핑',
-    items: ['주문/배송 조회', '취소·반품/교환 내역', '좋아요'],
+    items: ['주문/배송 조회', '취소·반품/교환 내역', '최근 본 상품', '좋아요'],
   },
   {
     title: '마이 활동',
@@ -104,6 +105,8 @@ const MyPage = () => {
       setViewMode('order-history');
     } else if (item === '취소·반품/교환 내역') {
       setViewMode('claim-history');
+    } else if (item === '최근 본 상품') {
+      setViewMode('recent-views');
     } else if (item === '좋아요') {
       setViewMode('like-list');
     } else if (item === '성분 관리') {
@@ -133,6 +136,8 @@ const MyPage = () => {
         return <OrderHistory orders={DEMO_ORDERS} />;
       case 'claim-history':
         return <ClaimHistory claims={DEMO_CLAIMS} />;
+      case 'recent-views':
+        return <RecentViewedProducts />;
       case 'like-list':
         return <LikeList likes={likes} />;
       case 'ingredient-management':
@@ -528,8 +533,13 @@ const MyPage = () => {
         isOpen={isIngredientAddModalOpen}
         onClose={() => setIsIngredientAddModalOpen(false)}
         onAdd={(ingredient, listType) => {
-          console.log('Added:', ingredient, 'to', listType);
-          // TODO: Dispatch action to add ingredient
+          // 성분 추가 API 호출
+          dispatch(
+            addIngredient({
+              ingredientId: ingredient.id,
+              type: listType, // 'FOCUS' | 'AVOID'
+            }),
+          );
         }}
       />
     </div>
