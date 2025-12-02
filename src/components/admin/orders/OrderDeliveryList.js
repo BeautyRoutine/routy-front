@@ -4,7 +4,8 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setItems, setItemsCount } from 'features/orders/admDeliveriesSlice';
 
-import LoadingSpinner from 'components/common/LoadingSpinner';
+import { RenderingStateHandler } from 'components/common/commonUtils';
+
 import ListItem from './OrderDeliveryListItem';
 
 const paramKeys = {
@@ -78,17 +79,13 @@ const OrderDeliveryList = () => {
         delv_e_end_day: endEndDate,
       };
 
-      // console.log(`${apiBaseUrl}/orders/delivery/list`);
-      // console.log(params);
       setLoading(true);
       setError('');
       try {
         const result = await axios.get(`${apiBaseUrl}/orders/delivery/list`, { params });
-        // console.log(result);
         dispatch(setItems(result.data.data.list));
         dispatch(setItemsCount(result.data.data.total));
       } catch (err) {
-        console.error('택배목록 불러오기 실패: ', err);
         setError('❌ 목록 불러오기 실패');
         dispatch(setItems([]));
         dispatch(setItemsCount(0));
@@ -211,7 +208,7 @@ const OrderDeliveryList = () => {
             {loading ? (
               <tr>
                 <td colSpan="7" className="text-center py-5">
-                  <LoadingSpinner />
+                  <RenderingStateHandler loading={loading} error={error} data={items.length > 0 ? items : null} />
                 </td>
               </tr>
             ) : error ? (
