@@ -81,4 +81,20 @@ export const requestPhoneVerify = payload => api.post('/api/auth/phone/request',
  */
 export const confirmPhoneVerify = payload => api.post('/api/auth/phone/confirm', payload).then(res => res.data);
 
+// -------------------------
+// 성분 관련 API
+// -------------------------
+
+// 성분 검색
+export const searchIngredients = keyword => api.get('/api/ingredients', { params: { keyword } });
+
+// -------------------------
+// 카카오 로그인 URL (단순 문자열)
+// -------------------------
+export function getKakaoUrl() {
+  const base = api.defaults.baseURL.replace(/\/+$/, ''); // 끝 / 제거
+  // 백엔드의 /auth/kakao/login 으로 보내면, 거기서 카카오로 redirect 해줌
+  return `${base}/auth/kakao/login`;
+}
+
 export default api;
