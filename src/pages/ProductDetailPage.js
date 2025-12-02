@@ -56,7 +56,7 @@ const ProductDetailPage = () => {
       //상품번호가 있을때만 서버요청
       fetchData();
     }
-  }, [prdNo]);
+  }, [prdNo, apiBaseUrl]);
 
   // 로딩 중일 때 화면 돌아가기
   if (loading) {
