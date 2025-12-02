@@ -15,10 +15,14 @@ const SimilarSkinProducts = ({ userSkin }) => {
     if (!isLoggedIn) return;
     if (!userSkin) return;
 
-    Promise.all(prdNos.map(no => axios.get(`http://localhost:8080/api/products/${no}`)))
-      .then(responses => {
-        const converted = responses.map((res, index) => {
-          const p = res.data.data;
+    const loadRecommend = async () => {
+      try {
+        const res = await axios.get('http://localhost:8080/api/products/list/skin_type', {
+          params: {
+            limit: 4,
+            skin: Number(userSkin), // ★ 피부타입은 숫자 (1, 2)
+          },
+        });
 
         const list = res.data.data || [];
 
@@ -31,9 +35,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
           discount: null,
           price: p.prdPrice,
           original: null,
-          img: p.prdImg
-            ? `/images/${p.prdImg}`
-            : `/images/product${index + 1}.jpg`,
+          img: p.prdImg ? `/images/${p.prdImg}` : `/images/product${index + 1}.jpg`,
         }));
 
         setProducts(converted);
@@ -49,20 +51,12 @@ const SimilarSkinProducts = ({ userSkin }) => {
     return (
       <div className="container my-5 text-center similar-skin-section">
         <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
-        <p className="text-muted small mb-4">
-          로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
-        </p>
+        <p className="text-muted small mb-4">로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!</p>
 
-        <button
-          className="btn btn-primary rounded-pill px-4 me-2"
-          onClick={() => navigate('/login')}
-        >
+        <button className="btn btn-primary rounded-pill px-4 me-2" onClick={() => navigate('/login')}>
           로그인
         </button>
-        <button
-          className="btn btn-outline-primary rounded-pill px-4"
-          onClick={() => navigate('/signup')}
-        >
+        <button className="btn btn-outline-primary rounded-pill px-4" onClick={() => navigate('/signup')}>
           회원가입
         </button>
       </div>
@@ -73,9 +67,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-      <h5 className="fw-bold text-primary mb-1">
-        비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!
-      </h5>
+      <h5 className="fw-bold text-primary mb-1">비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!</h5>
       <p className="text-muted small mb-4">
         {userSkin === '1' ? '지성' : userSkin === '2' ? '건성' : '피부 타입'} 사용자들의 인기 상품
       </p>
@@ -89,19 +81,12 @@ const SimilarSkinProducts = ({ userSkin }) => {
               onClick={() => navigate(`/products/${p.id}`)}
             >
               {p.discount && (
-                <span className="badge bg-danger position-absolute top-0 start-0 m-2">
-                  {p.discount} OFF
-                </span>
+                <span className="badge bg-danger position-absolute top-0 start-0 m-2">{p.discount} OFF</span>
               )}
 
               <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
 
-              <img
-                src={p.img}
-                className="card-img-top"
-                alt={p.name}
-                style={{ borderRadius: '10px' }}
-              />
+              <img src={p.img} className="card-img-top" alt={p.name} style={{ borderRadius: '10px' }} />
 
               <div className="card-body text-start">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
@@ -117,9 +102,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
                 <p className="small mb-2">⭐ {p.rating}</p>
 
-                <h6 className="fw-bold text-dark">
-                  {p.price.toLocaleString()}원
-                </h6>
+                <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
 
                 <button
                   className="btn cart-btn w-100 mt-2"
