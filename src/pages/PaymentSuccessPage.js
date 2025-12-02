@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
-export function PaymentSuccessPage() {
+function PaymentSuccessPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isConfirming, setIsConfirming] = useState(true);
@@ -68,8 +68,8 @@ export function PaymentSuccessPage() {
           <h1 style={{ color: 'blue' }}>🎉 결제 성공!</h1>
           <p>{result.message}</p>
           <div className="receipt">
-             <p>주문번호: {orderId}</p>
-             <p>결제금액: {Number(amount).toLocaleString()}원</p>
+            <p>주문번호: {orderId}</p>
+            <p>결제금액: {Number(amount).toLocaleString()}원</p>
           </div>
           <button onClick={() => navigate('/')}>홈으로 돌아가기</button>
         </>
@@ -83,3 +83,5 @@ export function PaymentSuccessPage() {
     </div>
   );
 }
+
+export default PaymentSuccessPage;

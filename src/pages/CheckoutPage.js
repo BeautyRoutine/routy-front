@@ -7,7 +7,7 @@ import './CheckoutPage.css';
 // Toss Payments 클라이언트 키 (환경 변수에서 로드)
 const CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY || 'test_ck_ZLKGPx4M3MP7W9RlGR678BaWypv1';
 
-export function CheckoutPage() {
+function CheckoutPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [tossPayments, setTossPayments] = useState(null);
@@ -68,10 +68,10 @@ export function CheckoutPage() {
         totalAmount: amount,
         orderName: orderName,
         items: orderItems.map(item => ({
-            productNo: item.prdNo,   
-            quantity: item.quantity,
-            price: item.price
-        }))
+          productNo: item.prdNo,
+          quantity: item.quantity,
+          price: item.price,
+        })),
       };
 
       // 백엔드에 주문 저장 요청
@@ -94,14 +94,13 @@ export function CheckoutPage() {
       // 오라클 시퀀스 번호(숫자)를 문자열로 변환해서 전달해야 함
       await tossPayments.requestPayment('카드', {
         amount,
-        orderId: String(realOrderId), 
+        orderId: String(realOrderId),
         orderName,
         customerName: '테스트', // 필요시 로그인 정보 사용
         customerEmail: 'test@example.com',
         successUrl: `${window.location.origin}/routy-front#/payment/success`,
         failUrl: `${window.location.origin}/routy-front#/payment/fail`,
       });
-
     } catch (error) {
       setIsLoading(false);
 
@@ -151,3 +150,5 @@ export function CheckoutPage() {
     </div>
   );
 }
+
+export default CheckoutPage;

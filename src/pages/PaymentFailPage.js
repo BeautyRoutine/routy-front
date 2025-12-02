@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
-export function PaymentFailPage() {
+function PaymentFailPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -70,3 +70,5 @@ export function PaymentFailPage() {
     </div>
   );
 }
+
+export default PaymentFailPage;
