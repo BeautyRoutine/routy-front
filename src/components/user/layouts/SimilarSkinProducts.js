@@ -4,11 +4,13 @@ import './SimilarSkinProducts.css';
 import { Heart } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
+  const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl);
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
   useEffect(() => {
@@ -17,7 +19,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
     const loadRecommend = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/api/products/list/skin_type', {
+        const res = await axios.get(`${apiBaseUrl}/products/list/skin_type`, {
           params: {
             limit: 4,
             skin: Number(userSkin), // ★ 피부타입은 숫자 (1, 2)
@@ -45,7 +47,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
     };
 
     loadRecommend();
-  }, [isLoggedIn, userSkin]);
+  }, [isLoggedIn, userSkin, apiBaseUrl]);
 
   if (!isLoggedIn) {
     return (
