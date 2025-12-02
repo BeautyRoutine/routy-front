@@ -9,51 +9,83 @@ const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
+  const isLoggedIn = !!localStorage.getItem('accessToken');
+
   useEffect(() => {
-    // 임시 더미 상품 → 필요하면 API로 변경 가능
-    const prdNos = [101, 102, 103, 104];
+    if (!isLoggedIn) return;
+    if (!userSkin) return;
 
-    Promise.all(prdNos.map(no => axios.get(`http://localhost:8080/api/products/${no}`)))
-      .then(responses => {
-        const converted = responses.map((res, index) => {
-          const p = res.data;
+    const loadRecommend = async () => {
+      try {
+        const res = await axios.get(
+          'http://localhost:8080/api/products/list/skin_type',
+          {
+            params: {
+              limit: 4,
+              skin: Number(userSkin)   // ★ 피부타입은 숫자 (1, 2)
+            }
+          }
+        );
 
-          return {
-            id: p.prdNo,
-            name: p.prdName,
-            brand: p.prdCompany,
-            rating: 4.7,
-            tags: ['추천', '피부'],
-            discount: null,
-            price: p.prdPrice,
-            original: null,
-            img: `/images/product${index + 1}.jpg`,
-          };
-        });
+        const list = res.data.data || [];
+
+        const converted = list.map((p, index) => ({
+          id: p.prdNo,
+          name: p.prdName,
+          brand: p.prdCompany,
+          rating: 4.7,
+          tags: ['추천', '피부'],
+          discount: null,
+          price: p.prdPrice,
+          original: null,
+          img: p.prdImg
+            ? `/images/${p.prdImg}`
+            : `/images/product${index + 1}.jpg`,
+        }));
 
         setProducts(converted);
-      })
-      .catch(err => console.error(err));
-  }, []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  // 상품 상세로 이동
-  const goDetail = prdNo => {
-    navigate(`/products/${prdNo}`);
-  };
+    loadRecommend();
+  }, [isLoggedIn, userSkin]);
 
-  // 버튼 클릭 시 이동
-  const handleMoreClick = () => {
-    if (userSkin) {
-      navigate(`/products?limit=20&skin=${userSkin}`);
-    } else {
-      navigate(`/products?limit=20`);
-    }
-  };
+  if (!isLoggedIn) {
+    return (
+      <div className="container my-5 text-center similar-skin-section">
+        <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
+        <p className="text-muted small mb-4">
+          로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
+        </p>
+
+        <button
+          className="btn btn-primary rounded-pill px-4 me-2"
+          onClick={() => navigate('/login')}
+        >
+          로그인
+        </button>
+        <button
+          className="btn btn-outline-primary rounded-pill px-4"
+          onClick={() => navigate('/signup')}
+        >
+          회원가입
+        </button>
+      </div>
+    );
+  }
+
+  if (products.length === 0) return null;
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-      <h5 className="fw-bold text-primary mb-1">비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!</h5>
-      <p className="text-muted small mb-4">건성·민감성 피부 사용자 12,440명이 선택</p>
+      <h5 className="fw-bold text-primary mb-1">
+        비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!
+      </h5>
+      <p className="text-muted small mb-4">
+        {userSkin === '1' ? '지성' : userSkin === '2' ? '건성' : '피부 타입'} 사용자들의 인기 상품
+      </p>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
         {products.map(p => (
@@ -61,15 +93,22 @@ const SimilarSkinProducts = ({ userSkin }) => {
             <div
               className="card h-100 border-0 shadow-sm product-card position-relative"
               style={{ cursor: 'pointer' }}
-              onClick={() => goDetail(p.id)} // 카드 클릭 → 상세 페이지 이동
+              onClick={() => navigate(`/products/${p.id}`)}
             >
               {p.discount && (
-                <span className="badge bg-danger position-absolute top-0 start-0 m-2">{p.discount} OFF</span>
+                <span className="badge bg-danger position-absolute top-0 start-0 m-2">
+                  {p.discount} OFF
+                </span>
               )}
 
               <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
 
-              <img src={p.img} className="card-img-top" alt={p.name} style={{ borderRadius: '10px' }} />
+              <img
+                src={p.img}
+                className="card-img-top"
+                alt={p.name}
+                style={{ borderRadius: '10px' }}
+              />
 
               <div className="card-body text-start">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
@@ -85,13 +124,14 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
                 <p className="small mb-2">⭐ {p.rating}</p>
 
-                <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
+                <h6 className="fw-bold text-dark">
+                  {p.price.toLocaleString()}원
+                </h6>
 
-                {/* 장바구니 버튼: 카드 클릭 이벤트 막기 */}
                 <button
                   className="btn cart-btn w-100 mt-2"
                   onClick={e => {
-                    e.stopPropagation(); // 카드 클릭과 분리
+                    e.stopPropagation();
                     alert('장바구니에 추가되었습니다.');
                   }}
                 >
@@ -103,9 +143,11 @@ const SimilarSkinProducts = ({ userSkin }) => {
         ))}
       </div>
 
-      {/* 추천 상품 더보기 버튼 */}
       <div className="mt-4">
-        <button className="btn btn-outline-primary rounded-pill px-4" onClick={handleMoreClick}>
+        <button
+          className="btn btn-outline-primary rounded-pill px-4"
+          onClick={() => navigate(`/products?limit=20&skin=${userSkin}`)}
+        >
           더 많은 추천 상품 보기
         </button>
       </div>

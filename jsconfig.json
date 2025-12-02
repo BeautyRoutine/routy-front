@@ -3,6 +3,6 @@
     "baseUrl": "src",
     "checkJs": false
   },
-  "include": ["src"],
+  "include": ["src", "src/components/user/layouts/RecentViewedRecommend.js"],
   "exclude": ["node_modules"]
 }

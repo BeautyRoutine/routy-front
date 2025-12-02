@@ -1,0 +1,85 @@
+import React, { useState, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './PopularProducts.css';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const PopularProducts = () => {
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const userNo = localStorage.getItem('userNo'); // 로그인 여부 확인
+    const params = { limit: 4 };
+
+    if (userNo) params.user_no = userNo;
+
+    axios
+      .get('http://localhost:8080/api/products/list/skin_cate', { params })
+      .then(res => {
+        const list = res.data.data || [];
+
+        const converted = list.map(p => ({
+          id: p.prdNo,
+          name: p.prdName,
+          brand: p.prdCompany,
+          rating: p.avgRating || 4.5, // 백엔드에 별점 없으면 기본값
+          reviewText: p.reviewCount ? `${p.reviewCount}개의 리뷰` : '',
+          img: p.prdImg ? `/images/${p.prdImg}` : '/images/no-img.png',
+        }));
+
+        setProducts(converted);
+      })
+      .catch(err => console.error('추천 상품 불러오기 실패:', err));
+  }, []);
+
+  const filledProducts = [...products, ...Array(4 - products.length).fill(null)].slice(0, 4);
+
+  return (
+    <div className="container my-5">
+      <div className="mb-3" style={{ textAlign: 'left' }}>
+        <h4 className="fw-bold mb-1">당신을 위한 추천</h4>
+        <p className="text-muted small mb-0">
+          {localStorage.getItem('userNo')
+            ? '당신의 피부타입과 행동을 기반으로 추천해드려요'
+            : '인기 순위 기반으로 추천해드려요'}
+        </p>
+      </div>
+
+      <div className="row row-cols-1 row-cols-md-4 g-4">
+        {filledProducts.map((p, index) => (
+          <div key={index} className="col">
+            <div
+              className="card h-100 border-0 shadow-sm product-card"
+              style={{ cursor: p ? 'pointer' : 'default' }}
+              onClick={() => p && navigate(`/products/${p.id}`)}
+            >
+              {p ? (
+                <>
+                  <img src={p.img} className="card-img-top" alt={p.name} />
+                  <div className="card-body">
+                    <h6 className="fw-semibold mb-1">{p.name}</h6>
+                    <p className="text-muted small mb-1">{p.brand}</p>
+                    <p className="text-warning small mb-0">
+                      ★ {p.rating} <span className="text-muted"> {p.reviewText}</span>
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="empty-card-img"></div>
+                  <div className="card-body">
+                    <h6 className="fw-semibold mb-1 text-muted">상품 없음</h6>
+                    <p className="text-muted small mb-0">추천 준비중</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default PopularProducts;
