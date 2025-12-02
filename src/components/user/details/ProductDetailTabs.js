@@ -127,6 +127,10 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
         {/* 리뷰*/}
         <Tab eventKey="review" title={`리뷰 (${reviewInfo.summary.totalCount})`}>
           <div className="tab-content-area">
+            <div className="d-flex justify-content-end mb-3">
+              {/* (임시) 버튼 UI */}
+              <Button variant="primary">리뷰 작성하기</Button>
+            </div>
             <ReviewList reviewInfo={reviewInfo} />
           </div>
         </Tab>
