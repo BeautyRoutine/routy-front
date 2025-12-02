@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setItems, setItemsCount } from 'features/orders/admDeliveriesSlice';
@@ -19,6 +19,7 @@ const paramKeys = {
 
 const OrderDeliveryList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -181,7 +182,10 @@ const OrderDeliveryList = () => {
 
       {/* 테이블 */}
       <div className="table-responsive">
-        <div className="d-flex justify-content-end mb-2">
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <button className="btn btn-success" onClick={() => navigate('/admin/order/delivery/add')}>
+            <i class="bi bi-plus-square" /> 택배 추가
+          </button>
           <span className="text-muted">총 {rowTotal}건</span>
         </div>
         <table className="table table-bordered table-hover align-middle text-center shadow-sm rounded">

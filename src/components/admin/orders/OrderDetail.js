@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectItem, clearSelectedItem } from 'features/orders/admOrdersSlice';
@@ -12,6 +12,7 @@ import OrderDelvTable from './OrderDelvTable';
 
 const OrderDetail = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const apiBaseUrl = useSelector(state => state.admConfig.apiBaseUrl);
@@ -92,7 +93,15 @@ const OrderDetail = () => {
 
             <OrderPrdTable odInfo={selectedItem} apiBaseUrl={apiBaseUrl} />
 
-            <h5 className="fw-bold border-bottom pb-2 mb-3 text-primary">배송 정보</h5>
+            <h5 className="d-flex justify-content-between align-items-center fw-bold border-bottom text-primary pb-2 mb-3">
+              배송 정보
+              <button
+                className="btn btn-sm btn-success"
+                onClick={() => navigate(`/admin/order/delivery/add?od_no=${selectedItem.ODNO}`)}
+              >
+                <i class="bi bi-plus-square" /> 택배 추가
+              </button>
+            </h5>
             <table className="table table-hover table-bordered align-middle">
               <colgroup>
                 <col style={{ width: '20%' }} />
