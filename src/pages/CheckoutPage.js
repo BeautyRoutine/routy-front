@@ -59,20 +59,49 @@ export function CheckoutPage() {
     setIsLoading(true);
 
     try {
-      // 주문번호 생성 (실제로는 백엔드에서 생성해야 함)
-      const orderId = `ORDER_${Date.now()}`;
+      // 주문명 생성
       const orderName =
         orderItems.length > 1 ? `${orderItems[0].name} 외 ${orderItems.length - 1}건` : orderItems[0].name;
 
+      // 백엔드 DTO 규격에 맞춰 데이터 변환
+      const orderData = {
+        totalAmount: amount,
+        orderName: orderName,
+        items: orderItems.map(item => ({
+            productNo: item.prdNo,   
+            quantity: item.quantity,
+            price: item.price
+        }))
+      };
+
+      // 백엔드에 주문 저장 요청
+      const response = await fetch('/api/payments/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        throw new Error('주문 생성(저장)에 실패했습니다.');
+      }
+
+      // 백엔드가 생성해준 진짜 주문번호(DB PK) 받기
+      const realOrderId = await response.json();
+
+      console.log('생성된 주문번호:', realOrderId);
+
+      // 토스 결제창 띄우기
+      // 오라클 시퀀스 번호(숫자)를 문자열로 변환해서 전달해야 함
       await tossPayments.requestPayment('카드', {
         amount,
-        orderId,
+        orderId: String(realOrderId), 
         orderName,
-        customerName: '테스트',
+        customerName: '테스트', // 필요시 로그인 정보 사용
         customerEmail: 'test@example.com',
         successUrl: `${window.location.origin}/routy-front#/payment/success`,
         failUrl: `${window.location.origin}/routy-front#/payment/fail`,
       });
+
     } catch (error) {
       setIsLoading(false);
 
