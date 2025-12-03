@@ -229,7 +229,7 @@ export const updateUserProfile = createAsyncThunk(
         profileImageUrl: data.profileImageUrl,
       };
 
-      const response = await api.put(getEndpoints(userNo).profile, payload);
+      const response = await api.put(getEndpoints(userId).profile, payload);
 
       // 응답 받은 후 Redux 상태 업데이트를 위해 리턴
       return response.data || data;
@@ -243,13 +243,13 @@ export const updateUserProfile = createAsyncThunk(
  * Async Thunk: 비밀번호 변경
  *
  * 현재 비밀번호와 새 비밀번호를 받아 서버에 변경 요청을 보냅니다.
- * @param {Object} payload - { userNo, currentPassword, newPassword }
+ * @param {Object} payload - { userId, currentPassword, newPassword }
  */
 export const changePassword = createAsyncThunk(
   'user/changePassword',
   async ({ userId, currentPassword, newPassword }, { rejectWithValue }) => {
     try {
-      const response = await api.put(getEndpoints(userNo).password, { currentPassword, newPassword });
+      const response = await api.put(getEndpoints(userId).password, { currentPassword, newPassword });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || '비밀번호 변경에 실패했습니다.');
@@ -260,13 +260,13 @@ export const changePassword = createAsyncThunk(
 /**
  * Async Thunk: 성분 추가 (선호/기피)
  *
- * @param {Object} payload - { userNo, ingredientId, type: 'FOCUS' | 'AVOID' }
+ * @param {Object} payload - { userId, ingredientId, type: 'FOCUS' | 'AVOID' }
  */
 export const addIngredient = createAsyncThunk(
   'user/addIngredient',
   async ({ userId, ingredientId, type }, { rejectWithValue }) => {
     try {
-      await api.post(getEndpoints(userNo).ingredients, { ingredientId, type });
+      await api.post(getEndpoints(userId).ingredients, { ingredientId, type });
       // 성공 시 최신 목록 다시 조회
       const response = await api.get(getEndpoints(userId).ingredients);
       const rawData = response.data || {};
@@ -281,14 +281,14 @@ export const addIngredient = createAsyncThunk(
 /**
  * Async Thunk: 성분 삭제
  *
- * @param {Object} payload - { userNo, ingredientId, type }
+ * @param {Object} payload - { userId, ingredientId, type }
  */
 export const removeIngredient = createAsyncThunk(
   'user/removeIngredient',
   async ({ userId, ingredientId, type }, { rejectWithValue }) => {
     try {
-      // DELETE /api/users/{userNo}/ingredients/{ingredientId}
-      await api.delete(`${getEndpoints(userNo).ingredients}/${ingredientId}`, { params: { type } });
+      // DELETE /api/users/{userId}/ingredients/{ingredientId}
+      await api.delete(`${getEndpoints(userId).ingredients}/${ingredientId}`, { params: { type } });
       // 성공 시 최신 목록 다시 조회
       const response = await api.get(getEndpoints(userId).ingredients);
       const rawData = response.data || {};
