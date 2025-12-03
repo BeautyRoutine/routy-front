@@ -99,7 +99,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/mypage" element={<MyPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/products/:prdNo" element={<ProductDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
           <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
