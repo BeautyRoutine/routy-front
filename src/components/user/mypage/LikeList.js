@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { DEMO_LIKES } from '../data/mypageMocks';
 import './LikeList.css';
 
-const LikeList = ({ likes = DEMO_LIKES }) => {
+const LikeList = ({ likes = { products: [], brands: [] } }) => {
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'brands'
 
   const items = activeTab === 'products' ? likes.products || [] : likes.brands || [];

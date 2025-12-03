@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { DEMO_CLAIMS } from '../data/mypageMocks';
 import './ClaimHistory.css';
 
-const ClaimHistory = ({ claims = DEMO_CLAIMS }) => {
+const ClaimHistory = ({ claims = [] }) => {
   const [period, setPeriod] = useState('3months');
 
   const filteredClaims = claims;

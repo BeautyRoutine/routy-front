@@ -10,7 +10,7 @@ export const DEMO_USER_PROFILE = {
   reviews: 12,
   orders: 8,
   favorites: 24,
-  skinConcerns: ['수분 부족', '유효 케어', '탄력 개선', '미백'],
+  // skinConcerns: ['수분 부족', '유효 케어', '탄력 개선', '미백'], // 삭제
 };
 
 export const DEMO_ORDER_STEPS = [
