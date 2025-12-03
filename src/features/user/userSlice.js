@@ -388,6 +388,28 @@ export const removeLike = createAsyncThunk(
 );
 
 /**
+ * Async Thunk: 최근 본 상품 저장
+ *
+ * @param {Object} payload - { userId, prdNo, prdSubCate }
+ */
+export const saveRecentProduct = createAsyncThunk(
+  'user/saveRecentProduct',
+  async ({ userId, prdNo, prdSubCate }, { rejectWithValue }) => {
+    try {
+      // POST /api/users/{userId}/recent-products?prdNo=...&prdSubCate=...
+      await api.post(getEndpoints(userId).recentProducts, null, {
+        params: { prdNo, prdSubCate },
+      });
+      return { prdNo };
+    } catch (error) {
+      // 최근 본 상품 저장은 실패해도 사용자에게 알릴 필요가 크지 않으므로 콘솔만 찍음
+      console.error('최근 본 상품 저장 실패:', error);
+      return rejectWithValue(error.response?.data || '최근 본 상품 저장 실패');
+    }
+  },
+);
+
+/**
  * Async Thunk: 클레임 신청
  */
 export const createClaim = createAsyncThunk('user/createClaim', async ({ userId, data }, { rejectWithValue }) => {
