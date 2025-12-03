@@ -11,15 +11,19 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
-  // ★ 공통 카드 변환 함수
   const convertToCard = (list) =>
     list.map((p, index) => ({
       id: p.prdNo,
       name: p.prdName,
       brand: p.prdCompany,
-      rating: p.avgRating ?? 4.0,     // ★ 여기만 중요!!!
+
+      // ★ avgRating이 null / undefined 이면 4.0으로 강제, 숫자 변환
+      rating: Number(p.avgRating ?? 4.0),
+
       price: p.prdPrice,
-      img: p.prdImg ? `/images/${p.prdImg}` : `/images/product${index + 1}.jpg`,
+      img: p.prdImg
+        ? `/images/${p.prdImg}`
+        : `/images/product${index + 1}.jpg`,
     }));
 
   useEffect(() => {
@@ -39,7 +43,6 @@ const SimilarSkinProducts = ({ userSkin }) => {
       setProducts(convertToCard(res.data.data || []));
     };
 
-    // fallback / skinType 체크
     if (!isLoggedIn || !userSkin) {
       loadFallback();
     } else {
@@ -49,15 +52,12 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-
-      {/* 상단 타이틀 */}
       <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
 
       <p className="text-muted small mb-4">
         로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
       </p>
 
-      {/* ★ 카드가 타이틀 밑으로 올라옴 */}
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
         {products.map((p) => (
           <div key={p.id} className="col">
@@ -82,7 +82,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
 
-                {/* ★ 별점 소수점 표시 유지 */}
+                {/* ★ safe toFixed */}
                 <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
 
                 <h6 className="fw-bold text-dark">
@@ -94,7 +94,6 @@ const SimilarSkinProducts = ({ userSkin }) => {
         ))}
       </div>
 
-      {/* ★ 버튼은 카드 아래에 배치 */}
       {!isLoggedIn && (
         <div className="mb-2">
           <button
