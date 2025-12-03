@@ -1,9 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DEMO_RECENT_VIEWS } from '../data/mypageMocks';
 import './RecentViewedProducts.css';
 
-const RecentViewedProducts = ({ products = DEMO_RECENT_VIEWS }) => {
+const RecentViewedProducts = ({ products = [] }) => {
   const navigate = useNavigate();
 
   const handleProductClick = id => {

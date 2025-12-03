@@ -16,7 +16,6 @@ import MyReviewList from '../components/user/mypage/MyReviewList';
 import { fetchMyPageData, updateUserProfile, addIngredient } from '../features/user/userSlice';
 import '../styles/MyPage.css';
 import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConstants';
-import { DEMO_ORDERS, DEMO_LIKES, DEMO_CLAIMS } from '../components/user/data/mypageMocks';
 
 /**
  * buildNavSections Helper
@@ -51,7 +50,7 @@ const buildNavSections = user => [
 const MyPage = () => {
   const dispatch = useDispatch();
   // const navigate = useNavigate();
-  const { profile: userProfile, ingredients, likes } = useSelector(state => state.user);
+  const { profile: userProfile, ingredients, likes, orderSteps } = useSelector(state => state.user);
 
   // UI State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
@@ -62,23 +61,6 @@ const MyPage = () => {
 
   // Derived State: 사용자 정보가 변경될 때마다 네비게이션 메뉴 재생성
   const navSections = useMemo(() => buildNavSections(userProfile), [userProfile]);
-
-  // Calculate Order Counts from DEMO_ORDERS
-  const orderCounts = useMemo(() => {
-    const counts = {
-      주문접수: 0,
-      결제완료: 0,
-      배송준비중: 0,
-      배송중: 0,
-      배송완료: 0,
-    };
-    DEMO_ORDERS.forEach(order => {
-      if (counts[order.status] !== undefined) {
-        counts[order.status]++;
-      }
-    });
-    return counts;
-  }, []);
 
   useEffect(() => {
     // 테스트를 위해 1번 회원 데이터 조회
@@ -122,7 +104,8 @@ const MyPage = () => {
 
   const handleSaveProfile = updatedData => {
     // Redux Thunk를 통해 프로필 업데이트 요청
-    dispatch(updateUserProfile(updatedData));
+    // userProfile.userId는 백엔드의 userNo와 매핑되어 있음
+    dispatch(updateUserProfile({ userId: userProfile.userId, data: updatedData }));
   };
 
   // 뷰 모드에 따른 메인 컨텐츠 렌더링
@@ -133,9 +116,9 @@ const MyPage = () => {
       case 'withdrawal':
         return <MemberWithdrawal onCancel={handleShowDashboard} />;
       case 'order-history':
-        return <OrderHistory orders={DEMO_ORDERS} />;
+        return <OrderHistory orders={[]} />; // 주문 내역 API 미구현으로 빈 배열 전달
       case 'claim-history':
-        return <ClaimHistory claims={DEMO_CLAIMS} />;
+        return <ClaimHistory claims={[]} />; // 클레임 내역 API 미구현으로 빈 배열 전달
       case 'recent-views':
         return <RecentViewedProducts />;
       case 'like-list':
@@ -173,15 +156,6 @@ const MyPage = () => {
                           </span>
                         ))}
                     </div>
-                    {userProfile.skinConcerns && userProfile.skinConcerns.length > 0 && (
-                      <div className="hero-tags-row">
-                        {userProfile.skinConcerns.map(concern => (
-                          <span key={concern} className="skin-tag">
-                            {concern}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </div>
                 <div className="hero-links">
@@ -221,11 +195,11 @@ const MyPage = () => {
               </header>
               <div className="status-steps">
                 {[
-                  { label: '주문접수', value: orderCounts['주문접수'] },
-                  { label: '결제완료', value: orderCounts['결제완료'] },
-                  { label: '배송준비중', value: orderCounts['배송준비중'] },
-                  { label: '배송중', value: orderCounts['배송중'] },
-                  { label: '배송완료', value: orderCounts['배송완료'] },
+                  { label: '주문접수', value: orderSteps['주문접수'] || 0 },
+                  { label: '결제완료', value: orderSteps['결제완료'] || 0 },
+                  { label: '배송준비중', value: orderSteps['배송준비중'] || 0 },
+                  { label: '배송중', value: orderSteps['배송중'] || 0 },
+                  { label: '배송완료', value: orderSteps['배송완료'] || 0 },
                 ].map((step, index, arr) => (
                   <React.Fragment key={step.label}>
                     <div className="status-step">
