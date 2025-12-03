@@ -42,7 +42,13 @@ const UserGlobalLayout = ({
       .then(response => {
         // API 응답이 배열이라고 가정
         if (Array.isArray(response.data)) {
-          setRecentItems(response.data);
+          // SideSticky가 기대하는 포맷(id, title, image)으로 매핑
+          const mappedItems = response.data.map(item => ({
+            id: item.productId || item.id,
+            title: item.productName || item.name,
+            image: item.imageUrl || item.image,
+          }));
+          setRecentItems(mappedItems);
         } else {
           setRecentItems([]);
         }
