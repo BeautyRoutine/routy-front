@@ -26,3 +26,30 @@ export const RenderingStateHandler = ({ loading, error, data }) => {
   if (!data) return <div className="text-center my-5">데이터를 찾을 수 없습니다.</div>;
   return null;
 };
+
+// 로딩 오버레이
+export const LoadingOverlay = ({ show }) => {
+  if (!show) return null;
+
+  return (
+    <div
+      className="loading-overlay"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 9999,
+      }}
+    >
+      <div className="spinner-border text-light" role="status" style={{ width: '3rem', height: '3rem' }}>
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  );
+};
