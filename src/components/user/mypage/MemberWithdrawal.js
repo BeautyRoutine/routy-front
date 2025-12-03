@@ -36,14 +36,15 @@ const MemberWithdrawal = ({ onCancel }) => {
 
     if (window.confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       try {
-        // API 스펙상 비밀번호 검증 없이 userNo만으로 탈퇴 처리
-        // (실제 서비스에서는 비밀번호 검증 API가 선행되어야 함)
-        await dispatch(withdrawUser(targetUserNo)).unwrap();
+        // API 스펙 변경: 비밀번호 검증을 위해 password 함께 전송
+        await dispatch(withdrawUser({ userNo: targetUserNo, password })).unwrap();
         alert('회원 탈퇴가 완료되었습니다.');
         navigate('/'); // 홈으로 이동
       } catch (error) {
         console.error('Withdrawal failed:', error);
-        alert(typeof error === 'string' ? error : '회원 탈퇴 처리에 실패했습니다.');
+        // 에러 메시지 처리 (백엔드에서 보낸 메시지 표시)
+        const errorMsg = error?.resultMsg || (typeof error === 'string' ? error : '회원 탈퇴 처리에 실패했습니다.');
+        alert(errorMsg);
       }
     }
   };
