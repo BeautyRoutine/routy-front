@@ -6,10 +6,26 @@ import {
   FALLBACK_INGREDIENT_GROUPS,
 } from '../../components/user/data/mypageConstants';
 
+// 피부 타입 매핑 (DB Code <-> UI Label)
+// 1:건성 / 2:중성 / 3:지성 / 4:복합성 / 5:수부지 / 6:선택안함
+const SKIN_TYPE_MAP = {
+  1: '건성',
+  2: '중성',
+  3: '지성',
+  4: '복합성',
+  5: '수부지',
+  6: '선택안함',
+};
+
+const getSkinTypeCode = label => {
+  const entry = Object.entries(SKIN_TYPE_MAP).find(([key, value]) => value === label);
+  return entry ? parseInt(entry[0], 10) : null;
+};
+
 // API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
 const getEndpoints = (userId = 'me') => ({
   profile: `/api/users/${userId}/profile`,
-  orders: `/api/users/${userId}/orders/status-summary`,
+  // orders: `/api/users/${userId}/orders/status-summary`, // 미구현
   ingredients: `/api/users/${userId}/ingredients`,
   likes: `/api/users/${userId}/likes`, // 좋아요 목록 엔드포인트 추가
   password: `/api/users/${userId}/password`,
@@ -25,23 +41,23 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
   const endpoints = getEndpoints(userId);
   try {
     // API 호출 시도
-    const [profileRes, ordersRes, ingredientsRes, likesRes] = await Promise.all([
+    const [profileRes, ingredientsRes, likesRes] = await Promise.all([
       api.get(endpoints.profile).catch(err => {
         console.error('Profile API Load Failed:', err);
         return { data: FALLBACK_USER_PROFILE };
       }),
-      api.get(endpoints.orders).catch(err => {
-        console.error('Orders API Load Failed:', err);
-        return { data: FALLBACK_ORDER_STEPS };
-      }),
+      // api.get(endpoints.orders).catch(err => {
+      //   console.error('Orders API Load Failed:', err);
+      //   return { data: FALLBACK_ORDER_STEPS };
+      // }),
       api.get(endpoints.ingredients).catch(err => {
         console.error('Ingredients API Load Failed:', err);
         return { data: FALLBACK_INGREDIENT_GROUPS };
       }),
-      api.get(endpoints.likes).catch(err => {
+      api.get(endpoints.likes, { params: { type: 'PRODUCT' } }).catch(err => {
         console.error('Likes API Load Failed:', err);
-        // 좋아요 API 실패 시 빈 배열 반환 (또는 DEMO 데이터)
-        return { data: { products: [], brands: [] } };
+        // 좋아요 API 실패 시 빈 배열 반환
+        return { data: [] };
       }),
     ]);
 
@@ -51,24 +67,42 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
     // 백엔드 응답 데이터를 프론트엔드 포맷으로 매핑
     const backendProfile = profileRes.data || {};
     const mappedProfile = {
-      ...FALLBACK_USER_PROFILE, // 기본값 유지 (tags, skinConcerns 등 없는 필드 대비)
+      ...FALLBACK_USER_PROFILE, // 기본값 유지
       ...backendProfile, // 덮어쓰기
       // 필드명 불일치 해결
       name: backendProfile.userName || backendProfile.name || FALLBACK_USER_PROFILE.name,
       nickname:
         backendProfile.nickName || backendProfile.nickname || backendProfile.userName || FALLBACK_USER_PROFILE.nickname,
       tier: backendProfile.userLevel || backendProfile.tier || FALLBACK_USER_PROFILE.tier,
-      // id 필드 매핑 (필요 시)
+      // id 필드 매핑
       userId: backendProfile.userNo || backendProfile.userId,
       // 리뷰 카운트 매핑 (백엔드: reviewCount -> 프론트: reviews)
       reviews: backendProfile.reviewCount ?? FALLBACK_USER_PROFILE.reviews,
+      // skinType -> tags 변환 (UI가 tags 배열을 사용함)
+      tags: backendProfile.skinType ? [SKIN_TYPE_MAP[backendProfile.skinType] || backendProfile.skinType] : [],
+      skinConcerns: [],
+    };
+
+    // 좋아요 데이터 매핑
+    const likeList = Array.isArray(likesRes.data) ? likesRes.data : [];
+    const mappedLikes = {
+      products: likeList.map(item => ({
+        id: item.likeId,
+        productId: item.productId,
+        name: item.productName,
+        brand: item.productCompany,
+        price: item.price,
+        image: item.imageUrl,
+        date: item.regDate,
+      })),
+      brands: [], // 브랜드 좋아요는 아직 API 명세에 없음
     };
 
     return {
       profile: mappedProfile,
-      orderSteps: ordersRes.data || FALLBACK_ORDER_STEPS,
+      orderSteps: FALLBACK_ORDER_STEPS, // 미구현이므로 폴백 사용
       ingredients: ingredientsRes.data || FALLBACK_INGREDIENT_GROUPS,
-      likes: likesRes.data || { products: [], brands: [] },
+      likes: mappedLikes,
     };
   } catch (error) {
     console.error('데이터 로드 실패, 폴백 데이터 사용', error);
@@ -90,19 +124,26 @@ export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
   async ({ userId = 'me', data }, { rejectWithValue }) => {
     try {
-      // 백엔드 API 스펙에 맞춰 필드명 변환 (프론트: name -> 백엔드: userName 등)
+      // 백엔드 API 스펙에 맞춰 필드명 변환
+      // UserProfileUpdateRequest: userName, nickName, email, phone, address, zipCode, skinType, profileImageUrl
       const payload = {
-        ...data,
-        userName: data.name, // 백엔드가 userName을 쓴다면 매핑
-        userLevel: data.tier, // (수정 가능한 필드인지 확인 필요)
-        userNo: data.userId,
-        // 필요하다면 skinType -> tags 등으로 역변환 로직 추가
+        userName: data.name,
+        nickName: data.nickname,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        zipCode: data.zipCode,
+        skinType: data.skinType
+          ? getSkinTypeCode(data.skinType)
+          : data.tags && data.tags.length > 0
+          ? getSkinTypeCode(data.tags[0])
+          : null,
+        profileImageUrl: data.profileImageUrl,
       };
 
       const response = await api.put(getEndpoints(userId).profile, payload);
 
       // 응답 받은 후 Redux 상태 업데이트를 위해 리턴
-      // 만약 백엔드가 수정된 객체 전체를 반환하지 않는다면 payload를 리턴해서 상태 업데이트
       return response.data || data;
     } catch (error) {
       return rejectWithValue(error.response?.data || '프로필 수정에 실패했습니다.');
