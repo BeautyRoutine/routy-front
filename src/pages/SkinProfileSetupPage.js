@@ -24,7 +24,7 @@ const SkinProfileSetupPage = () => {
     setError(null);
 
     try {
-      // ✅ 변경: access_token → token
+      // 변경: access_token → token
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('로그인이 필요합니다');
