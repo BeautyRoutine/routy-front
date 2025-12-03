@@ -11,83 +11,53 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
+  const convertToCard = (list) =>
+    list.map((p, index) => ({
+      id: p.prdNo,
+      name: p.prdName,
+      brand: p.prdCompany,
+      rating: p.prdRating || 4.0,
+      price: p.prdPrice,
+      img: p.prdImg ? `/images/${p.prdImg}` : `/images/product${index + 1}.jpg`,
+    }));
+
   useEffect(() => {
-    if (!isLoggedIn) return;
-    if (!userSkin) return;
-
-    const loadRecommend = async () => {
-      try {
-        const res = await axios.get(
-          'http://localhost:8080/api/products/list/skin_type',
-          {
-            params: {
-              limit: 4,
-              skin: Number(userSkin)   // ★ 피부타입은 숫자 (1, 2)
-            }
-          }
-        );
-
-        const list = res.data.data || [];
-
-        const converted = list.map((p, index) => ({
-          id: p.prdNo,
-          name: p.prdName,
-          brand: p.prdCompany,
-          rating: 4.7,
-          tags: ['추천', '피부'],
-          discount: null,
-          price: p.prdPrice,
-          original: null,
-          img: p.prdImg
-            ? `/images/${p.prdImg}`
-            : `/images/product${index + 1}.jpg`,
-        }));
-
-        setProducts(converted);
-      } catch (err) {
-        console.error(err);
-      }
+    const loadFallback = async () => {
+      const res = await axios.get(
+        'http://localhost:8080/api/products/list/fallback',
+        { params: { minRating: 3.0, limit: 4 } }
+      );
+      setProducts(convertToCard(res.data.data || []));
     };
 
-    loadRecommend();
+    const loadSkinRecommend = async () => {
+      const res = await axios.get(
+        'http://localhost:8080/api/products/list/skin_type',
+        { params: { limit: 4, skin: Number(userSkin) } }
+      );
+      setProducts(convertToCard(res.data.data || []));
+    };
+
+    // fallback / skinType 체크
+    if (!isLoggedIn || !userSkin) {
+      loadFallback();
+    } else {
+      loadSkinRecommend();
+    }
   }, [isLoggedIn, userSkin]);
-
-  if (!isLoggedIn) {
-    return (
-      <div className="container my-5 text-center similar-skin-section">
-        <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
-        <p className="text-muted small mb-4">
-          로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
-        </p>
-
-        <button
-          className="btn btn-primary rounded-pill px-4 me-2"
-          onClick={() => navigate('/login')}
-        >
-          로그인
-        </button>
-        <button
-          className="btn btn-outline-primary rounded-pill px-4"
-          onClick={() => navigate('/signup')}
-        >
-          회원가입
-        </button>
-      </div>
-    );
-  }
-
-  if (products.length === 0) return null;
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-      <h5 className="fw-bold text-primary mb-1">
-        비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!
-      </h5>
+
+      {/* 상단 타이틀 */}
+      <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
+
       <p className="text-muted small mb-4">
-        {userSkin === '1' ? '지성' : userSkin === '2' ? '건성' : '피부 타입'} 사용자들의 인기 상품
+        로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
       </p>
 
-      <div className="row row-cols-1 row-cols-md-4 g-4">
+      {/* ★ 카드가 여기로 올라온다 */}
+      <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
         {products.map(p => (
           <div key={p.id} className="col">
             <div
@@ -95,12 +65,6 @@ const SimilarSkinProducts = ({ userSkin }) => {
               style={{ cursor: 'pointer' }}
               onClick={() => navigate(`/products/${p.id}`)}
             >
-              {p.discount && (
-                <span className="badge bg-danger position-absolute top-0 start-0 m-2">
-                  {p.discount} OFF
-                </span>
-              )}
-
               <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
 
               <img
@@ -113,44 +77,35 @@ const SimilarSkinProducts = ({ userSkin }) => {
               <div className="card-body text-start">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
-
-                <div className="mb-2">
-                  {p.tags.map((tag, i) => (
-                    <span key={i} className="badge bg-light text-primary me-1">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
                 <p className="small mb-2">⭐ {p.rating}</p>
 
                 <h6 className="fw-bold text-dark">
                   {p.price.toLocaleString()}원
                 </h6>
-
-                <button
-                  className="btn cart-btn w-100 mt-2"
-                  onClick={e => {
-                    e.stopPropagation();
-                    alert('장바구니에 추가되었습니다.');
-                  }}
-                >
-                  장바구니
-                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-4">
-        <button
-          className="btn btn-outline-primary rounded-pill px-4"
-          onClick={() => navigate(`/products?limit=20&skin=${userSkin}`)}
-        >
-          더 많은 추천 상품 보기
-        </button>
-      </div>
+      {/* ★ 버튼은 카드 아래에 있어야 함 */}
+      {!isLoggedIn && (
+        <div className="mb-2">
+          <button
+            className="btn btn-primary rounded-pill px-4 me-2"
+            onClick={() => navigate('/login')}
+          >
+            로그인
+          </button>
+          <button
+            className="btn btn-outline-primary rounded-pill px-4"
+            onClick={() => navigate('/signup')}
+          >
+            회원가입
+          </button>
+        </div>
+      )}
+
     </div>
   );
 };
