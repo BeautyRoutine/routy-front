@@ -23,16 +23,16 @@ const getSkinTypeCode = label => {
 };
 
 // API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
-const getEndpoints = userNo => ({
-  profile: `/api/users/${userNo}/profile`,
-  orders: `/api/users/${userNo}/orders/status-summary`,
-  ingredients: `/api/users/${userNo}/ingredients`,
-  likes: `/api/users/${userNo}/likes`,
-  reviews: `/api/users/${userNo}/reviews`,
-  recentProducts: `/api/users/${userNo}/recent-products`,
-  claims: `/api/users/${userNo}/claims`,
-  password: `/api/users/${userNo}/password`,
-  withdrawal: `/api/users/${userNo}`,
+const getEndpoints = userId => ({
+  profile: `/api/users/${userId}/profile`,
+  orders: `/api/users/${userId}/orders/status-summary`,
+  ingredients: `/api/users/${userId}/ingredients`,
+  likes: `/api/users/${userId}/likes`,
+  reviews: `/api/users/${userId}/reviews`,
+  recentProducts: `/api/users/${userId}/recent-products`,
+  claims: `/api/users/${userId}/claims`,
+  password: `/api/users/${userId}/password`,
+  withdrawal: `/api/users/${userId}`,
 });
 
 // 성분 리스트를 focus/avoid로 분류하는 헬퍼 함수
@@ -58,10 +58,10 @@ const transformIngredients = list => {
  * Async Thunk: 마이페이지 데이터 전체 로드
  *
  * 사용자 프로필, 주문 진행 상황, 선호 성분 등 마이페이지에 필요한 모든 데이터를 가져옵니다.
- * @param {string} userNo - 조회할 사용자 ID
+ * @param {string} userId - 조회할 사용자 ID
  */
-export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (userNo, { rejectWithValue }) => {
-  const endpoints = getEndpoints(userNo);
+export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (userId, { rejectWithValue }) => {
+  const endpoints = getEndpoints(userId);
   try {
     // API 호출 시도
     const [profileRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] = await Promise.all([
@@ -210,7 +210,7 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
  */
 export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
-  async ({ userNo, data }, { rejectWithValue }) => {
+  async ({ userId, data }, { rejectWithValue }) => {
     try {
       // 백엔드 API 스펙에 맞춰 필드명 변환
       // UserProfileUpdateRequest: userName, nickName, email, phone, address, zipCode, skinType, profileImageUrl
@@ -229,7 +229,7 @@ export const updateUserProfile = createAsyncThunk(
         profileImageUrl: data.profileImageUrl,
       };
 
-      const response = await api.put(getEndpoints(userNo).profile, payload);
+      const response = await api.put(getEndpoints(userId).profile, payload);
 
       // 응답 받은 후 Redux 상태 업데이트를 위해 리턴
       return response.data || data;
@@ -243,13 +243,13 @@ export const updateUserProfile = createAsyncThunk(
  * Async Thunk: 비밀번호 변경
  *
  * 현재 비밀번호와 새 비밀번호를 받아 서버에 변경 요청을 보냅니다.
- * @param {Object} payload - { userNo, currentPassword, newPassword }
+ * @param {Object} payload - { userId, currentPassword, newPassword }
  */
 export const changePassword = createAsyncThunk(
   'user/changePassword',
-  async ({ userNo, currentPassword, newPassword }, { rejectWithValue }) => {
+  async ({ userId, currentPassword, newPassword }, { rejectWithValue }) => {
     try {
-      const response = await api.put(getEndpoints(userNo).password, { currentPassword, newPassword });
+      const response = await api.put(getEndpoints(userId).password, { currentPassword, newPassword });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || '비밀번호 변경에 실패했습니다.');
@@ -260,15 +260,15 @@ export const changePassword = createAsyncThunk(
 /**
  * Async Thunk: 성분 추가 (선호/기피)
  *
- * @param {Object} payload - { userNo, ingredientId, type: 'FOCUS' | 'AVOID' }
+ * @param {Object} payload - { userId, ingredientId, type: 'FOCUS' | 'AVOID' }
  */
 export const addIngredient = createAsyncThunk(
   'user/addIngredient',
-  async ({ userNo, ingredientId, type }, { rejectWithValue }) => {
+  async ({ userId, ingredientId, type }, { rejectWithValue }) => {
     try {
-      await api.post(getEndpoints(userNo).ingredients, { ingredientId, type });
+      await api.post(getEndpoints(userId).ingredients, { ingredientId, type });
       // 성공 시 최신 목록 다시 조회
-      const response = await api.get(getEndpoints(userNo).ingredients);
+      const response = await api.get(getEndpoints(userId).ingredients);
       const rawData = response.data || {};
       const list = rawData.data || rawData;
       return Array.isArray(list) ? transformIngredients(list) : list;
@@ -281,16 +281,16 @@ export const addIngredient = createAsyncThunk(
 /**
  * Async Thunk: 성분 삭제
  *
- * @param {Object} payload - { userNo, ingredientId, type }
+ * @param {Object} payload - { userId, ingredientId, type }
  */
 export const removeIngredient = createAsyncThunk(
   'user/removeIngredient',
-  async ({ userNo, ingredientId, type }, { rejectWithValue }) => {
+  async ({ userId, ingredientId, type }, { rejectWithValue }) => {
     try {
-      // DELETE /api/users/{userNo}/ingredients/{ingredientId}
-      await api.delete(`${getEndpoints(userNo).ingredients}/${ingredientId}`, { params: { type } });
+      // DELETE /api/users/{userId}/ingredients/{ingredientId}
+      await api.delete(`${getEndpoints(userId).ingredients}/${ingredientId}`, { params: { type } });
       // 성공 시 최신 목록 다시 조회
-      const response = await api.get(getEndpoints(userNo).ingredients);
+      const response = await api.get(getEndpoints(userId).ingredients);
       const rawData = response.data || {};
       const list = rawData.data || rawData;
       return Array.isArray(list) ? transformIngredients(list) : list;
@@ -320,9 +320,9 @@ export const checkNickname = createAsyncThunk('user/checkNickname', async (nickn
 /**
  * Async Thunk: 나의 리뷰 목록 조회
  */
-export const fetchMyReviews = createAsyncThunk('user/fetchMyReviews', async (userNo, { rejectWithValue }) => {
+export const fetchMyReviews = createAsyncThunk('user/fetchMyReviews', async (userId, { rejectWithValue }) => {
   try {
-    const response = await api.get(getEndpoints(userNo).reviews);
+    const response = await api.get(getEndpoints(userId).reviews);
     const rawData = response.data || {};
     return rawData.data || rawData || [];
   } catch (error) {
@@ -333,9 +333,9 @@ export const fetchMyReviews = createAsyncThunk('user/fetchMyReviews', async (use
 /**
  * Async Thunk: 리뷰 삭제
  */
-export const deleteReview = createAsyncThunk('user/deleteReview', async ({ userNo, reviewId }, { rejectWithValue }) => {
+export const deleteReview = createAsyncThunk('user/deleteReview', async ({ userId, reviewId }, { rejectWithValue }) => {
   try {
-    await api.delete(`${getEndpoints(userNo).reviews}/${reviewId}`);
+    await api.delete(`${getEndpoints(userId).reviews}/${reviewId}`);
     return reviewId; // 삭제된 ID 반환
   } catch (error) {
     return rejectWithValue(error.response?.data || '리뷰 삭제에 실패했습니다.');
@@ -345,13 +345,13 @@ export const deleteReview = createAsyncThunk('user/deleteReview', async ({ userN
 /**
  * Async Thunk: 회원 탈퇴
  */
-export const withdrawUser = createAsyncThunk('user/withdrawUser', async ({ userNo, password }, { rejectWithValue }) => {
+export const withdrawUser = createAsyncThunk('user/withdrawUser', async ({ userId, password }, { rejectWithValue }) => {
   try {
     // DELETE 요청에 body를 실을 때는 config.data에 넣어야 함
-    await api.delete(getEndpoints(userNo).withdrawal, {
+    await api.delete(getEndpoints(userId).withdrawal, {
       data: { password },
     });
-    return userNo;
+    return userId;
   } catch (error) {
     return rejectWithValue(error.response?.data || '회원 탈퇴에 실패했습니다.');
   }
@@ -362,9 +362,9 @@ export const withdrawUser = createAsyncThunk('user/withdrawUser', async ({ userN
  */
 export const addLike = createAsyncThunk(
   'user/addLike',
-  async ({ userNo, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
+  async ({ userId, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
     try {
-      await api.post(`${getEndpoints(userNo).likes}/${productId}`, null, { params: { type } });
+      await api.post(`${getEndpoints(userId).likes}/${productId}`, null, { params: { type } });
       return { productId, type };
     } catch (error) {
       return rejectWithValue(error.response?.data || '좋아요 추가에 실패했습니다.');
@@ -377,9 +377,9 @@ export const addLike = createAsyncThunk(
  */
 export const removeLike = createAsyncThunk(
   'user/removeLike',
-  async ({ userNo, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
+  async ({ userId, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
     try {
-      await api.delete(`${getEndpoints(userNo).likes}/${productId}`, { params: { type } });
+      await api.delete(`${getEndpoints(userId).likes}/${productId}`, { params: { type } });
       return { productId, type };
     } catch (error) {
       return rejectWithValue(error.response?.data || '좋아요 삭제에 실패했습니다.');
@@ -390,14 +390,32 @@ export const removeLike = createAsyncThunk(
 /**
  * Async Thunk: 클레임 신청
  */
-export const createClaim = createAsyncThunk('user/createClaim', async ({ userNo, data }, { rejectWithValue }) => {
+export const createClaim = createAsyncThunk('user/createClaim', async ({ userId, data }, { rejectWithValue }) => {
   try {
-    await api.post(getEndpoints(userNo).claims, data);
+    await api.post(getEndpoints(userId).claims, data);
     return data;
   } catch (error) {
     return rejectWithValue(error.response?.data || '클레임 신청에 실패했습니다.');
   }
 });
+
+const loadUserFromStorage = () => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return null;
+
+    const parsedUser = JSON.parse(storedUser);
+    if (!parsedUser.userId) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      return null;
+    }
+    return parsedUser;
+  } catch (e) {
+    localStorage.removeItem('user');
+    return null;
+  }
+};
 
 const initialState = {
   profile: FALLBACK_USER_PROFILE,
@@ -409,8 +427,8 @@ const initialState = {
   loading: false,
   error: null,
   // 회원가입/로그인 후 사용자 정보
-  currentUser: null,
-  isAuthenticated: false,
+  currentUser: loadUserFromStorage(),
+  isAuthenticated: !!loadUserFromStorage(),
 };
 
 const userSlice = createSlice({
@@ -430,6 +448,7 @@ const userSlice = createSlice({
       state.currentUser = null;
       state.isAuthenticated = false;
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
   },
   extraReducers: builder => {
@@ -498,6 +517,17 @@ const userSlice = createSlice({
           // skinType 등 다른 필드도 필요 시 매핑
         };
         state.profile = mappedProfile;
+
+        // currentUser 정보도 업데이트 (localStorage 동기화)
+        if (state.currentUser) {
+          const updatedUser = {
+            ...state.currentUser,
+            userName: mappedProfile.name,
+            // 필요한 경우 다른 필드도 업데이트
+          };
+          state.currentUser = updatedUser;
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
