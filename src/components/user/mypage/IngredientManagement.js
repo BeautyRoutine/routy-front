@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Plus, ChevronLeft, ThumbsUp, ThumbsDown, Search, FileText, AlertCircle, Droplets } from 'lucide-react';
+import { removeIngredient, addIngredient } from '../../../features/user/userSlice';
 import '../../../styles/MyPage.css';
 
 const IngredientManagement = ({ ingredients, onAddClick }) => {
+  const dispatch = useDispatch();
+  const { profile } = useSelector(state => state.user);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [selectedIngredient, setSelectedIngredient] = useState(null);
@@ -17,10 +21,93 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
     setSelectedIds(newSelected);
   };
 
-  const handleDelete = () => {
-    console.log('Deleting items:', [...selectedIds]);
-    setIsEditing(false);
-    setSelectedIds(new Set());
+  const handleDelete = async () => {
+    if (!profile?.userNo) {
+      console.error('UserNo is missing');
+      return;
+    }
+
+    const itemsToDelete = [];
+    selectedIds.forEach(idStr => {
+      const [type, indexStr] = idStr.split('-');
+      const index = parseInt(indexStr, 10);
+      const list = ingredients[type];
+      if (list && list[index]) {
+        const item = list[index];
+        // id 필드 확인 (id, ingredientId, ingNo 등)
+        const ingredientId = item.id || item.ingredientId || item.ingNo;
+
+        if (ingredientId) {
+          itemsToDelete.push({
+            ingredientId,
+            type: type === 'focus' ? 'FOCUS' : 'AVOID',
+          });
+        } else {
+          console.warn('Ingredient ID missing for item:', item);
+        }
+      }
+    });
+
+    if (itemsToDelete.length === 0) {
+      console.log('No items to delete');
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      // 일괄 삭제 처리
+      await Promise.all(
+        itemsToDelete.map(item => dispatch(removeIngredient({ userNo: profile.userNo, ...item })).unwrap()),
+      );
+
+      // 성공 시 편집 모드 종료
+      setIsEditing(false);
+      setSelectedIds(new Set());
+    } catch (error) {
+      console.error('Failed to delete ingredients:', error);
+      alert('성분 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleToggleInterest = async targetType => {
+    if (!selectedIngredient) return;
+
+    const currentType = selectedIngredient.type; // 'focus' or 'avoid'
+    const targetTypeUpper = targetType === 'focus' ? 'FOCUS' : 'AVOID';
+    const currentTypeUpper = currentType === 'focus' ? 'FOCUS' : 'AVOID';
+
+    // 1. 이미 해당 상태라면 -> 삭제 (토글 해제)
+    if (currentType === targetType) {
+      await dispatch(
+        removeIngredient({
+          userNo: profile.userNo,
+          ingredientId: selectedIngredient.id,
+          type: currentTypeUpper,
+        }),
+      );
+      setSelectedIngredient(null); // 목록으로 복귀
+    }
+    // 2. 다른 상태라면 -> 기존 상태 삭제 후 새로운 상태 추가 (상태 변경)
+    else {
+      // 기존 상태 삭제
+      await dispatch(
+        removeIngredient({
+          userNo: profile.userNo,
+          ingredientId: selectedIngredient.id,
+          type: currentTypeUpper,
+        }),
+      );
+      // 새로운 상태 추가
+      await dispatch(
+        addIngredient({
+          userNo: profile.userNo,
+          ingredientId: selectedIngredient.id,
+          type: targetTypeUpper,
+        }),
+      );
+      // 상세 뷰 상태 업데이트
+      setSelectedIngredient({ ...selectedIngredient, type: targetType });
+    }
   };
 
   const renderDetailView = () => {
@@ -43,11 +130,17 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
           </div>
 
           <div className="detail-actions">
-            <button className={`action-toggle-btn focus ${selectedIngredient.type === 'focus' ? 'active' : ''}`}>
+            <button
+              className={`action-toggle-btn focus ${selectedIngredient.type === 'focus' ? 'active' : ''}`}
+              onClick={() => handleToggleInterest('focus')}
+            >
               <ThumbsUp size={20} />
               <span>관심있어요</span>
             </button>
-            <button className={`action-toggle-btn avoid ${selectedIngredient.type === 'avoid' ? 'active' : ''}`}>
+            <button
+              className={`action-toggle-btn avoid ${selectedIngredient.type === 'avoid' ? 'active' : ''}`}
+              onClick={() => handleToggleInterest('avoid')}
+            >
               <ThumbsDown size={20} />
               <span>피할래요</span>
             </button>

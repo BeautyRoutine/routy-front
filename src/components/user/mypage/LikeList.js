@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeLike } from '../../../features/user/userSlice';
 import './LikeList.css';
 
 const LikeList = ({ likes = { products: [], brands: [] } }) => {
+  const dispatch = useDispatch();
+  const { profile } = useSelector(state => state.user);
+  const userNo = profile?.userNo;
+
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'brands'
 
   const items = activeTab === 'products' ? likes.products || [] : likes.brands || [];
+
+  const handleDelete = async productId => {
+    if (window.confirm('좋아요 목록에서 삭제하시겠습니까?')) {
+      await dispatch(removeLike({ userNo, productId, type: 'PRODUCT' }));
+    }
+  };
 
   return (
     <div className="like-list-container">
@@ -83,7 +95,9 @@ const LikeList = ({ likes = { products: [], brands: [] } }) => {
                     </div>
                     <div className="col-manage">
                       <button className="btn-cart">장바구니</button>
-                      <button className="btn-delete">삭제</button>
+                      <button className="btn-delete" onClick={() => handleDelete(item.productId)}>
+                        삭제
+                      </button>
                     </div>
                   </>
                 ) : (

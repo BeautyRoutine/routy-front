@@ -86,7 +86,17 @@ export const confirmPhoneVerify = payload => api.post('/api/auth/phone/confirm',
 // -------------------------
 
 // 성분 검색
-export const searchIngredients = keyword => api.get('/api/ingredients', { params: { keyword } });
+export const searchIngredients = params => {
+  // params: { page, size, keyword }
+  const { page = 1, size = 10, keyword = '' } = params || {};
+  return api.get('/api/admin/ingredients', {
+    params: {
+      page,
+      page_gap: size,
+      ing_name: keyword,
+    },
+  });
+};
 
 // -------------------------
 // 카카오 로그인 URL (단순 문자열)

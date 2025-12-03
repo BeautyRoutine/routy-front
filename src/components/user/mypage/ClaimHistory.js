@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import './ClaimHistory.css';
 
-const ClaimHistory = ({ claims = [] }) => {
+const ClaimHistory = () => {
+  const { claims } = useSelector(state => state.user);
   const [period, setPeriod] = useState('3months');
 
-  const filteredClaims = claims;
+  const filteredClaims = claims || [];
 
   return (
     <div className="claim-history-container">
