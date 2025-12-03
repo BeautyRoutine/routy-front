@@ -25,7 +25,7 @@ const getSkinTypeCode = label => {
 // API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
 const getEndpoints = userId => ({
   profile: `/api/users/${userId}/profile`,
-  orders: `/api/users/${userId}/orders/status-summary`,
+  // orders: `/api/users/${userId}/orders/status-summary`, // 미구현
   ingredients: `/api/users/${userId}/ingredients`,
   likes: `/api/users/${userId}/likes`,
   reviews: `/api/users/${userId}/reviews`,
@@ -69,10 +69,10 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
         console.error('Profile API Load Failed:', err);
         return { data: FALLBACK_USER_PROFILE };
       }),
-      api.get(endpoints.orders).catch(err => {
-        console.error('Orders API Load Failed:', err);
-        return { data: FALLBACK_ORDER_STEPS };
-      }),
+      // api.get(endpoints.orders).catch(err => {
+      //   console.error('Orders API Load Failed:', err);
+      //   return { data: FALLBACK_ORDER_STEPS };
+      // }),
       api.get(endpoints.ingredients).catch(err => {
         console.error('Ingredients API Load Failed:', err);
         return { data: FALLBACK_INGREDIENT_GROUPS };
