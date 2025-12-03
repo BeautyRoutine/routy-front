@@ -24,7 +24,7 @@ const ProductDetailPage = () => {
         setLoading(true); //로딩 시작
         //get 요청 주소 : http://localhost:8080/api/products/101
         const productRes = await axios.get(`${apiBaseUrl}/products/${prdNo}`);
-
+        const reviewRes = await axios.get(`${apiBaseUrl}/products/${prdNo}/reviews`);
         // 백엔드 API (상품, 리뷰, 성분)
         // const [productRes, reviewRes, ingredientRes] = await Promise.all([
         //axios.get(`/api/products/${prdNo}`),
@@ -35,9 +35,9 @@ const ProductDetailPage = () => {
         // 데이터 구조 만들기
         const combinedData = {
           productInfo: productRes.data.data, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
-          // reviewInfo: reviewRes.data.data, // 리뷰 데이터
+          reviewInfo: reviewRes.data.data || { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 리뷰 데이터
           // ingredientInfo: ingredientRes.data.data, // 성분 데이터
-          reviewInfo: { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 일단 더미
+          // reviewInfo: { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 일단 더미
           ingredientInfo: { totalCount: 0, ingredients: [] }, // 일단 더미
           purchaseInfo: {}, // 하드코딩인거도 수정해야하는데
         };
