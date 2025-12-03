@@ -13,7 +13,7 @@ import RecentViewedProducts from '../components/user/mypage/RecentViewedProducts
 import IngredientManagement from '../components/user/mypage/IngredientManagement';
 import IngredientAddModal from '../components/user/mypage/IngredientAddModal';
 import MyReviewList from '../components/user/mypage/MyReviewList';
-import { fetchMyPageData, updateUserProfile, addIngredient } from '../features/user/userSlice';
+import { fetchMyPageData, updateUserProfile, addIngredient, removeIngredient } from '../features/user/userSlice';
 import '../styles/MyPage.css';
 import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConstants';
 
@@ -102,10 +102,13 @@ const MyPage = () => {
     }
   };
 
-  const handleSaveProfile = updatedData => {
+  const handleSaveProfile = async updatedData => {
     // Redux Thunk를 통해 프로필 업데이트 요청
-    // userProfile.userId는 백엔드의 userNo와 매핑되어 있음
-    dispatch(updateUserProfile({ userId: userProfile.userId, data: updatedData }));
+    // userProfile.userNo는 백엔드의 userNo와 매핑되어 있음
+    const result = await dispatch(updateUserProfile({ userNo: userProfile.userNo, data: updatedData }));
+    if (updateUserProfile.fulfilled.match(result)) {
+      window.location.reload();
+    }
   };
 
   // 뷰 모드에 따른 메인 컨텐츠 렌더링
@@ -506,10 +509,21 @@ const MyPage = () => {
       <IngredientAddModal
         isOpen={isIngredientAddModalOpen}
         onClose={() => setIsIngredientAddModalOpen(false)}
+        currentIngredients={ingredients}
         onAdd={(ingredient, listType) => {
           // 성분 추가 API 호출
           dispatch(
             addIngredient({
+              userNo: userProfile.userNo,
+              ingredientId: ingredient.id,
+              type: listType, // 'FOCUS' | 'AVOID'
+            }),
+          );
+        }}
+        onRemove={(ingredient, listType) => {
+          dispatch(
+            removeIngredient({
+              userNo: userProfile.userNo,
               ingredientId: ingredient.id,
               type: listType, // 'FOCUS' | 'AVOID'
             }),

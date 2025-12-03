@@ -1,12 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import './RecentViewedProducts.css';
 
-const RecentViewedProducts = ({ products = [] }) => {
+const RecentViewedProducts = () => {
   const navigate = useNavigate();
+  const { recentProducts } = useSelector(state => state.user);
+  const products = recentProducts || [];
 
   const handleProductClick = id => {
     navigate(`/product/${id}`);
+  };
+
+  const handleDelete = id => {
+    // TODO: 최근 본 상품 삭제 API 연동 필요 (현재 백엔드 컨트롤러에 DELETE 메서드 없음)
+    alert('삭제 기능은 준비 중입니다.');
   };
 
   return (
@@ -57,7 +65,15 @@ const RecentViewedProducts = ({ products = [] }) => {
               <div className="col-date">{item.viewedDate}</div>
               <div className="col-manage">
                 <button className="btn-cart">장바구니</button>
-                <button className="btn-delete">삭제</button>
+                <button
+                  className="btn-delete"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleDelete(item.id);
+                  }}
+                >
+                  삭제
+                </button>
               </div>
             </div>
           ))}

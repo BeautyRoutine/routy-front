@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { X, Lock, Check, AlertCircle } from 'lucide-react';
 import { changePassword } from '../../../features/user/userSlice';
 import '../../../styles/MyPage.css'; // Reusing MyPage styles for consistency
@@ -13,6 +13,7 @@ import '../../../styles/MyPage.css'; // Reusing MyPage styles for consistency
  */
 const PasswordChange = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
+  const { profile } = useSelector(state => state.user);
 
   // Form State: 입력 필드 값 관리
   const [currentPassword, setCurrentPassword] = useState('');
@@ -104,7 +105,7 @@ const PasswordChange = ({ isOpen, onClose }) => {
     }
 
     // 5. Redux Action Dispatch: 비밀번호 변경 요청
-    dispatch(changePassword({ currentPassword, newPassword }))
+    dispatch(changePassword({ userNo: profile.userNo, currentPassword, newPassword }))
       .unwrap()
       .then(() => {
         setSuccess('비밀번호가 성공적으로 변경되었습니다.');

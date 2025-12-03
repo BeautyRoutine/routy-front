@@ -23,49 +23,87 @@ const getSkinTypeCode = label => {
 };
 
 // API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
-const getEndpoints = (userId = 'me') => ({
-  profile: `/api/users/${userId}/profile`,
-  // orders: `/api/users/${userId}/orders/status-summary`, // 미구현
-  ingredients: `/api/users/${userId}/ingredients`,
-  likes: `/api/users/${userId}/likes`, // 좋아요 목록 엔드포인트 추가
-  password: `/api/users/${userId}/password`,
+const getEndpoints = userNo => ({
+  profile: `/api/users/${userNo}/profile`,
+  orders: `/api/users/${userNo}/orders/status-summary`,
+  ingredients: `/api/users/${userNo}/ingredients`,
+  likes: `/api/users/${userNo}/likes`,
+  reviews: `/api/users/${userNo}/reviews`,
+  recentProducts: `/api/users/${userNo}/recent-products`,
+  claims: `/api/users/${userNo}/claims`,
+  password: `/api/users/${userNo}/password`,
+  withdrawal: `/api/users/${userNo}`,
 });
+
+// 성분 리스트를 focus/avoid로 분류하는 헬퍼 함수
+const transformIngredients = list => {
+  if (!Array.isArray(list)) return FALLBACK_INGREDIENT_GROUPS;
+
+  // 데이터 매핑: id, name 등 필수 필드 보장
+  const mappedList = list.map(item => ({
+    ...item,
+    // 백엔드 필드명(ingredientId, ingNo 등)을 프론트엔드 표준(id)으로 매핑
+    id: item.id || item.ingredientId || item.ingNo,
+    name: item.name || item.ingredientName || item.ingName,
+    desc: item.desc || item.description || item.ingDesc,
+  }));
+
+  return {
+    focus: mappedList.filter(i => i.type === 'FOCUS'),
+    avoid: mappedList.filter(i => i.type === 'AVOID'),
+  };
+};
 
 /**
  * Async Thunk: 마이페이지 데이터 전체 로드
  *
  * 사용자 프로필, 주문 진행 상황, 선호 성분 등 마이페이지에 필요한 모든 데이터를 가져옵니다.
- * @param {string} userId - 조회할 사용자 ID (기본값: 'me')
+ * @param {string} userNo - 조회할 사용자 ID
  */
-export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (userId = 'me', { rejectWithValue }) => {
-  const endpoints = getEndpoints(userId);
+export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (userNo, { rejectWithValue }) => {
+  const endpoints = getEndpoints(userNo);
   try {
     // API 호출 시도
-    const [profileRes, ingredientsRes, likesRes] = await Promise.all([
+    const [profileRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] = await Promise.all([
       api.get(endpoints.profile).catch(err => {
         console.error('Profile API Load Failed:', err);
         return { data: FALLBACK_USER_PROFILE };
       }),
-      // api.get(endpoints.orders).catch(err => {
-      //   console.error('Orders API Load Failed:', err);
-      //   return { data: FALLBACK_ORDER_STEPS };
-      // }),
+      api.get(endpoints.orders).catch(err => {
+        console.error('Orders API Load Failed:', err);
+        return { data: FALLBACK_ORDER_STEPS };
+      }),
       api.get(endpoints.ingredients).catch(err => {
         console.error('Ingredients API Load Failed:', err);
         return { data: FALLBACK_INGREDIENT_GROUPS };
       }),
       api.get(endpoints.likes, { params: { type: 'PRODUCT' } }).catch(err => {
         console.error('Likes API Load Failed:', err);
-        // 좋아요 API 실패 시 빈 배열 반환
+        return { data: [] };
+      }),
+      api.get(endpoints.reviews).catch(err => {
+        console.error('Reviews API Load Failed:', err);
+        return { data: [] };
+      }),
+      api.get(endpoints.recentProducts).catch(err => {
+        console.error('Recent Products API Load Failed:', err);
+        return { data: [] };
+      }),
+      api.get(endpoints.claims).catch(err => {
+        console.error('Claims API Load Failed:', err);
         return { data: [] };
       }),
     ]);
 
     // [DEBUG] 실제 받아온 데이터 구조 확인
     console.log('API Response - Profile:', profileRes.data);
+    console.log('API Response - Ingredients:', ingredientsRes.data);
 
     // 백엔드 응답 데이터를 프론트엔드 포맷으로 매핑
-    const backendProfile = profileRes.data || {};
+    // ApiResponse 구조(data 필드) 처리
+    const rawProfile = profileRes.data || {};
+    const backendProfile = rawProfile.data || rawProfile;
+
     const mappedProfile = {
       ...FALLBACK_USER_PROFILE, // 기본값 유지
       ...backendProfile, // 덮어쓰기
@@ -75,7 +113,13 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
         backendProfile.nickName || backendProfile.nickname || backendProfile.userName || FALLBACK_USER_PROFILE.nickname,
       tier: backendProfile.userLevel || backendProfile.tier || FALLBACK_USER_PROFILE.tier,
       // id 필드 매핑
-      userId: backendProfile.userNo || backendProfile.userId,
+      // "me" 문자열이 들어오는 경우를 방지하기 위해 숫자 변환 가능 여부 체크
+      userNo:
+        backendProfile.userNo && !isNaN(Number(backendProfile.userNo))
+          ? backendProfile.userNo
+          : backendProfile.userId && !isNaN(Number(backendProfile.userId))
+          ? backendProfile.userId
+          : null,
       // 리뷰 카운트 매핑 (백엔드: reviewCount -> 프론트: reviews)
       reviews: backendProfile.reviewCount ?? FALLBACK_USER_PROFILE.reviews,
       // skinType -> tags 변환 (UI가 tags 배열을 사용함)
@@ -83,10 +127,18 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
       skinConcerns: [],
     };
 
+    // 성분 데이터 매핑
+    const rawIngredients = ingredientsRes.data || {};
+    const ingredientsData = rawIngredients.data || rawIngredients;
+    const mappedIngredients = Array.isArray(ingredientsData) ? transformIngredients(ingredientsData) : ingredientsData;
+
     // 좋아요 데이터 매핑
-    const likeList = Array.isArray(likesRes.data) ? likesRes.data : [];
+    const rawLikes = likesRes.data || {};
+    const likeList = rawLikes.data || rawLikes || [];
+    const safeLikeList = Array.isArray(likeList) ? likeList : [];
+
     const mappedLikes = {
-      products: likeList.map(item => ({
+      products: safeLikeList.map(item => ({
         id: item.likeId,
         productId: item.productId,
         name: item.productName,
@@ -98,11 +150,44 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
       brands: [], // 브랜드 좋아요는 아직 API 명세에 없음
     };
 
+    // 리뷰 데이터 매핑
+    const rawReviews = reviewsRes.data || {};
+    const reviewList = rawReviews.data || rawReviews || [];
+    const mappedReviews = Array.isArray(reviewList) ? reviewList : [];
+
+    // 최근 본 상품 매핑
+    const rawRecent = recentRes.data || {};
+    const recentList = rawRecent.data || rawRecent || [];
+    const mappedRecent = Array.isArray(recentList)
+      ? recentList.map(item => ({
+          id: item.productId || item.id,
+          name: item.productName || item.name,
+          brand: item.brandName || item.brand || item.productCompany,
+          price: item.price || 0,
+          salePrice: item.salePrice,
+          discount: item.discountRate || item.discount,
+          image: item.imageUrl || item.image,
+          viewedDate: item.viewedAt || item.viewedDate,
+        }))
+      : [];
+
+    // 클레임 데이터 매핑
+    const rawClaims = claimsRes.data || {};
+    const claimList = rawClaims.data || rawClaims || [];
+    const mappedClaims = Array.isArray(claimList) ? claimList : [];
+
+    // 주문 데이터 매핑
+    const rawOrders = ordersRes.data || {};
+    const orderSteps = rawOrders.data || rawOrders;
+
     return {
       profile: mappedProfile,
-      orderSteps: FALLBACK_ORDER_STEPS, // 미구현이므로 폴백 사용
-      ingredients: ingredientsRes.data || FALLBACK_INGREDIENT_GROUPS,
+      orderSteps: orderSteps || FALLBACK_ORDER_STEPS,
+      ingredients: mappedIngredients || FALLBACK_INGREDIENT_GROUPS,
       likes: mappedLikes,
+      myReviews: mappedReviews,
+      recentProducts: mappedRecent,
+      claims: mappedClaims,
     };
   } catch (error) {
     console.error('데이터 로드 실패, 폴백 데이터 사용', error);
@@ -111,6 +196,9 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
       orderSteps: FALLBACK_ORDER_STEPS,
       ingredients: FALLBACK_INGREDIENT_GROUPS,
       likes: { products: [], brands: [] },
+      myReviews: [],
+      recentProducts: [],
+      claims: [],
     };
   }
 });
@@ -122,7 +210,7 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
  */
 export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
-  async ({ userId = 'me', data }, { rejectWithValue }) => {
+  async ({ userNo, data }, { rejectWithValue }) => {
     try {
       // 백엔드 API 스펙에 맞춰 필드명 변환
       // UserProfileUpdateRequest: userName, nickName, email, phone, address, zipCode, skinType, profileImageUrl
@@ -141,7 +229,7 @@ export const updateUserProfile = createAsyncThunk(
         profileImageUrl: data.profileImageUrl,
       };
 
-      const response = await api.put(getEndpoints(userId).profile, payload);
+      const response = await api.put(getEndpoints(userNo).profile, payload);
 
       // 응답 받은 후 Redux 상태 업데이트를 위해 리턴
       return response.data || data;
@@ -155,13 +243,13 @@ export const updateUserProfile = createAsyncThunk(
  * Async Thunk: 비밀번호 변경
  *
  * 현재 비밀번호와 새 비밀번호를 받아 서버에 변경 요청을 보냅니다.
- * @param {Object} payload - { userId, currentPassword, newPassword }
+ * @param {Object} payload - { userNo, currentPassword, newPassword }
  */
 export const changePassword = createAsyncThunk(
   'user/changePassword',
-  async ({ userId = 'me', currentPassword, newPassword }, { rejectWithValue }) => {
+  async ({ userNo, currentPassword, newPassword }, { rejectWithValue }) => {
     try {
-      const response = await api.put(getEndpoints(userId).password, { currentPassword, newPassword });
+      const response = await api.put(getEndpoints(userNo).password, { currentPassword, newPassword });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || '비밀번호 변경에 실패했습니다.');
@@ -172,16 +260,18 @@ export const changePassword = createAsyncThunk(
 /**
  * Async Thunk: 성분 추가 (선호/기피)
  *
- * @param {Object} payload - { userId, ingredientId, type: 'FOCUS' | 'AVOID' }
+ * @param {Object} payload - { userNo, ingredientId, type: 'FOCUS' | 'AVOID' }
  */
 export const addIngredient = createAsyncThunk(
   'user/addIngredient',
-  async ({ userId = 'me', ingredientId, type }, { rejectWithValue }) => {
+  async ({ userNo, ingredientId, type }, { rejectWithValue }) => {
     try {
-      await api.post(getEndpoints(userId).ingredients, { ingredientId, type });
+      await api.post(getEndpoints(userNo).ingredients, { ingredientId, type });
       // 성공 시 최신 목록 다시 조회
-      const response = await api.get(getEndpoints(userId).ingredients);
-      return response.data;
+      const response = await api.get(getEndpoints(userNo).ingredients);
+      const rawData = response.data || {};
+      const list = rawData.data || rawData;
+      return Array.isArray(list) ? transformIngredients(list) : list;
     } catch (error) {
       return rejectWithValue(error.response?.data || '성분 추가에 실패했습니다.');
     }
@@ -191,17 +281,19 @@ export const addIngredient = createAsyncThunk(
 /**
  * Async Thunk: 성분 삭제
  *
- * @param {Object} payload - { userId, ingredientId, type }
+ * @param {Object} payload - { userNo, ingredientId, type }
  */
 export const removeIngredient = createAsyncThunk(
   'user/removeIngredient',
-  async ({ userId = 'me', ingredientId, type }, { rejectWithValue }) => {
+  async ({ userNo, ingredientId, type }, { rejectWithValue }) => {
     try {
-      // DELETE /api/users/{userId}/ingredients/{ingredientId}
-      await api.delete(`${getEndpoints(userId).ingredients}/${ingredientId}`, { params: { type } });
+      // DELETE /api/users/{userNo}/ingredients/{ingredientId}
+      await api.delete(`${getEndpoints(userNo).ingredients}/${ingredientId}`, { params: { type } });
       // 성공 시 최신 목록 다시 조회
-      const response = await api.get(getEndpoints(userId).ingredients);
-      return response.data;
+      const response = await api.get(getEndpoints(userNo).ingredients);
+      const rawData = response.data || {};
+      const list = rawData.data || rawData;
+      return Array.isArray(list) ? transformIngredients(list) : list;
     } catch (error) {
       return rejectWithValue(error.response?.data || '성분 삭제에 실패했습니다.');
     }
@@ -219,9 +311,88 @@ export const checkNickname = createAsyncThunk('user/checkNickname', async (nickn
     const response = await api.get('/api/users/check-nickname', {
       params: { nickname },
     });
-    return response.data; // true(사용가능) or false(중복)
+    return response.data.data; // true(사용가능) or false(중복)
   } catch (error) {
     return rejectWithValue(error.response?.data || '닉네임 확인 중 오류가 발생했습니다.');
+  }
+});
+
+/**
+ * Async Thunk: 나의 리뷰 목록 조회
+ */
+export const fetchMyReviews = createAsyncThunk('user/fetchMyReviews', async (userNo, { rejectWithValue }) => {
+  try {
+    const response = await api.get(getEndpoints(userNo).reviews);
+    const rawData = response.data || {};
+    return rawData.data || rawData || [];
+  } catch (error) {
+    return rejectWithValue(error.response?.data || '리뷰 목록을 불러오는데 실패했습니다.');
+  }
+});
+
+/**
+ * Async Thunk: 리뷰 삭제
+ */
+export const deleteReview = createAsyncThunk('user/deleteReview', async ({ userNo, reviewId }, { rejectWithValue }) => {
+  try {
+    await api.delete(`${getEndpoints(userNo).reviews}/${reviewId}`);
+    return reviewId; // 삭제된 ID 반환
+  } catch (error) {
+    return rejectWithValue(error.response?.data || '리뷰 삭제에 실패했습니다.');
+  }
+});
+
+/**
+ * Async Thunk: 회원 탈퇴
+ */
+export const withdrawUser = createAsyncThunk('user/withdrawUser', async (userNo, { rejectWithValue }) => {
+  try {
+    await api.delete(getEndpoints(userNo).withdrawal);
+    return userNo;
+  } catch (error) {
+    return rejectWithValue(error.response?.data || '회원 탈퇴에 실패했습니다.');
+  }
+});
+
+/**
+ * Async Thunk: 좋아요 추가
+ */
+export const addLike = createAsyncThunk(
+  'user/addLike',
+  async ({ userNo, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
+    try {
+      await api.post(`${getEndpoints(userNo).likes}/${productId}`, null, { params: { type } });
+      return { productId, type };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || '좋아요 추가에 실패했습니다.');
+    }
+  },
+);
+
+/**
+ * Async Thunk: 좋아요 삭제
+ */
+export const removeLike = createAsyncThunk(
+  'user/removeLike',
+  async ({ userNo, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
+    try {
+      await api.delete(`${getEndpoints(userNo).likes}/${productId}`, { params: { type } });
+      return { productId, type };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || '좋아요 삭제에 실패했습니다.');
+    }
+  },
+);
+
+/**
+ * Async Thunk: 클레임 신청
+ */
+export const createClaim = createAsyncThunk('user/createClaim', async ({ userNo, data }, { rejectWithValue }) => {
+  try {
+    await api.post(getEndpoints(userNo).claims, data);
+    return data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data || '클레임 신청에 실패했습니다.');
   }
 });
 
@@ -229,7 +400,9 @@ const initialState = {
   profile: FALLBACK_USER_PROFILE,
   orderSteps: FALLBACK_ORDER_STEPS,
   ingredients: FALLBACK_INGREDIENT_GROUPS,
-  likes: { products: [], brands: [] }, // 초기값 추가
+  likes: { products: [], brands: [] },
+  myReviews: [],
+  recentProducts: [],
   loading: false,
   error: null,
   // 회원가입/로그인 후 사용자 정보
@@ -269,10 +442,42 @@ const userSlice = createSlice({
         state.orderSteps = action.payload.orderSteps;
         state.ingredients = action.payload.ingredients;
         state.likes = action.payload.likes;
+        state.myReviews = action.payload.myReviews;
+        state.recentProducts = action.payload.recentProducts;
+        state.claims = action.payload.claims;
       })
       .addCase(fetchMyPageData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // createClaim
+      .addCase(createClaim.fulfilled, (state, action) => {
+        // 클레임 신청 성공 시 목록을 다시 불러오거나, 임시로 추가할 수 있음
+        // 여기서는 간단히 로딩 상태만 해제 (실제로는 fetchMyPageData를 다시 호출하는 것이 좋음)
+        state.loading = false;
+      })
+      // fetchMyReviews
+      .addCase(fetchMyReviews.fulfilled, (state, action) => {
+        state.myReviews = action.payload;
+      })
+      // deleteReview
+      .addCase(deleteReview.fulfilled, (state, action) => {
+        state.myReviews = state.myReviews.filter(review => review.reviewId !== action.payload);
+      })
+      // withdrawUser
+      .addCase(withdrawUser.fulfilled, state => {
+        state.currentUser = null;
+        state.isAuthenticated = false;
+        localStorage.removeItem('token');
+      })
+      // removeLike
+      .addCase(removeLike.fulfilled, (state, action) => {
+        const { productId, type } = action.payload;
+        if (type === 'PRODUCT') {
+          state.likes.products = state.likes.products.filter(item => item.productId !== productId);
+        } else {
+          // 브랜드 좋아요 삭제 로직 (추후 구현 시)
+        }
       })
       // updateUserProfile
       .addCase(updateUserProfile.pending, state => {
