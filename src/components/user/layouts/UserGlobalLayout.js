@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Header } from './Header';
 import SideSticky from './SideSticky';
 import api from '../../../lib/apiClient';
-import { ENDPOINTS, DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from './headerConstants';
+import { DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from './headerConstants';
 
 /**
  * 사용자용 전역 레이아웃. Header와 사이드 스티키를 묶어 렌더링하며,
@@ -21,6 +22,8 @@ const UserGlobalLayout = ({
   onCartClick,
 }) => {
   const [recentItems, setRecentItems] = useState([]);
+  const { currentUser } = useSelector(state => state.user);
+  const userId = currentUser?.userId;
 
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -28,13 +31,14 @@ const UserGlobalLayout = ({
 
   // 로그인 상태 변경 시 최근 본 상품 API 호출
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !userId) {
       setRecentItems([]);
       return;
     }
 
+    // /api/users/{userId}/recent-products
     api
-      .get(ENDPOINTS.recentProducts)
+      .get(`/api/users/${userId}/recent-products`)
       .then(response => {
         // API 응답이 배열이라고 가정
         if (Array.isArray(response.data)) {
@@ -48,12 +52,13 @@ const UserGlobalLayout = ({
         // API 실패 시 데모 데이터 폴백 (개발 편의용)
         setRecentItems(DEMO_RECENT_ITEMS);
       });
-  }, [isLoggedIn]);
+  }, [isLoggedIn, userId]);
 
   return (
     <>
       <Header
         isLoggedIn={isLoggedIn}
+        userId={userId}
         onLoginChange={onLoginChange}
         onLoginClick={onLoginClick}
         onSignupClick={onSignupClick}

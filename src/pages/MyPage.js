@@ -50,7 +50,7 @@ const buildNavSections = user => [
 const MyPage = () => {
   const dispatch = useDispatch();
   // const navigate = useNavigate();
-  const { profile: userProfile, ingredients, likes, orderSteps } = useSelector(state => state.user);
+  const { profile: userProfile, ingredients, likes, orderSteps, currentUser } = useSelector(state => state.user);
 
   // UI State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
@@ -63,9 +63,11 @@ const MyPage = () => {
   const navSections = useMemo(() => buildNavSections(userProfile), [userProfile]);
 
   useEffect(() => {
-    // 테스트를 위해 1번 회원 데이터 조회
-    dispatch(fetchMyPageData('1'));
-  }, [dispatch]);
+    // 로그인된 사용자 ID로 데이터 조회
+    if (currentUser && currentUser.userId) {
+      dispatch(fetchMyPageData(currentUser.userId));
+    }
+  }, [dispatch, currentUser]);
 
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
@@ -104,8 +106,8 @@ const MyPage = () => {
 
   const handleSaveProfile = async updatedData => {
     // Redux Thunk를 통해 프로필 업데이트 요청
-    // userProfile.userNo는 백엔드의 userNo와 매핑되어 있음
-    const result = await dispatch(updateUserProfile({ userNo: userProfile.userNo, data: updatedData }));
+    // currentUser.userId는 백엔드의 userId와 매핑되어 있음
+    const result = await dispatch(updateUserProfile({ userId: currentUser.userId, data: updatedData }));
     if (updateUserProfile.fulfilled.match(result)) {
       window.location.reload();
     }
@@ -514,7 +516,7 @@ const MyPage = () => {
           // 성분 추가 API 호출
           dispatch(
             addIngredient({
-              userNo: userProfile.userNo,
+              userId: currentUser.userId,
               ingredientId: ingredient.id,
               type: listType, // 'FOCUS' | 'AVOID'
             }),
@@ -523,7 +525,7 @@ const MyPage = () => {
         onRemove={(ingredient, listType) => {
           dispatch(
             removeIngredient({
-              userNo: userProfile.userNo,
+              userId: currentUser.userId,
               ingredientId: ingredient.id,
               type: listType, // 'FOCUS' | 'AVOID'
             }),
