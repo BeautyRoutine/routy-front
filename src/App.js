@@ -16,6 +16,7 @@ import AdminHome from 'pages/admin/AdminHome';
 import Footer from 'components/user/layouts/footer';
 import ScrollToTop from 'components/common/ScrollToTop';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css';
 
 function App() {
