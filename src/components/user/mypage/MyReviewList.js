@@ -1,62 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import api from '../../../lib/apiClient';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchMyReviews, deleteReview } from '../../../features/user/userSlice';
 import './OrderHistory.css'; // 스타일 재사용
 
 const MyReviewList = () => {
-  const { profile } = useSelector(state => state.user);
-  const userId = profile?.userId || 'me';
+  const dispatch = useDispatch();
+  const { profile, myReviews, loading } = useSelector(state => state.user);
+  const userNo = profile?.userNo;
 
-  const [reviews, setReviews] = useState([]);
+  const [visibleReviews, setVisibleReviews] = useState([]);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef();
   const ITEMS_PER_PAGE = 5;
 
-  // 데이터 로드 함수
-  const loadReviews = async () => {
-    if (loading) return;
-    setLoading(true);
-
-    try {
-      // 실제 API 호출
-      const response = await api.get(`/api/users/${userId}/reviews`, {
-        params: {
-          page: page - 1, // Spring Boot Pageable은 0-based index
-          size: ITEMS_PER_PAGE,
-        },
-      });
-
-      // 응답이 배열인 경우 처리 (API_SPECS 예시 기준)
-      const newReviews = Array.isArray(response.data) ? response.data : response.data.content || [];
-
-      if (newReviews.length === 0) {
-        setHasMore(false);
-      } else {
-        // 중복 제거 (혹시 모를 key 중복 방지)
-        setReviews(prev => {
-          const existingIds = new Set(prev.map(r => r.reviewId));
-          const uniqueNew = newReviews.filter(r => !existingIds.has(r.reviewId));
-          return [...prev, ...uniqueNew];
-        });
-
-        if (newReviews.length < ITEMS_PER_PAGE) {
-          setHasMore(false);
-        }
-      }
-    } catch (error) {
-      console.error('리뷰 목록 로드 실패:', error);
-      setHasMore(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 초기 데이터 로드
   useEffect(() => {
-    loadReviews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+    if (userNo) {
+      dispatch(fetchMyReviews(userNo));
+    }
+  }, [dispatch, userNo]);
+
+  // 클라이언트 사이드 페이지네이션 처리
+  useEffect(() => {
+    if (!myReviews) return;
+
+    const start = 0;
+    const end = page * ITEMS_PER_PAGE;
+    const sliced = myReviews.slice(start, end);
+
+    setVisibleReviews(sliced);
+    setHasMore(end < myReviews.length);
+  }, [myReviews, page]);
 
   // IntersectionObserver 설정
   useEffect(() => {
@@ -83,20 +58,26 @@ const MyReviewList = () => {
     };
   }, [hasMore, loading]);
 
+  const handleDelete = async reviewId => {
+    if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+      await dispatch(deleteReview({ userNo, reviewId }));
+    }
+  };
+
   return (
     <div className="order-history-container">
       <h2 className="page-title">나의 리뷰</h2>
       <div className="order-list">
-        {reviews.length === 0 && !loading ? (
+        {visibleReviews.length === 0 && !loading ? (
           <div className="empty-list">
             <p>작성한 리뷰가 없습니다.</p>
           </div>
         ) : (
-          reviews.map((review, index) => (
+          visibleReviews.map((review, index) => (
             <div
               key={`${review.reviewId}-${index}`}
               className="order-table-row"
-              style={{ display: 'flex', padding: '20px', alignItems: 'flex-start' }}
+              style={{ display: 'flex', padding: '20px', alignItems: 'flex-start', position: 'relative' }}
             >
               <div style={{ width: '80px', marginRight: '20px', flexShrink: 0 }}>
                 {/* API 응답에 이미지가 없으면 플레이스홀더 사용 */}
@@ -132,6 +113,23 @@ const MyReviewList = () => {
                   </div>
                 )}
               </div>
+              <button
+                onClick={() => handleDelete(review.reviewId)}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  background: 'none',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  color: '#666',
+                }}
+              >
+                삭제
+              </button>
             </div>
           ))
         )}
