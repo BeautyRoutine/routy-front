@@ -9,54 +9,50 @@ const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
+  // 로그인 여부
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
-  const convertToCard = (list) =>
+  // 공통 카드 변환 함수
+  const convertToCard = list =>
     list.map((p, index) => ({
       id: p.prdNo,
       name: p.prdName,
       brand: p.prdCompany,
-      rating: p.prdRating || 4.0,
+      rating: p.prdRating || p.avgStar || 4.0, // ★ 별점 처리
       price: p.prdPrice,
       img: p.prdImg ? `/images/${p.prdImg}` : `/images/product${index + 1}.jpg`,
     }));
 
   useEffect(() => {
+    // ★ fallback: 로그인 X or 피부타입 없음 → 별점 3.0 이상 best 4개
     const loadFallback = async () => {
-      const res = await axios.get(
-        'http://localhost:8080/api/products/list/fallback',
-        { params: { minRating: 3.0, limit: 4 } }
-      );
+      const res = await axios.get('http://localhost:8080/api/products/list/fallback', {
+        params: { minRating: 3.0, limit: 4 },
+      });
       setProducts(convertToCard(res.data.data || []));
     };
 
+    // ★ 로그인 + 피부 타입 O → 피부타입 기반 추천
     const loadSkinRecommend = async () => {
-      const res = await axios.get(
-        'http://localhost:8080/api/products/list/skin_type',
-        { params: { limit: 4, skin: Number(userSkin) } }
-      );
+      const res = await axios.get('http://localhost:8080/api/products/list/skin_type', {
+        params: { limit: 4, skin: Number(userSkin) },
+      });
       setProducts(convertToCard(res.data.data || []));
     };
 
-    // fallback / skinType 체크
-    if (!isLoggedIn || !userSkin) {
-      loadFallback();
-    } else {
-      loadSkinRecommend();
-    }
+    // 조건 분기
+    if (!isLoggedIn || !userSkin) loadFallback();
+    else loadSkinRecommend();
   }, [isLoggedIn, userSkin]);
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-
-      {/* 상단 타이틀 */}
+      {/* 상단 제목 */}
       <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
 
-      <p className="text-muted small mb-4">
-        로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
-      </p>
+      <p className="text-muted small mb-4">로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!</p>
 
-      {/* ★ 카드가 여기로 올라온다 */}
+      {/* ★ 카드가 위에 위치해야 함 */}
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
         {products.map(p => (
           <div key={p.id} className="col">
@@ -65,47 +61,48 @@ const SimilarSkinProducts = ({ userSkin }) => {
               style={{ cursor: 'pointer' }}
               onClick={() => navigate(`/products/${p.id}`)}
             >
+              {/* 하트 */}
               <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
 
-              <img
-                src={p.img}
-                className="card-img-top"
-                alt={p.name}
-                style={{ borderRadius: '10px' }}
-              />
+              {/* 썸네일 */}
+              <img src={p.img} className="card-img-top" alt={p.name} style={{ borderRadius: '10px' }} />
 
               <div className="card-body text-start">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
-                <p className="small mb-2">⭐ {p.rating}</p>
 
-                <h6 className="fw-bold text-dark">
-                  {p.price.toLocaleString()}원
-                </h6>
+                {/* ★ 별점 소수점까지 표시 */}
+                <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
+
+                <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
+
+                {/* ★ 장바구니 버튼 복구 */}
+                <button
+                  className="btn cart-btn w-100 mt-2"
+                  onClick={e => {
+                    e.stopPropagation();
+                    alert('장바구니에 추가되었습니다.');
+                  }}
+                >
+                  장바구니
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ★ 버튼은 카드 아래에 있어야 함 */}
+      {/* ★ 로그인 안했을 때 버튼은 카드 아래에 위치 */}
       {!isLoggedIn && (
         <div className="mb-2">
-          <button
-            className="btn btn-primary rounded-pill px-4 me-2"
-            onClick={() => navigate('/login')}
-          >
+          <button className="btn btn-primary rounded-pill px-4 me-2" onClick={() => navigate('/login')}>
             로그인
           </button>
-          <button
-            className="btn btn-outline-primary rounded-pill px-4"
-            onClick={() => navigate('/signup')}
-          >
+          <button className="btn btn-outline-primary rounded-pill px-4" onClick={() => navigate('/signup')}>
             회원가입
           </button>
         </div>
       )}
-
     </div>
   );
 };
