@@ -4,7 +4,7 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-
 import { CartPage } from './pages/CartPage';
 
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
-
+import SkinProfileSetupPage from './pages/SkinProfileSetupPage';
 import Home from 'pages/Home';
 import MyPage from './pages/MyPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -107,6 +107,7 @@ function App() {
           <Route path="/signup" element={isLoggedIn ? <Navigate to="/" replace /> : <SignupPage />} />
           <Route path="/logout" element={<LogoutPage />} />
           <Route path="*" element={<div style={{ padding: 24 }}>페이지를 찾을 수 없습니다.</div>} />
+          <Route path="/skin-profile" element={<SkinProfileSetupPage />} />
         </Routes>
       </main>
 
