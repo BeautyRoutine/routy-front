@@ -139,7 +139,7 @@ const ReviewList = ({ reviewInfo }) => {
               {/* 사진이 있을 때만 표시 */}
               {review.revImg && <img src={review.revImg} alt="리뷰 사진" className="review-attached-img" />}
 
-              <p className="review-text-content">{review.revContent || review.revGood}</p>
+              <p className="review-text-content">{review.content}</p>
             </div>
 
             {/* 태그*/}
