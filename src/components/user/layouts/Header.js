@@ -110,6 +110,7 @@ const SAVE_PREF_KEY = 'routy:search-save-enabled';
  */
 export function Header({
   isLoggedIn,
+  userId,
   onLoginChange,
   onNavigate,
   onLoginClick,
@@ -354,7 +355,7 @@ export function Header({
 
   // 로그인 이후 알림/장바구니 카운트를 API에서 읽어온다
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !userId) {
       setAutoNotificationCount(FALLBACK_COUNTS.notifications);
       setAutoCartCount(FALLBACK_COUNTS.cart);
       return undefined;
@@ -366,8 +367,9 @@ export function Header({
       const controller = new AbortController();
       aborters.push(() => controller.abort());
 
+      // /api/users/{userId}/notifications/count
       api
-        .get(ENDPOINTS.notificationCount, { signal: controller.signal })
+        .get(`/api/users/${userId}/notifications/count`, { signal: controller.signal })
         .then(response => {
           const result = response.data;
           const value =
@@ -390,8 +392,17 @@ export function Header({
       const controller = new AbortController();
       aborters.push(() => controller.abort());
 
+      // 장바구니는 보통 userId가 필요하거나 세션 기반일 수 있음.
+      // 여기서는 userId를 사용하는 것으로 가정: /api/users/{userId}/cart/count
+      // 만약 /api/cart/count가 세션 기반이라면 그대로 둬도 됨.
+      // 하지만 일관성을 위해 userId를 사용하는 것이 좋음.
+      // 기존 ENDPOINTS.cartCount가 '/api/cart/count' 였음.
+      // 백엔드 스펙에 따라 다르지만, 일단 기존 유지하되 userId가 있으면 query param으로라도 보낼 수 있음.
+      // 혹은 /api/users/{userId}/cart/count 로 변경.
+      // 안전하게 기존 ENDPOINTS.cartCount를 사용하되, userId가 있으면 path를 변경하는 식으로.
+      // 여기서는 /api/users/{userId}/cart/count 로 변경 시도.
       api
-        .get(ENDPOINTS.cartCount, { signal: controller.signal })
+        .get(`/api/users/${userId}/cart/count`, { signal: controller.signal })
         .then(response => {
           const result = response.data;
           const value =
@@ -403,8 +414,18 @@ export function Header({
           setAutoCartCount(value);
         })
         .catch(error => {
-          console.error('장바구니 수 불러오기 실패:', error);
-          setAutoCartCount(FALLBACK_COUNTS.cart);
+          // 실패 시 기존 엔드포인트로 재시도 (혹시 세션 기반일 경우)
+          api
+            .get(ENDPOINTS.cartCount, { signal: controller.signal })
+            .then(res => {
+              const result = res.data;
+              const value = typeof result === 'number' ? result : result?.count ?? FALLBACK_COUNTS.cart;
+              setAutoCartCount(value);
+            })
+            .catch(() => {
+              console.error('장바구니 수 불러오기 실패:', error);
+              setAutoCartCount(FALLBACK_COUNTS.cart);
+            });
         });
     } else {
       setAutoCartCount(cartCount);
@@ -413,7 +434,7 @@ export function Header({
     return () => {
       aborters.forEach(abort => abort());
     };
-  }, [isLoggedIn, notificationCount, cartCount]);
+  }, [isLoggedIn, userId, notificationCount, cartCount]);
 
   useEffect(() => {
     if (typeof notificationCount === 'number') return;
@@ -468,15 +489,18 @@ export function Header({
   // 검색 패널 관련 헬퍼 및 핸들러
   // ---------------------------------
   const fetchRecentSearches = useCallback(() => {
-    if (!ENDPOINTS.searchRecent) return;
+    // userId가 없으면 검색 기록을 가져올 수 없음 (또는 로컬 스토리지 사용)
+    if (!userId) return;
+
     if (recentFetchController.current) {
       recentFetchController.current.abort();
     }
     const controller = new AbortController();
     recentFetchController.current = controller;
 
+    // /api/users/{userId}/search/history
     api
-      .get(ENDPOINTS.searchRecent, { signal: controller.signal })
+      .get(`/api/users/${userId}/search/history`, { signal: controller.signal })
       .then(response => {
         const normalized = normalizeRecentSearches(response.data);
         if (Array.isArray(normalized) && normalized.length) {
@@ -487,7 +511,7 @@ export function Header({
         if (error.name === 'CanceledError') return;
         console.error('최근 검색어 불러오기 실패:', error);
       });
-  }, []);
+  }, [userId]);
 
   const fetchSimilarSkinSearches = useCallback(() => {
     if (!ENDPOINTS.searchSimilarSkin) return;
