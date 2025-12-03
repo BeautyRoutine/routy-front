@@ -345,9 +345,12 @@ export const deleteReview = createAsyncThunk('user/deleteReview', async ({ userN
 /**
  * Async Thunk: 회원 탈퇴
  */
-export const withdrawUser = createAsyncThunk('user/withdrawUser', async (userNo, { rejectWithValue }) => {
+export const withdrawUser = createAsyncThunk('user/withdrawUser', async ({ userNo, password }, { rejectWithValue }) => {
   try {
-    await api.delete(getEndpoints(userNo).withdrawal);
+    // DELETE 요청에 body를 실을 때는 config.data에 넣어야 함
+    await api.delete(getEndpoints(userNo).withdrawal, {
+      data: { password },
+    });
     return userNo;
   } catch (error) {
     return rejectWithValue(error.response?.data || '회원 탈퇴에 실패했습니다.');
