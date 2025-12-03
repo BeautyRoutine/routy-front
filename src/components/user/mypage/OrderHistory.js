@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { DEMO_ORDERS } from '../data/mypageMocks';
 import './OrderHistory.css';
 
-const OrderHistory = ({ orders = DEMO_ORDERS }) => {
+const OrderHistory = ({ orders = [] }) => {
   const [period, setPeriod] = useState('3months'); // '1month', '3months', '6months', '12months'
   const [visibleOrders, setVisibleOrders] = useState([]);
   const [page, setPage] = useState(1);

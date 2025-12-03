@@ -1,22 +1,51 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
+import { withdrawUser } from '../../../features/user/userSlice';
 import './MemberWithdrawal.css';
 
 const MemberWithdrawal = ({ onCancel }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { profile, currentUser } = useSelector(state => state.user);
   const [agreed, setAgreed] = useState(false);
   const [password, setPassword] = useState('');
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
     if (!agreed) return;
     if (!password) {
       alert('비밀번호를 입력해주세요.');
       return;
     }
-    // API call for withdrawal would go here
+
+    // userNo 결정 로직: profile.userNo가 유효하지 않으면 currentUser.userNo 사용
+    let targetUserNo = profile?.userNo;
+
+    // "me" 문자열이거나 숫자가 아닌 경우 처리
+    if (!targetUserNo || isNaN(Number(targetUserNo))) {
+      if (currentUser?.userNo && !isNaN(Number(currentUser.userNo))) {
+        targetUserNo = currentUser.userNo;
+      }
+    }
+
+    if (!targetUserNo) {
+      alert('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+      return;
+    }
+
     if (window.confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      console.log('Withdrawal requested');
-      alert('회원 탈퇴가 완료되었습니다.');
-      // Redirect to home or logout
+      try {
+        // API 스펙 변경: 비밀번호 검증을 위해 password 함께 전송
+        await dispatch(withdrawUser({ userNo: targetUserNo, password })).unwrap();
+        alert('회원 탈퇴가 완료되었습니다.');
+        navigate('/'); // 홈으로 이동
+      } catch (error) {
+        console.error('Withdrawal failed:', error);
+        // 에러 메시지 처리 (백엔드에서 보낸 메시지 표시)
+        const errorMsg = error?.resultMsg || (typeof error === 'string' ? error : '회원 탈퇴 처리에 실패했습니다.');
+        alert(errorMsg);
+      }
     }
   };
 

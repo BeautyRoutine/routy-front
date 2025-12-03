@@ -2,68 +2,71 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
-import axios from 'axios';
+import api from '../lib/apiClient';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const [formData, setFormData] = useState({
     userId: '',
-    userPw: ''
+    userPw: '',
   });
 
   const [errors, setErrors] = useState({});
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     const newErrors = {};
-    
+
     if (!formData.userId.trim()) {
       newErrors.userId = '아이디를 입력해주세요';
     }
-    
+
     if (!formData.userPw) {
       newErrors.userPw = '비밀번호를 입력해주세요';
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
+      const response = await api.post('/api/auth/login', {
         userId: formData.userId,
-        userPw: formData.userPw
+        userPw: formData.userPw,
       });
-      
+
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
-        
-        dispatch(setUser({
+
+        const user = {
           userId: response.data.userId,
           userName: response.data.userName,
-          userLevel: response.data.userLevel
-        }));
-        
+          userLevel: response.data.userLevel,
+        };
+        localStorage.setItem('user', JSON.stringify(user));
+
+        dispatch(setUser(user));
+
         alert('로그인 성공!');
         navigate('/');
       }
@@ -80,52 +83,62 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%)',
-      padding: '40px 20px'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '24px',
-        padding: '50px 60px',
-        width: '100%',
-        maxWidth: '500px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
-      }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%)',
+        padding: '40px 20px',
+      }}
+    >
+      <div
+        style={{
+          background: 'white',
+          borderRadius: '24px',
+          padding: '50px 60px',
+          width: '100%',
+          maxWidth: '500px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+        }}
+      >
         {/* 로고 */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #81D4FA 0%, #80CBC4 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 20px',
-            fontSize: '36px',
-            fontWeight: '700',
-            color: 'white'
-          }}>
+          <div
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #81D4FA 0%, #80CBC4 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+              fontSize: '36px',
+              fontWeight: '700',
+              color: 'white',
+            }}
+          >
             R
           </div>
-          <h1 style={{
-            color: '#42A5F5',
-            fontSize: '32px',
-            fontWeight: '700',
-            margin: '0 0 10px 0'
-          }}>
+          <h1
+            style={{
+              color: '#42A5F5',
+              fontSize: '32px',
+              fontWeight: '700',
+              margin: '0 0 10px 0',
+            }}
+          >
             Routy
           </h1>
-          <p style={{
-            color: '#666',
-            fontSize: '14px',
-            margin: 0
-          }}>
+          <p
+            style={{
+              color: '#666',
+              fontSize: '14px',
+              margin: 0,
+            }}
+          >
             나만의 뷰티 루틴을 Routy와 함께 시작해보세요
           </p>
         </div>
@@ -133,13 +146,15 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit}>
           {/* 아이디 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               아이디
             </label>
             <input
@@ -157,21 +172,27 @@ const LoginPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.userId && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userId}</p>}
+            {errors.userId && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userId}
+              </p>
+            )}
           </div>
 
           {/* 비밀번호 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               비밀번호
             </label>
             <input
@@ -189,37 +210,45 @@ const LoginPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.userPw && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userPw}</p>}
+            {errors.userPw && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userPw}
+              </p>
+            )}
           </div>
 
           {/* 로그인 상태 유지 & 비밀번호 찾기 */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            marginBottom: '30px',
-            padding: '0 5px'
-          }}>
-            <label style={{ 
-              display: 'flex', 
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              cursor: 'pointer',
-              fontSize: '14px',
-              color: '#666'
-            }}>
+              marginBottom: '30px',
+              padding: '0 5px',
+            }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                fontSize: '14px',
+                color: '#666',
+              }}
+            >
               <input
                 type="checkbox"
                 checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                onChange={e => setRememberMe(e.target.checked)}
                 style={{
                   marginRight: '8px',
                   width: '18px',
                   height: '18px',
                   cursor: 'pointer',
-                  accentColor: '#42A5F5'
+                  accentColor: '#42A5F5',
                 }}
               />
               로그인 상태 유지
@@ -233,7 +262,7 @@ const LoginPage = () => {
                 color: '#42A5F5',
                 cursor: 'pointer',
                 fontSize: '14px',
-                fontWeight: '500'
+                fontWeight: '500',
               }}
             >
               비밀번호 찾기
@@ -254,13 +283,13 @@ const LoginPage = () => {
               fontWeight: '700',
               cursor: 'pointer',
               transition: 'all 0.3s',
-              boxShadow: '0 4px 15px rgba(66, 165, 245, 0.3)'
+              boxShadow: '0 4px 15px rgba(66, 165, 245, 0.3)',
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={e => {
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = '0 6px 20px rgba(66, 165, 245, 0.4)';
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={e => {
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = '0 4px 15px rgba(66, 165, 245, 0.3)';
             }}
@@ -281,7 +310,7 @@ const LoginPage = () => {
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: '600',
-                textDecoration: 'none'
+                textDecoration: 'none',
               }}
             >
               회원가입

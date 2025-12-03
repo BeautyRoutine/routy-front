@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Search,
@@ -12,108 +12,109 @@ import {
   Ban,
   Check,
 } from 'lucide-react';
+import { searchIngredients } from '../../../lib/apiClient';
 import '../../../styles/MyPage.css';
 
-// Mock data for search results with detailed info
-const MOCK_INGREDIENTS = [
-  {
-    id: 1,
-    name: '히알루론산',
-    engName: 'Hyaluronic Acid',
-    desc: '수분 공급 및 보습 유지',
-    ewg: { grade: 1, label: '낮은 위험도', data: '적당함(Fair)' },
-    purpose: '피부컨디셔닝제(기타), 점도증가제(수성)',
-    limit: '해당 없음',
-    ban: '해당 없음',
-    caution20: '해당 없음',
-    allergy: '해당 없음',
-    skinType: '해당 없음',
-    functional: '해당 없음',
-  },
-  {
-    id: 2,
-    name: '티트리 오일',
-    engName: 'Tea Tree Leaf Oil',
-    desc: '피부 진정 및 트러블 케어',
-    ewg: { grade: 1, label: '낮은 위험도', data: '적당함(Fair)' },
-    purpose: '향료, 피부컨디셔닝제',
-    limit: '해당 없음',
-    ban: '해당 없음',
-    caution20: '해당 없음',
-    allergy: '리모넨 (자연유래)',
-    skinType: '지성 피부 추천',
-    functional: '해당 없음',
-  },
-  {
-    id: 3,
-    name: '파라벤',
-    engName: 'Paraben',
-    desc: '보존제, 피부 자극 가능성',
-    ewg: { grade: 7, label: '높은 위험도', data: '제한적(Limited)' },
-    purpose: '살균보존제',
-    limit: '단일 0.4%, 혼합 0.8%',
-    ban: '일부 종류 금지',
-    caution20: '파라벤류',
-    allergy: '해당 없음',
-    skinType: '민감성 주의',
-    functional: '해당 없음',
-  },
-  {
-    id: 4,
-    name: '알코올',
-    engName: 'Alcohol',
-    desc: '수분 증발, 건조 유발 가능',
-    ewg: { grade: 2, label: '낮은 위험도', data: '적당함(Fair)' },
-    purpose: '기포방지제, 수렴제, 향료, 용제',
-    limit: '해당 없음',
-    ban: '해당 없음',
-    caution20: '해당 없음',
-    allergy: '해당 없음',
-    skinType: '건성/민감성 주의',
-    functional: '해당 없음',
-  },
-  {
-    id: 5,
-    name: '세라마이드',
-    engName: 'Ceramide NP',
-    desc: '피부 장벽 강화',
-    ewg: { grade: 1, label: '낮은 위험도', data: '좋음(Good)' },
-    purpose: '피부교질화제, 헤어컨디셔닝제',
-    limit: '해당 없음',
-    ban: '해당 없음',
-    caution20: '해당 없음',
-    allergy: '해당 없음',
-    skinType: '건성 추천',
-    functional: '해당 없음',
-  },
-  {
-    id: 6,
-    name: '나이아신아마이드',
-    engName: 'Niacinamide',
-    desc: '미백 및 피지 조절',
-    ewg: { grade: 1, label: '낮은 위험도', data: '좋음(Good)' },
-    purpose: '피부컨디셔닝제',
-    limit: '해당 없음',
-    ban: '해당 없음',
-    caution20: '해당 없음',
-    allergy: '해당 없음',
-    skinType: '모든 피부',
-    functional: '미백 기능성',
-  },
-];
-
-const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
+const IngredientAddModal = ({ isOpen, onClose, onAdd, onRemove, currentIngredients }) => {
   const [view, setView] = useState('search'); // 'search' | 'detail'
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [addedFocusIds, setAddedFocusIds] = useState([]);
   const [addedAvoidIds, setAddedAvoidIds] = useState([]);
 
-  if (!isOpen) return null;
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 10;
 
+  // 모달이 열릴 때 기존 성분 목록을 로컬 상태에 반영
+  useEffect(() => {
+    if (isOpen && currentIngredients) {
+      // id가 없는 경우를 대비해 ingredientId, ingNo 등도 확인하여 매핑
+      const focusIds = (currentIngredients.focus || []).map(item => item.id || item.ingredientId || item.ingNo);
+      const avoidIds = (currentIngredients.avoid || []).map(item => item.id || item.ingredientId || item.ingNo);
+      setAddedFocusIds(focusIds);
+      setAddedAvoidIds(avoidIds);
+    }
+  }, [isOpen, currentIngredients]);
+
+  // 검색어 또는 페이지 변경 시 API 호출
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      setLoading(true);
+      try {
+        const res = await searchIngredients({
+          page: currentPage,
+          size: pageSize,
+          keyword: searchTerm,
+        });
+
+        // API 응답 처리
+        // 예상 구조: { list: [...], totalPage: N, ... }
+        const data = res.data || {};
+        console.log('성분 검색 API 응답:', data); // 디버깅용 로그
+
+        const list = data.list || [];
+
+        // totalPage 필드명 확인 (totalPage, total_page, totalPages 등)
+        // 또는 totalCount, count, total 등으로 전체 개수가 올 경우 페이지 수 계산
+        let total = 1;
+        if (data.totalPage || data.total_page || data.totalPages) {
+          total = data.totalPage || data.total_page || data.totalPages;
+        } else if (data.totalCount || data.total_count || data.count || data.total) {
+          const count = data.totalCount || data.total_count || data.count || data.total;
+          total = Math.ceil(count / pageSize);
+        }
+
+        // 최소 1페이지 보장
+        total = Math.max(1, total);
+
+        const mappedList = list.map(item => ({
+          id: item.ingNo,
+          name: item.ingName,
+          engName: item.ingEnName === 'nan' ? '' : item.ingEnName,
+          desc: item.ingDesc === 'nan' ? '' : item.ingDesc,
+          // 상세 정보 매핑 (필요한 경우 추가 매핑)
+          functional: item.ingFunctional === 'nan' ? '해당 없음' : item.ingFunctional,
+          allergy: item.ingAllergen ? '주의 성분 포함' : '해당 없음',
+          caution20: item.ingDanger ? '주의 성분' : '해당 없음',
+          purpose: item.ingFunctional === 'nan' ? '정보 없음' : item.ingFunctional, // 임시 매핑
+        }));
+
+        setSearchResults(mappedList);
+        setTotalPages(total);
+      } catch (error) {
+        console.error('성분 검색 실패:', error);
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // 검색어가 없어도 전체 목록 조회를 위해 호출 (또는 검색어가 있을 때만 호출하도록 조건 추가 가능)
+    // 여기서는 검색어가 변경되면 1페이지로 리셋하는 로직이 필요하므로 분리하거나 의존성 관리 필요
+    const timer = setTimeout(() => {
+      fetchIngredients();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, currentPage]);
+
+  // 검색어 변경 시 페이지 리셋
   const handleSearch = e => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // 검색어 변경 시 1페이지로 이동
   };
+
+  const handlePageChange = newPage => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  if (!isOpen) return null;
 
   const handleItemClick = ingredient => {
     setSelectedIngredient(ingredient);
@@ -128,26 +129,36 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
   const toggleFocus = id => {
     if (addedFocusIds.includes(id)) {
       setAddedFocusIds(addedFocusIds.filter(i => i !== id));
-      // TODO: Dispatch remove action
+      if (onRemove && selectedIngredient) onRemove(selectedIngredient, 'FOCUS');
     } else {
       setAddedFocusIds([...addedFocusIds, id]);
-      setAddedAvoidIds(addedAvoidIds.filter(i => i !== id)); // Remove from avoid if adding to focus
-      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'focus');
+
+      // 만약 피할 성분에 있었다면 제거 (서버에서도 제거 요청 필요)
+      if (addedAvoidIds.includes(id)) {
+        setAddedAvoidIds(addedAvoidIds.filter(i => i !== id));
+        if (onRemove && selectedIngredient) onRemove(selectedIngredient, 'AVOID');
+      }
+
+      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'FOCUS');
     }
   };
 
   const toggleAvoid = id => {
     if (addedAvoidIds.includes(id)) {
       setAddedAvoidIds(addedAvoidIds.filter(i => i !== id));
-      // TODO: Dispatch remove action
+      if (onRemove && selectedIngredient) onRemove(selectedIngredient, 'AVOID');
     } else {
       setAddedAvoidIds([...addedAvoidIds, id]);
-      setAddedFocusIds(addedFocusIds.filter(i => i !== id)); // Remove from focus if adding to avoid
-      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'avoid');
+
+      // 만약 관심 성분에 있었다면 제거
+      if (addedFocusIds.includes(id)) {
+        setAddedFocusIds(addedFocusIds.filter(i => i !== id));
+        if (onRemove && selectedIngredient) onRemove(selectedIngredient, 'FOCUS');
+      }
+
+      if (onAdd && selectedIngredient) onAdd(selectedIngredient, 'AVOID');
     }
   };
-
-  const filteredIngredients = MOCK_INGREDIENTS.filter(item => item.name.includes(searchTerm));
 
   // Detail View Component
   const DetailView = ({ ingredient }) => {
@@ -200,7 +211,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>배합목적</strong>
-                <p>{ingredient.purpose}</p>
+                <p>{ingredient.purpose || '정보 없음'}</p>
               </div>
             </div>
 
@@ -210,7 +221,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>배합한도</strong>
-                <p>{ingredient.limit}</p>
+                <p>{ingredient.limit || '해당 없음'}</p>
               </div>
             </div>
 
@@ -220,7 +231,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>배합금지</strong>
-                <p>{ingredient.ban}</p>
+                <p>{ingredient.ban || '해당 없음'}</p>
               </div>
             </div>
 
@@ -230,7 +241,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>20가지 주의성분</strong>
-                <p>{ingredient.caution20}</p>
+                <p>{ingredient.caution20 || '해당 없음'}</p>
               </div>
             </div>
 
@@ -240,7 +251,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>알레르기 유발 주의성분</strong>
-                <p>{ingredient.allergy}</p>
+                <p>{ingredient.allergy || '해당 없음'}</p>
               </div>
             </div>
 
@@ -250,7 +261,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>피부타입별 특이성분</strong>
-                <p>{ingredient.skinType}</p>
+                <p>{ingredient.skinType || '해당 없음'}</p>
               </div>
             </div>
 
@@ -260,7 +271,7 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
               <div className="info-text">
                 <strong>기능성 성분 여부</strong>
-                <p>{ingredient.functional}</p>
+                <p>{ingredient.functional || '해당 없음'}</p>
               </div>
             </div>
           </div>
@@ -309,25 +320,78 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd }) => {
               </div>
 
               <div className="search-results">
-                {filteredIngredients.length > 0 ? (
-                  <div className="ingredient-grid">
-                    {filteredIngredients.map(item => (
-                      <div
-                        key={item.id}
-                        className="ingredient-card search-result clickable"
-                        onClick={() => handleItemClick(item)}
-                      >
-                        <div className="card-content">
-                          <span className="ingredient-name">{item.name}</span>
-                          <p className="ingredient-desc">{item.desc}</p>
-                        </div>
-                        <ChevronRight size={20} color="#ccc" />
-                      </div>
-                    ))}
+                {loading ? (
+                  <div className="empty-search">
+                    <p>검색 중...</p>
                   </div>
+                ) : searchResults.length > 0 ? (
+                  <>
+                    <div className="ingredient-grid">
+                      {searchResults.map(item => (
+                        <div
+                          key={item.id}
+                          className="ingredient-card search-result clickable"
+                          onClick={() => handleItemClick(item)}
+                        >
+                          <div className="card-content">
+                            <span className="ingredient-name">{item.name}</span>
+                            <p className="ingredient-desc">{item.desc}</p>
+                          </div>
+                          <ChevronRight size={20} color="#ccc" />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div
+                      className="pagination-controls"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '16px',
+                        marginTop: '20px',
+                        paddingBottom: '20px',
+                      }}
+                    >
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        style={{
+                          padding: '8px 12px',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '6px',
+                          background: currentPage === 1 ? '#f5f5f5' : 'white',
+                          color: currentPage === 1 ? '#999' : '#333',
+                          cursor: currentPage === 1 ? 'default' : 'pointer',
+                          fontSize: '13px',
+                        }}
+                      >
+                        이전
+                      </button>
+                      <span style={{ fontSize: '14px', color: '#666' }}>
+                        {currentPage} / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        style={{
+                          padding: '8px 12px',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '6px',
+                          background: currentPage === totalPages ? '#f5f5f5' : 'white',
+                          color: currentPage === totalPages ? '#999' : '#333',
+                          cursor: currentPage === totalPages ? 'default' : 'pointer',
+                          fontSize: '13px',
+                        }}
+                      >
+                        다음
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   <div className="empty-search">
-                    <p>검색 결과가 없습니다.</p>
+                    <p>{searchTerm ? '검색 결과가 없습니다.' : '성분을 검색해보세요.'}</p>
                   </div>
                 )}
               </div>
