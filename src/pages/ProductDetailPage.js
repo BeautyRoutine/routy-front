@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import api from 'lib/apiClient';
+import { saveRecentProduct } from 'features/user/userSlice';
 import ProductImageGallery from 'components/user/details/ProductImageGallery';
 import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
@@ -11,10 +12,24 @@ import ProductIngredientAnalysis from 'components/user/details/ProductIngredient
 
 const ProductDetailPage = () => {
   const { prdNo } = useParams(); // URL의 :prdNo 값을 가져옴 (예: 101)
-  const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl); //백엔드 주소 가져오기, 미리 apiBaseUrl 지정해둠
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector(state => state.user);
 
   const [productData, setProductData] = useState(null); //  데이터를 담을 state
   const [loading, setLoading] = useState(true); // 로딩 중인지 체크
+
+  // 최근 본 상품 저장
+  useEffect(() => {
+    if (currentUser && currentUser.userId && prdNo) {
+      // prdSubCate는 상품 정보에 포함되어 있을 수 있으나,
+      // 현재 시점(진입 시점)에서는 알기 어려울 수 있음.
+      // 일단 필수값인 prdNo만 보냄. 필요하다면 상품 정보 로드 후 호출해야 함.
+      // 하지만 "진입할 때마다"라고 했으므로 여기서 호출.
+      // 만약 서브카테고리가 필수라면 상품 로드 후 호출로 위치를 옮겨야 함.
+      // 요청사항: "prdSubCate: 서브 카테고리 번호 (선택)" -> 선택이므로 prdNo만 보냄.
+      dispatch(saveRecentProduct({ userId: currentUser.userId, prdNo }));
+    }
+  }, [currentUser, prdNo, dispatch]);
 
   // 연결작업
   useEffect(() => {
@@ -22,22 +37,14 @@ const ProductDetailPage = () => {
       //비동기
       try {
         setLoading(true); //로딩 시작
-        //get 요청 주소 : http://localhost:8080/api/products/101
-        const productRes = await axios.get(`${apiBaseUrl}/products/${prdNo}`);
-        const reviewRes = await axios.get(`${apiBaseUrl}/products/${prdNo}/reviews`);
-        // 백엔드 API (상품, 리뷰, 성분)
-        // const [productRes, reviewRes, ingredientRes] = await Promise.all([
-        //axios.get(`/api/products/${prdNo}`),
-        //axios.get(`/api/products/${prdNo}/reviews`),
-        //axios.get(`/api/products/${prdNo}/ingredients`),
-        // ]);
+        //get 요청 주소 : /api/products/101
+        const productRes = await api.get(`/api/products/${prdNo}`);
+        const reviewRes = await api.get(`/api/products/${prdNo}/reviews`);
 
         // 데이터 구조 만들기
         const combinedData = {
           productInfo: productRes.data.data, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
           reviewInfo: reviewRes.data.data || { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 리뷰 데이터
-          // ingredientInfo: ingredientRes.data.data, // 성분 데이터
-          // reviewInfo: { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 일단 더미
           ingredientInfo: { totalCount: 0, ingredients: [] }, // 일단 더미
           purchaseInfo: {}, // 하드코딩인거도 수정해야하는데
         };
@@ -56,7 +63,7 @@ const ProductDetailPage = () => {
       //상품번호가 있을때만 서버요청
       fetchData();
     }
-  }, [prdNo, apiBaseUrl]);
+  }, [prdNo]);
 
   // 로딩 중일 때 화면 돌아가기
   if (loading) {
