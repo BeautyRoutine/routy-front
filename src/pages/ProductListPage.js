@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../lib/apiClient';
 import { useSearchParams } from 'react-router-dom';
 import CategoryFilter from '../components/user/product/CategoryFilter';
 import ProductGrid from '../components/user/product/ProductGrid';
@@ -17,7 +17,7 @@ const ProductListPage = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/api/products/list/skin_cate', { params: { limit, skin } });
+        const res = await api.get('/api/products/list/skin_cate', { params: { limit, skin } });
 
         const list = res.data.data || [];
         setProducts(list);

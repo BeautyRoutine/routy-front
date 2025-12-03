@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
-import axios from 'axios';
+import api from '../lib/apiClient';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
+      const response = await api.post('/api/auth/login', {
         userId: formData.userId,
         userPw: formData.userPw,
       });
