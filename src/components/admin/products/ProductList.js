@@ -144,7 +144,7 @@ const ProductList = () => {
                   </td>
                   <td>
                     <img
-                      src={`/images/${p.prdImg}`}
+                      src={`${process.env.PUBLIC_URL}/images/product/${p.prdImg}`}
                       alt="상품 이미지"
                       width={50}
                       height={50}

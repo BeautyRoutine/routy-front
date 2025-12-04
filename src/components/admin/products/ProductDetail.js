@@ -55,7 +55,7 @@ const ProductDetail = () => {
           {/* 상품 이미지 */}
           <div className="text-center mb-4">
             <img
-              src={`/images/${product.prdImg}`}
+              src={`${process.env.PUBLIC_URL}/images/product/${product.prdImg}`}
               alt={product.prdName}
               style={{
                 width: '200px',
