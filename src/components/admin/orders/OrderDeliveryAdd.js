@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 
 import OrderPrdTable from './OrderPrdTable';
+import AddressFields from 'components/common/AddressFields';
 
 const OrderDeliveryAdd = () => {
   const navigate = useNavigate();
@@ -35,20 +36,6 @@ const OrderDeliveryAdd = () => {
   const handleChange = e => {
     const { name, value } = e.target;
     setItem(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handlePostcode = () => {
-    new window.daum.Postcode({
-      oncomplete: function (data) {
-        setItem(prev => ({
-          ...prev,
-          delvGetZip: data.zonecode,
-          delvGetJibunAddr: data.jibunAddress || data.autoJibunAddress,
-          delvGetRoadAddr: data.roadAddress,
-          delvGetBcCode: data.bcode,
-        }));
-      },
-    }).open();
   };
 
   const handleSave = async () => {
@@ -153,80 +140,8 @@ const OrderDeliveryAdd = () => {
                   />
                 </td>
               </tr>
-
-              <tr>
-                <th className="bg-light">우편번호</th>
-                <td colSpan="2">
-                  <input
-                    type="text"
-                    name="delvGetZip"
-                    className="form-control bg-light"
-                    value={item.delvGetZip}
-                    readOnly
-                    onClick={handlePostcode}
-                  />
-                </td>
-                <td>
-                  <button type="button" className="btn btn-dark w-100" onClick={handlePostcode}>
-                    주소 검색
-                  </button>
-                </td>
-              </tr>
-
-              <tr>
-                <th className="bg-light">지번 주소</th>
-                <td colSpan="3">
-                  <input
-                    type="text"
-                    name="delvGetJibunAddr"
-                    className="form-control bg-light"
-                    value={item.delvGetJibunAddr}
-                    readOnly
-                    onClick={handlePostcode}
-                  />
-                </td>
-              </tr>
-
-              <tr>
-                <th className="bg-light">도로명 주소</th>
-                <td colSpan="3">
-                  <input
-                    type="text"
-                    name="delvGetRoadAddr"
-                    className="form-control bg-light"
-                    value={item.delvGetRoadAddr}
-                    readOnly
-                    onClick={handlePostcode}
-                  />
-                </td>
-              </tr>
-
-              <tr>
-                <th className="bg-light">상세 주소</th>
-                <td colSpan="3">
-                  <input
-                    type="text"
-                    name="delvGetDetailAddr"
-                    className="form-control"
-                    value={item.delvGetDetailAddr}
-                    onChange={handleChange}
-                  />
-                </td>
-              </tr>
-
-              <tr>
-                <th className="bg-light">시군구 코드</th>
-                <td colSpan="3">
-                  <input
-                    type="text"
-                    name="delvGetBcCode"
-                    className="form-control bg-light"
-                    value={item.delvGetBcCode}
-                    readOnly
-                    onClick={handlePostcode}
-                  />
-                </td>
-              </tr>
+              {/* 주소 입력폼 컴포넌트 임포트 */}
+              <AddressFields item={item} setItem={setItem} handleChange={handleChange} prefix="delvGet" />
             </tbody>
           </table>
 

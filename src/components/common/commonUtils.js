@@ -1,4 +1,10 @@
-// src/components/common/commonUtils.js
+/**
+ * 대부분의 컴포넌트에 적용될 수 있을법한 공통 기능 모음
+ * - 날짜 분리(날짜, 시간)
+ * - 뒤로가기 훅
+ * - 렌더링 또는 조회 분기 처리
+ * - 실행중 로딩 오버레이(두번 클릭 못 하게 막는 용도)
+ */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
