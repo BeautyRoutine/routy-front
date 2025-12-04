@@ -4,74 +4,79 @@ import './SimilarSkinProducts.css';
 import { Heart } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 
 const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
-  const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl);
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
-  const convertToCard = list =>
+  // 공통 카드 변환
+  const convertToCard = (list) =>
     list.map((p, index) => ({
       id: p.prdNo,
       name: p.prdName,
       brand: p.prdCompany,
-      rating: Number(p.avgRating ?? 4.0),
+      rating: p.avgRating ? Number(p.avgRating) : 4.0,
       price: p.prdPrice,
-      img: p.prdImg ? `/images/${p.prdImg}` : `/images/product${index + 1}.jpg`,
+      img: p.prdImg
+        ? `/images/${p.prdImg}`
+        : `/images/product${index + 1}.jpg`,
     }));
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadFallback = async () => {
       try {
-        // 로그인 X → fallback 조회
-        if (!isLoggedIn) {
-          const res = await axios.get(`${apiBaseUrl}/products/list/fallback`, {
-            params: { limit: 4 },
-          });
-          setProducts(convertToCard(res.data.data || []));
-          return;
-        }
-
-        // 로그인 O + userSkin 없음 → fallback 조회
-        if (!userSkin) {
-          const res = await axios.get(`${apiBaseUrl}/products/list/fallback`, {
-            params: { limit: 4 },
-          });
-          setProducts(convertToCard(res.data.data || []));
-          return;
-        }
-
-        // 로그인 + userSkin 존재 → 피부타입 추천 조회
-        const res = await axios.get(`${apiBaseUrl}/products/list/skin_type`, {
-          params: { limit: 4, skin: Number(userSkin) },
-        });
+        const res = await axios.get(
+          'http://localhost:8080/api/products/list/fallback',
+          { params: { limit: 4 } }
+        );
         setProducts(convertToCard(res.data.data || []));
       } catch (err) {
-        console.error(err);
+        console.error('Fallback error:', err);
       }
     };
 
-    fetchData();
-  }, [isLoggedIn, userSkin, apiBaseUrl]);
+    const loadSkinRecommend = async () => {
+      try {
+        const res = await axios.get(
+          'http://localhost:8080/api/products/list/skin_type',
+          { params: { limit: 4, skin: Number(userSkin) } }
+        );
+        setProducts(convertToCard(res.data.data || []));
+      } catch (err) {
+        console.error('Skin recommend error:', err);
+        loadFallback();
+      }
+    };
 
-  // 데이터가 없으면 출력 X
-  if (products.length === 0) return null;
+    // ① 로그인 X → fallback
+    if (!isLoggedIn) {
+      loadFallback();
+      return;
+    }
+
+    // ② 로그인 O + userSkin 없음 → fallback
+    if (!userSkin) {
+      loadFallback();
+      return;
+    }
+
+    // ③ 로그인 O + userSkin 있음 → 피부 타입 추천
+    loadSkinRecommend();
+  }, [isLoggedIn, userSkin]);
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-      <h5 className="fw-bold text-primary mb-1">
-        비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!
-      </h5>
+      <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
 
       <p className="text-muted small mb-4">
         로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
       </p>
 
+      {/* 카드 목록 */}
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
-        {products.map(p => (
+        {products.map((p) => (
           <div key={p.id} className="col">
             <div
               className="card h-100 border-0 shadow-sm product-card position-relative"
@@ -93,27 +98,19 @@ const SimilarSkinProducts = ({ userSkin }) => {
               <div className="card-body text-start">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
+
                 <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
 
                 <h6 className="fw-bold text-dark">
                   {p.price.toLocaleString()}원
                 </h6>
-
-                <button
-                  className="btn cart-btn w-100 mt-2"
-                  onClick={e => {
-                    e.stopPropagation();
-                    alert('장바구니에 추가되었습니다.');
-                  }}
-                >
-                  장바구니
-                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
+      {/* 로그인 유도 버튼 */}
       {!isLoggedIn && (
         <div className="mb-2">
           <button
@@ -135,4 +132,5 @@ const SimilarSkinProducts = ({ userSkin }) => {
 };
 
 export default SimilarSkinProducts;
+
 
