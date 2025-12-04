@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
-import axios from 'axios';
+import api from '../lib/apiClient';
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const [formData, setFormData] = useState({
     userId: '',
     userPw: '',
@@ -19,36 +19,36 @@ const SignupPage = () => {
     userJibunAddr: '',
     userRoadAddr: '',
     userDetailAddr: '',
-    userBirth: ''
+    userBirth: '',
   });
 
   const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
 
   const handlePostcode = () => {
     new window.daum.Postcode({
-      oncomplete: function(data) {
+      oncomplete: function (data) {
         setFormData(prev => ({
           ...prev,
           userZip: data.zonecode,
           userJibunAddr: data.jibunAddress || data.autoJibunAddress,
-          userRoadAddr: data.roadAddress
+          userRoadAddr: data.roadAddress,
         }));
-      }
+      },
     }).open();
   };
 
@@ -94,11 +94,11 @@ const SignupPage = () => {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     const newErrors = validateForm();
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -115,20 +115,22 @@ const SignupPage = () => {
         userJibunAddr: formData.userJibunAddr,
         userRoadAddr: formData.userRoadAddr,
         userDetailAddr: formData.userDetailAddr,
-        userBirth: formData.userBirth || null
+        userBirth: formData.userBirth || null,
       };
 
-      const response = await axios.post('http://localhost:8080/api/auth/signup', signupData);
-      
+      const response = await api.post('/api/auth/signup', signupData);
+
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
-        
-        dispatch(setUser({
-          userId: response.data.userId,
-          userName: response.data.userName,
-          userLevel: response.data.userLevel
-        }));
-        
+
+        dispatch(
+          setUser({
+            userId: response.data.userId,
+            userName: response.data.userName,
+            userLevel: response.data.userLevel,
+          }),
+        );
+
         alert('회원가입이 완료되었습니다!');
         navigate('/');
       }
@@ -143,52 +145,62 @@ const SignupPage = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%)',
-      padding: '40px 20px'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '24px',
-        padding: '50px 60px',
-        width: '100%',
-        maxWidth: '600px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
-      }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%)',
+        padding: '40px 20px',
+      }}
+    >
+      <div
+        style={{
+          background: 'white',
+          borderRadius: '24px',
+          padding: '50px 60px',
+          width: '100%',
+          maxWidth: '600px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+        }}
+      >
         {/* 로고 */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #81D4FA 0%, #80CBC4 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 20px',
-            fontSize: '36px',
-            fontWeight: '700',
-            color: 'white'
-          }}>
+          <div
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #81D4FA 0%, #80CBC4 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+              fontSize: '36px',
+              fontWeight: '700',
+              color: 'white',
+            }}
+          >
             R
           </div>
-          <h1 style={{
-            color: '#42A5F5',
-            fontSize: '32px',
-            fontWeight: '700',
-            margin: '0 0 10px 0'
-          }}>
+          <h1
+            style={{
+              color: '#42A5F5',
+              fontSize: '32px',
+              fontWeight: '700',
+              margin: '0 0 10px 0',
+            }}
+          >
             Routy
           </h1>
-          <p style={{
-            color: '#666',
-            fontSize: '14px',
-            margin: 0
-          }}>
+          <p
+            style={{
+              color: '#666',
+              fontSize: '14px',
+              margin: 0,
+            }}
+          >
             나만을 위한 맞춤형 뷰티 루틴을 시작하세요
           </p>
         </div>
@@ -196,13 +208,15 @@ const SignupPage = () => {
         <form onSubmit={handleSubmit}>
           {/* 이름 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               이름
             </label>
             <input
@@ -220,21 +234,27 @@ const SignupPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.userName && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userName}</p>}
+            {errors.userName && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userName}
+              </p>
+            )}
           </div>
 
           {/* 아이디 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               아이디
             </label>
             <input
@@ -252,21 +272,27 @@ const SignupPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.userId && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userId}</p>}
+            {errors.userId && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userId}
+              </p>
+            )}
           </div>
 
           {/* 이메일 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               이메일
             </label>
             <input
@@ -284,21 +310,27 @@ const SignupPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.userEmail && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userEmail}</p>}
+            {errors.userEmail && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userEmail}
+              </p>
+            )}
           </div>
 
           {/* 비밀번호 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               비밀번호
             </label>
             <input
@@ -316,21 +348,27 @@ const SignupPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.userPw && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userPw}</p>}
+            {errors.userPw && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userPw}
+              </p>
+            )}
           </div>
 
           {/* 비밀번호 확인 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               비밀번호 확인
             </label>
             <input
@@ -348,21 +386,27 @@ const SignupPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.confirmPassword && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.confirmPassword}</p>}
+            {errors.confirmPassword && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.confirmPassword}
+              </p>
+            )}
           </div>
 
           {/* 휴대폰 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               전화번호
             </label>
             <input
@@ -380,21 +424,27 @@ const SignupPage = () => {
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.userHp && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userHp}</p>}
+            {errors.userHp && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userHp}
+              </p>
+            )}
           </div>
 
           {/* 생년월일 (선택) */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               생년월일 <span style={{ color: '#999', fontWeight: '400' }}>(선택)</span>
             </label>
             <input
@@ -412,20 +462,22 @@ const SignupPage = () => {
                 backgroundColor: '#F3E5F5',
                 transition: 'all 0.3s',
                 boxSizing: 'border-box',
-                colorScheme: 'light'
+                colorScheme: 'light',
               }}
             />
           </div>
 
           {/* 주소 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px',
-              fontWeight: '600', 
-              color: '#333' 
-            }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
               배송 주소
             </label>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
@@ -442,7 +494,7 @@ const SignupPage = () => {
                   borderRadius: '50px',
                   fontSize: '15px',
                   backgroundColor: '#F3E5F5',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
                 }}
               />
               <button
@@ -458,10 +510,10 @@ const SignupPage = () => {
                   fontWeight: '600',
                   fontSize: '14px',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
                 }}
-                onMouseEnter={(e) => e.target.style.background = '#37474F'}
-                onMouseLeave={(e) => e.target.style.background = '#263238'}
+                onMouseEnter={e => (e.target.style.background = '#37474F')}
+                onMouseLeave={e => (e.target.style.background = '#263238')}
               >
                 주소 찾기
               </button>
@@ -480,7 +532,7 @@ const SignupPage = () => {
                 fontSize: '15px',
                 marginBottom: '10px',
                 backgroundColor: '#F3E5F5',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
             <input
@@ -497,11 +549,19 @@ const SignupPage = () => {
                 fontSize: '15px',
                 outline: 'none',
                 backgroundColor: '#F3E5F5',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             />
-            {errors.address && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.address}</p>}
-            {errors.userDetailAddr && <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>{errors.userDetailAddr}</p>}
+            {errors.address && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.address}
+              </p>
+            )}
+            {errors.userDetailAddr && (
+              <p style={{ color: '#E57373', fontSize: '12px', marginTop: '5px', marginLeft: '15px' }}>
+                {errors.userDetailAddr}
+              </p>
+            )}
           </div>
 
           {/* 가입하기 버튼 */}
@@ -519,13 +579,13 @@ const SignupPage = () => {
               cursor: 'pointer',
               transition: 'all 0.3s',
               marginTop: '30px',
-              boxShadow: '0 4px 15px rgba(66, 165, 245, 0.3)'
+              boxShadow: '0 4px 15px rgba(66, 165, 245, 0.3)',
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={e => {
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = '0 6px 20px rgba(66, 165, 245, 0.4)';
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={e => {
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = '0 4px 15px rgba(66, 165, 245, 0.3)';
             }}
@@ -546,7 +606,7 @@ const SignupPage = () => {
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: '600',
-                textDecoration: 'none'
+                textDecoration: 'none',
               }}
             >
               로그인

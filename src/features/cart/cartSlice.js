@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-const API_BASE_URL = 'http://localhost:8080/api';
+import api from '../../lib/apiClient';
 
 // createAsyncThunk를 사용, 비동기 작업 처리
 // 각 Thunk는 자동으로 pending, fulfilled, rejected 액션을 생성
@@ -15,9 +14,8 @@ const API_BASE_URL = 'http://localhost:8080/api';
  */
 export const fetchCartView = createAsyncThunk('cart/fetchCartView', async (_, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/cart`);
-    if (!response.ok) throw new Error('서버 응답 오류');
-    return await response.json();
+    const response = await api.get('/api/cart');
+    return response.data;
   } catch (e) {
     return rejectWithValue(e.message);
   }
@@ -34,13 +32,7 @@ export const updateCartItemQuantity = createAsyncThunk(
   'cart/updateItemQuantity',
   async ({ cartItemId, quantity }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/cart/items/${cartItemId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity }),
-      });
-      if (!response.ok) throw new Error('서버 응답 오류');
-
+      await api.patch(`/api/cart/items/${cartItemId}`, { quantity });
       // 서버 응답(response.json())을 무시하고 요청 파라미터를 반환
       // 이를 통해 로컬 state와 서버 state의 동기화를 클라이언트가 주도
       return { cartItemId, quantity };
@@ -58,13 +50,7 @@ export const updateCartItemQuantity = createAsyncThunk(
  */
 export const deleteCartItems = createAsyncThunk('cart/deleteItems', async (cartItemIds, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/cart/items`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cartItemIds }),
-    });
-    if (!response.ok) throw new Error('서버 응답 오류');
-
+    await api.delete('/api/cart/items', { data: { cartItemIds } });
     // 삭제 성공 시 삭제된 ID 목록을 반환하여 로컬에서 필터링
     return cartItemIds;
   } catch (e) {

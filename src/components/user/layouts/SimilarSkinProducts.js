@@ -47,21 +47,28 @@ const SimilarSkinProducts = ({ userSkin }) => {
       return;
     }
 
-    // 로그인 O 하지만 userSkin 없음 → fallback
+    // 로그인 O + userSkin 없음 → fallback 제공
     if (!userSkin) {
       loadFallback();
       return;
     }
 
-    // 로그인 O + userSkin O → 피부타입 추천
+    // 로그인 + userSkin 존재 → 피부타입 기반 추천
     loadSkinRecommend();
   }, [isLoggedIn, userSkin, apiBaseUrl]);
 
+  // 데이터가 없으면 출력 X
+  if (products.length === 0) return null;
+
   return (
     <div className="container my-5 text-center similar-skin-section">
-      <h5 className="fw-bold text-primary mb-1">비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!</h5>
+      <h5 className="fw-bold text-primary mb-1">
+        비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!
+      </h5>
 
-      <p className="text-muted small mb-4">로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!</p>
+      <p className="text-muted small mb-4">
+        로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
+      </p>
 
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
         {products.map(p => (
@@ -73,7 +80,12 @@ const SimilarSkinProducts = ({ userSkin }) => {
             >
               <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
 
-              <img src={p.img} className="card-img-top" alt={p.name} style={{ borderRadius: '10px' }} />
+              <img
+                src={p.img}
+                className="card-img-top"
+                alt={p.name}
+                style={{ borderRadius: '10px' }}
+              />
 
               <div className="card-body text-start">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
@@ -99,10 +111,16 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
       {!isLoggedIn && (
         <div className="mb-2">
-          <button className="btn btn-primary rounded-pill px-4 me-2" onClick={() => navigate('/login')}>
+          <button
+            className="btn btn-primary rounded-pill px-4 me-2"
+            onClick={() => navigate('/login')}
+          >
             로그인
           </button>
-          <button className="btn btn-outline-primary rounded-pill px-4" onClick={() => navigate('/signup')}>
+          <button
+            className="btn btn-outline-primary rounded-pill px-4"
+            onClick={() => navigate('/signup')}
+          >
             회원가입
           </button>
         </div>

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 /**
  * Axios 인스턴스 생성
@@ -6,9 +6,9 @@ import axios from "axios";
  * - withCredentials: 쿠키 전송 허용
  */
 const api = axios.create({
-  baseURL: "http://localhost:8080",  // /api 제거
+  baseURL: 'http://localhost:8080', // /api 제거
   withCredentials: true,
-  timeout: 10000,  // 10초 타임아웃
+  timeout: 10000, // 10초 타임아웃
 });
 
 /**
@@ -16,16 +16,16 @@ const api = axios.create({
  * - JWT 토큰을 자동으로 헤더에 추가
  */
 api.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -34,19 +34,19 @@ api.interceptors.request.use(
  * - 에러 메시지 통일
  */
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401) {
       // 토큰 만료 또는 인증 실패
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
       window.location.href = '/login';
     }
-    
+
     // 에러 메시지 추출
-    const message = error.response?.data?.resultMsg || error.message || "알 수 없는 오류가 발생했습니다.";
+    const message = error.response?.data?.resultMsg || error.message || '알 수 없는 오류가 발생했습니다.';
     return Promise.reject(new Error(message));
-  }
+  },
 );
 
 // -------------------------
@@ -58,31 +58,53 @@ api.interceptors.response.use(
  * @param {Object} payload - { email, password }
  * @returns {Promise} ApiResponse
  */
-export const login = (payload) =>
-  api.post("/api/auth/login", payload).then((res) => res.data);
+export const login = payload => api.post('/api/auth/login', payload).then(res => res.data);
 
 /**
  * 회원가입
  * @param {Object} payload - SignupRequest
  * @returns {Promise} ApiResponse
  */
-export const signUp = (payload) =>
-  api.post("/api/auth/signup", payload).then((res) => res.data);
+export const signUp = payload => api.post('/api/auth/signup', payload).then(res => res.data);
 
 /**
  * 휴대폰 인증 요청
  * @param {Object} payload - { phone }
  * @returns {Promise} ApiResponse
  */
-export const requestPhoneVerify = (payload) =>
-  api.post("/api/auth/phone/request", payload).then((res) => res.data);
+export const requestPhoneVerify = payload => api.post('/api/auth/phone/request', payload).then(res => res.data);
 
 /**
  * 휴대폰 인증 확인
  * @param {Object} payload - { phone, code }
  * @returns {Promise} ApiResponse
  */
-export const confirmPhoneVerify = (payload) =>
-  api.post("/api/auth/phone/confirm", payload).then((res) => res.data);
+export const confirmPhoneVerify = payload => api.post('/api/auth/phone/confirm', payload).then(res => res.data);
+
+// -------------------------
+// 성분 관련 API
+// -------------------------
+
+// 성분 검색
+export const searchIngredients = params => {
+  // params: { page, size, keyword }
+  const { page = 1, size = 10, keyword = '' } = params || {};
+  return api.get('/api/admin/ingredients', {
+    params: {
+      page,
+      page_gap: size,
+      ing_name: keyword,
+    },
+  });
+};
+
+// -------------------------
+// 카카오 로그인 URL (단순 문자열)
+// -------------------------
+export function getKakaoUrl() {
+  const base = api.defaults.baseURL.replace(/\/+$/, ''); // 끝 / 제거
+  // 백엔드의 /auth/kakao/login 으로 보내면, 거기서 카카오로 redirect 해줌
+  return `${base}/auth/kakao/login`;
+}
 
 export default api;

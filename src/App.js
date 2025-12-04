@@ -16,6 +16,7 @@ import AdminHome from 'pages/admin/AdminHome';
 import Footer from 'components/user/layouts/footer';
 import ScrollToTop from 'components/common/ScrollToTop';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css';
 
 function App() {
@@ -99,7 +100,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/mypage" element={<MyPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/products/:prdNo" element={<ProductDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
           <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
