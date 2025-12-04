@@ -23,38 +23,38 @@ const SimilarSkinProducts = ({ userSkin }) => {
       img: p.prdImg ? `/images/${p.prdImg}` : `/images/product${index + 1}.jpg`,
     }));
 
-  // ----------------------------
-  // API 호출 영역
-  // ----------------------------
-  const loadFallback = async () => {
-    const res = await axios.get(`${apiBaseUrl}/products/list/fallback`, {
-      params: { limit: 4 },
-    });
-    setProducts(convertToCard(res.data.data || []));
-  };
-
-  const loadSkinRecommend = async () => {
-    const res = await axios.get(`${apiBaseUrl}/products/list/skin_type`, {
-      params: { limit: 4, skin: Number(userSkin) },
-    });
-    setProducts(convertToCard(res.data.data || []));
-  };
-
   useEffect(() => {
-    // 로그인 X → fallback 제공
-    if (!isLoggedIn) {
-      loadFallback();
-      return;
-    }
+    const fetchData = async () => {
+      try {
+        // 로그인 X → fallback 조회
+        if (!isLoggedIn) {
+          const res = await axios.get(`${apiBaseUrl}/products/list/fallback`, {
+            params: { limit: 4 },
+          });
+          setProducts(convertToCard(res.data.data || []));
+          return;
+        }
 
-    // 로그인 O + userSkin 없음 → fallback 제공
-    if (!userSkin) {
-      loadFallback();
-      return;
-    }
+        // 로그인 O + userSkin 없음 → fallback 조회
+        if (!userSkin) {
+          const res = await axios.get(`${apiBaseUrl}/products/list/fallback`, {
+            params: { limit: 4 },
+          });
+          setProducts(convertToCard(res.data.data || []));
+          return;
+        }
 
-    // 로그인 + userSkin 존재 → 피부타입 기반 추천
-    loadSkinRecommend();
+        // 로그인 + userSkin 존재 → 피부타입 추천 조회
+        const res = await axios.get(`${apiBaseUrl}/products/list/skin_type`, {
+          params: { limit: 4, skin: Number(userSkin) },
+        });
+        setProducts(convertToCard(res.data.data || []));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
   }, [isLoggedIn, userSkin, apiBaseUrl]);
 
   // 데이터가 없으면 출력 X
@@ -78,7 +78,10 @@ const SimilarSkinProducts = ({ userSkin }) => {
               style={{ cursor: 'pointer' }}
               onClick={() => navigate(`/products/${p.id}`)}
             >
-              <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
+              <Heart
+                size={20}
+                className="position-absolute top-0 end-0 m-3 heart-icon"
+              />
 
               <img
                 src={p.img}
@@ -92,7 +95,9 @@ const SimilarSkinProducts = ({ userSkin }) => {
                 <p className="text-muted small mb-1">{p.brand}</p>
                 <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
 
-                <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
+                <h6 className="fw-bold text-dark">
+                  {p.price.toLocaleString()}원
+                </h6>
 
                 <button
                   className="btn cart-btn w-100 mt-2"
@@ -130,3 +135,4 @@ const SimilarSkinProducts = ({ userSkin }) => {
 };
 
 export default SimilarSkinProducts;
+
