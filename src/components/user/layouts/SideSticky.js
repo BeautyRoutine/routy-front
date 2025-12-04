@@ -118,7 +118,6 @@ const SideSticky = ({
                           // 이미지가 없으면 타이틀 첫 글자를 원형 플레이스홀더로 노출한다.
                           <span className="recent-thumb placeholder">{item.title?.[0] ?? '?'}</span>
                         )}
-                        <span className="recent-title">{item.title}</span>
                       </button>
                     </li>
                   );
