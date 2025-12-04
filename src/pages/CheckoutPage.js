@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 import './CheckoutPage.css';
@@ -7,39 +7,38 @@ import './CheckoutPage.css';
 const CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
 
 export default function CheckoutPage() {
-  const location = useLocation();
   const navigate = useNavigate();
   const [tossPayments, setTossPayments] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const [shippingInfo, setShippingInfo] = useState({
     receiverName: '',
     receiverPhone: '',
-    address: '',
+    zipCode: '', 
+    roadAddress: '',
     detailAddress: '',
+    deliveryMsg: '',
   });
 
   const { items, selectedItemIds } = useSelector(state => state.cart);
-
-  // .filter는 렌더링마다 새로운 배열을 만듭니다.
   const selectedItems = items.filter(item => selectedItemIds[item.cartItemId]);
 
-  const summary = location.state?.summary || { finalPaymentAmount: 0 };
-  const amount = summary.finalPaymentAmount;
+  // 금액 계산 로직
+  const productTotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = productTotal >= 30000 ? 0 : 3000;
+  const totalAmount = productTotal + deliveryFee; 
 
-  // ▼▼▼ [수정 1] 상품 유효성 검사 (상품이 바뀔 때만 실행) ▼▼▼
+  // 토스 SDK 초기화
+  useEffect(() => {
+    loadTossPayments(CLIENT_KEY).then(setTossPayments);
+  }, []);
+
+  // 상품 검증
   useEffect(() => {
     if (selectedItems.length === 0) {
       alert('주문할 상품이 없습니다.');
       navigate('/cart');
     }
-  }, [selectedItems.length, navigate]); // length만 체크하거나 의존성 최소화
-
-  // ▼▼▼ [수정 2] 토스 SDK 초기화 (맨 처음 한 번만 실행!) ▼▼▼
-  useEffect(() => {
-    // 여기 의존성 배열을 빈 배열 []로 비워야 무한루프가 안 돕니다.
-    loadTossPayments(CLIENT_KEY).then(setTossPayments);
-  }, []);
+  }, [selectedItems.length, navigate]);
 
   const handleInputChange = e => {
     const { name, value } = e.target;
@@ -49,8 +48,9 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     if (!tossPayments) return;
 
-    if (!shippingInfo.receiverName || !shippingInfo.address || !shippingInfo.receiverPhone) {
-      alert('배송지 정보를 모두 입력해주세요.');
+    // 유효성 검사
+    if (!shippingInfo.receiverName || !shippingInfo.roadAddress || !shippingInfo.receiverPhone) {
+      alert('필수 배송 정보를 모두 입력해주세요.');
       return;
     }
 
@@ -60,21 +60,28 @@ export default function CheckoutPage() {
       const orderName =
         selectedItems.length > 1 ? `${selectedItems[0].name} 외 ${selectedItems.length - 1}건` : selectedItems[0].name;
 
+      // OrderSaveRequestDTO 규격에 맞춘 데이터
       const orderData = {
+        userNo: 1, // 나중에 로그인 정보에서 가져와야 함
         receiverName: shippingInfo.receiverName,
         receiverPhone: shippingInfo.receiverPhone,
-        address: `${shippingInfo.address} ${shippingInfo.detailAddress}`,
+        zipCode: parseInt(shippingInfo.zipCode) || 0, // 숫자로 변환
+        roadAddress: shippingInfo.roadAddress,
+        detailAddress: shippingInfo.detailAddress,
+        deliveryMsg: shippingInfo.deliveryMsg,
 
-        totalAmount: amount,
+        totalAmount: totalAmount, 
+        deliveryFee: deliveryFee, 
         orderName: orderName,
+
         items: selectedItems.map(item => ({
-          prdNo: item.prdNo || item.id,
+          prdNo: item.productId,
           quantity: item.quantity,
           price: item.price,
         })),
       };
 
-      // 주문 생성 요청
+      // 1. 주문 생성 요청
       const response = await fetch('http://localhost:8080/api/payments/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,15 +92,20 @@ export default function CheckoutPage() {
         throw new Error('주문서 생성에 실패했습니다.');
       }
 
-      const realPayNo = await response.json();
-      console.log('생성된 결제번호:', realPayNo);
+      // 주문번호(odNo) 받기
+      const odNo = await response.json();
+      console.log('생성된 주문번호:', odNo);
 
+      // 주문번호를 최소 8자리 문자열로 변환 (예: 1 -> "00000001")
+      // 토스 요구사항(6자 이상) 충족 + 백엔드 호환(숫자로 파싱 가능)
+      const orderIdVal = String(odNo).padStart(8, '0');
+
+      //  토스 결제창 띄우기 (orderId = odNo)
       await tossPayments.requestPayment('카드', {
-        amount: amount,
-        orderId: String(realPayNo),
+        amount: totalAmount,
+        orderId: orderIdVal, // 주문번호를 문자열로 변환
         orderName: orderName,
         customerName: shippingInfo.receiverName,
-        customerEmail: 'test@example.com',
         successUrl: `${window.location.origin}/routy-front#/payment/success`,
         failUrl: `${window.location.origin}/routy-front#/payment/fail`,
       });
@@ -113,6 +125,7 @@ export default function CheckoutPage() {
 
         <div className="checkout-layout">
           <div className="checkout-main">
+            {/* 배송지 정보 입력 */}
             <div className="section-card">
               <h2>배송지 정보</h2>
               <div className="input-group">
@@ -122,7 +135,7 @@ export default function CheckoutPage() {
                   name="receiverName"
                   value={shippingInfo.receiverName}
                   onChange={handleInputChange}
-                  placeholder="이름을 입력하세요"
+                  placeholder="이름"
                 />
               </div>
               <div className="input-group">
@@ -132,17 +145,27 @@ export default function CheckoutPage() {
                   name="receiverPhone"
                   value={shippingInfo.receiverPhone}
                   onChange={handleInputChange}
-                  placeholder="010-0000-0000"
+                  placeholder="- 없이 숫자만 입력"
                 />
               </div>
               <div className="input-group">
                 <label>주소</label>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+                  <input
+                    type="text"
+                    name="zipCode"
+                    value={shippingInfo.zipCode}
+                    onChange={handleInputChange}
+                    placeholder="우편번호"
+                    style={{ width: '120px' }}
+                  />
+                </div>
                 <input
                   type="text"
-                  name="address"
-                  value={shippingInfo.address}
+                  name="roadAddress"
+                  value={shippingInfo.roadAddress}
                   onChange={handleInputChange}
-                  placeholder="기본 주소"
+                  placeholder="도로명 주소"
                   style={{ marginBottom: '8px' }}
                 />
                 <input
@@ -153,8 +176,19 @@ export default function CheckoutPage() {
                   placeholder="상세 주소"
                 />
               </div>
+              <div className="input-group">
+                <label>배송 요청사항</label>
+                <input
+                  type="text"
+                  name="deliveryMsg"
+                  value={shippingInfo.deliveryMsg}
+                  onChange={handleInputChange}
+                  placeholder="예: 문 앞에 놔주세요"
+                />
+              </div>
             </div>
 
+            {/* 상품 정보 */}
             <div className="section-card">
               <h2>주문 상품 ({selectedItems.length}개)</h2>
               {selectedItems.map(item => (
@@ -171,19 +205,24 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* 결제 요약 사이드바 */}
           <div className="checkout-sidebar">
             <div className="summary-card">
               <h3>최종 결제 금액</h3>
               <div className="price-row">
-                <span>상품 금액</span>
-                <span>{amount.toLocaleString()}원</span>
+                <span>총 상품금액</span>
+                <span>{productTotal.toLocaleString()}원</span>
+              </div>
+              <div className="price-row">
+                <span>배송비</span>
+                <span>{deliveryFee.toLocaleString()}원</span>
               </div>
               <div className="price-row total">
                 <span>총 결제금액</span>
-                <span className="total-price">{amount.toLocaleString()}원</span>
+                <span className="total-price">{totalAmount.toLocaleString()}원</span>
               </div>
               <button className="btn-pay" onClick={handlePayment} disabled={!tossPayments || isLoading}>
-                {isLoading ? '처리 중...' : '결제하기'}
+                {isLoading ? '처리 중...' : `${totalAmount.toLocaleString()}원 결제하기`}
               </button>
             </div>
           </div>
