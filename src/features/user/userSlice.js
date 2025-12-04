@@ -161,6 +161,7 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
     const mappedRecent = Array.isArray(recentList)
       ? recentList.map(item => ({
           id: item.productId || item.id,
+          prdNo: item.productId || item.id,
           name: item.productName || item.name,
           brand: item.brandName || item.brand || item.productCompany,
           price: item.price || 0,
@@ -395,14 +396,18 @@ export const removeLike = createAsyncThunk(
 export const saveRecentProduct = createAsyncThunk(
   'user/saveRecentProduct',
   async ({ userId, prdNo, prdSubCate }, { rejectWithValue }) => {
+    // 프론트에서 prdSubCate 없이 호출하는 실수를 방지
+    if (!prdSubCate) {
+      console.warn('[saveRecentProduct] prdSubCate가 없음 — 상품 상세 로드 이후에 호출해야 합니다.');
+      return rejectWithValue('prdSubCate is required');
+    }
+
     try {
-      // POST /api/users/{userId}/recent-products?prdNo=...&prdSubCate=...
       await api.post(getEndpoints(userId).recentProducts, null, {
         params: { prdNo, prdSubCate },
       });
       return { prdNo };
     } catch (error) {
-      // 최근 본 상품 저장은 실패해도 사용자에게 알릴 필요가 크지 않으므로 콘솔만 찍음
       console.error('최근 본 상품 저장 실패:', error);
       return rejectWithValue(error.response?.data || '최근 본 상품 저장 실패');
     }

@@ -15,7 +15,7 @@ const ProductGrid = ({ products, isLoggedIn }) => {
     }
 
     // 로그인 상태 → 상품 상세 페이지로 이동
-    navigate(`/product/${prdNo}`);
+    navigate(`/products/${prdNo}`);
   };
 
   return (

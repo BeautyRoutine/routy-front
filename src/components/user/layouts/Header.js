@@ -18,47 +18,34 @@ import logoImage from 'logo.svg';
 import {
   ENDPOINTS,
   FALLBACK_TOP,
-  FALLBACK_TREE,
   FALLBACK_COUNTS,
   FALLBACK_NOTIFICATIONS,
   FALLBACK_RECENT_SEARCHES,
   FALLBACK_SIMILAR_SKIN,
 } from './headerConstants';
 
-// 최상위 카테고리 응답을 문자열 배열로 정규화
-function normalizeTopCategories(data) {
-  if (!Array.isArray(data)) return FALLBACK_TOP;
-  const result = data
-    .map(item => {
-      if (typeof item === 'string') return item;
-      if (item && typeof item === 'object') return item.name || item.title;
-      return null;
-    })
-    .filter(Boolean);
-  return result.length ? result : FALLBACK_TOP;
-}
+// API 응답(Map<ID, {mainStr, sub: Map<ID, Name>}>)을 UI 포맷으로 변환
+function transformCategoryData(data) {
+  if (!data || typeof data !== 'object') return { top: [], tree: [] };
 
-// 중첩 카테고리를 { title, items } 구조의 배열로 정규화
-function normalizeCategoryTree(data) {
-  if (!Array.isArray(data)) return FALLBACK_TREE;
-  const result = data
-    .map(category => {
-      if (!category) return null;
-      const title = category.title || category.name || category.label;
-      if (!title) return null;
-      const items = Array.isArray(category.items || category.children)
-        ? (category.items || category.children)
-            .map(item => {
-              if (typeof item === 'string') return item;
-              if (item && typeof item === 'object') return item.name || item.title || item.label;
-              return null;
-            })
-            .filter(Boolean)
-        : [];
-      return { title, items };
-    })
-    .filter(Boolean);
-  return result.length ? result : FALLBACK_TREE;
+  // ID(키) 기준으로 정렬
+  const sortedKeys = Object.keys(data).sort((a, b) => Number(a) - Number(b));
+
+  const tree = sortedKeys.map(key => {
+    const category = data[key];
+    const title = category.mainStr;
+    const subMap = category.sub || {};
+
+    // 서브 카테고리도 ID 기준으로 정렬
+    const subKeys = Object.keys(subMap).sort((a, b) => Number(a) - Number(b));
+    const items = subKeys.map(subKey => subMap[subKey]);
+
+    return { title, items };
+  });
+
+  const top = tree.map(t => t.title);
+
+  return { top, tree };
 }
 
 // 검색 패널이 다양한 응답 포맷을 받아도 동작하도록 정규화 함수 묶음
@@ -130,9 +117,11 @@ export function Header({
   // ------------------------------
   const [scrolled, setScrolled] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [topCategories, setTopCategories] = useState(FALLBACK_TOP);
-  const [categoryTree, setCategoryTree] = useState(FALLBACK_TREE);
+  const [categoryTree, setCategoryTree] = useState([]);
   const [categoryLoading, setCategoryLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [categoryError, setCategoryError] = useState(null);
   const [headerHeight, setHeaderHeight] = useState(140);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -446,27 +435,28 @@ export function Header({
   const effectiveCartCount = typeof cartCount === 'number' ? cartCount : autoCartCount;
 
   // Spring Boot API에서 카테고리 데이터 로드
-  // eslint-disable-next-line no-unused-vars
   const loadCategories = useCallback(() => {
     const controller = new AbortController();
     setCategoryLoading(true);
     setCategoryError(null);
 
-    Promise.all([
-      // topCategories: 문자열 리스트만 필요
-      api.get(ENDPOINTS.topCategories, { signal: controller.signal }).catch(() => ({ data: null })),
-      // categoryTree: title + items 배열을 가진 객체 리스트 필요
-      api.get(ENDPOINTS.categoryTree, { signal: controller.signal }).catch(() => ({ data: null })),
-    ])
-      .then(([topRes, treeRes]) => {
-        if (topRes.data) setTopCategories(normalizeTopCategories(topRes.data));
-        if (treeRes.data) setCategoryTree(normalizeCategoryTree(treeRes.data));
+    api
+      .get(ENDPOINTS.categoryTree, { signal: controller.signal })
+      .then(response => {
+        // ApiResponse 구조 대응: response.data.data가 실제 데이터일 가능성 높음
+        const rawData = response.data?.data || response.data;
+        const { tree } = transformCategoryData(rawData);
+
+        // topCategories는 정적 메뉴(랭킹, 이벤트 등)를 유지하고,
+        // categoryTree만 API 데이터로 업데이트한다.
+        setCategoryTree(tree);
       })
       .catch(error => {
+        if (error.name === 'CanceledError') return;
         console.error('카테고리 불러오기 실패:', error);
         setCategoryError(error);
-        setTopCategories(FALLBACK_TOP);
-        setCategoryTree(FALLBACK_TREE);
+        // 에러 시에도 topCategories는 유지
+        setCategoryTree([]);
       })
       .finally(() => setCategoryLoading(false));
 
@@ -971,13 +961,26 @@ export function Header({
             <div className="nav-separator" />
 
             <div className="nav-scroll">
-              {(categoryError ? FALLBACK_TOP : topCategories).map(item => (
+              {topCategories.map(item => (
                 <button
                   type="button"
                   key={item}
                   className="nav-item"
                   onClick={() => {
-                    if (item === '랭킹') onNavigate?.('ranking');
+                    const routes = {
+                      랭킹: 'ranking',
+                      이벤트: 'event',
+                      '멤버십/쿠폰': 'membership',
+                      오특: 'oteuk',
+                      '헬스+': 'health',
+                      'LUXE EDIT': 'luxe',
+                      기획전: 'exhibition',
+                      세일: 'sale',
+                      기프트카드: 'giftcard',
+                    };
+                    if (routes[item]) {
+                      onNavigate?.(routes[item]);
+                    }
                   }}
                 >
                   {item}
@@ -994,7 +997,7 @@ export function Header({
             {categoryLoading && <div className="category-loading">카테고리를 불러오는 중...</div>}
             {!categoryLoading && (
               <div className="category-grid">
-                {(categoryError ? FALLBACK_TREE : categoryTree).map(category => (
+                {categoryTree.map(category => (
                   <div key={category.title} className="category-column">
                     <button
                       type="button"
