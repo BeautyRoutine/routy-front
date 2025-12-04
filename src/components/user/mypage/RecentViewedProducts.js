@@ -47,8 +47,8 @@ const RecentViewedProducts = () => {
               <div className="col-product" onClick={() => handleProductClick(item.prdNo)} style={{ cursor: 'pointer' }}>
                 <img src={item.image} alt={item.name} className="item-thumb" />
                 <div className="item-text">
-                  <span className="item-brand">{item.brand}</span>
                   <span className="item-name">{item.name}</span>
+                  <span className="item-brand">{item.brand}</span>
                 </div>
               </div>
               <div className="col-price">
