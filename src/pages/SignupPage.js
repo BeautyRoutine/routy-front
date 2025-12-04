@@ -132,7 +132,8 @@ const SignupPage = () => {
         );
 
         alert('회원가입이 완료되었습니다!');
-        navigate('/');
+        //변경: /skin-profile로 이동
+        navigate('/skin-profile');
       }
     } catch (error) {
       if (error.response?.data?.message) {
