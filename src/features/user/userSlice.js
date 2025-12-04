@@ -25,7 +25,7 @@ const getSkinTypeCode = label => {
 // API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
 const getEndpoints = userId => ({
   profile: `/api/users/${userId}/profile`,
-  // orders: `/api/users/${userId}/orders/status-summary`, // 미구현
+  orders: `/api/users/${userId}/orders/status-summary`, // 미구현
   ingredients: `/api/users/${userId}/ingredients`,
   likes: `/api/users/${userId}/likes`,
   reviews: `/api/users/${userId}/reviews`,
@@ -175,7 +175,7 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
             price: p.prdPrice,
             salePrice: p.salePrice,
             discount: p.discountRate || p.discount,
-            image: p.prdImg ? `/images/${p.prdImg}` : null,
+            image: p.prdImg ? `${api.defaults.baseURL}/images/product/${p.prdImg}` : null,
             viewedDate: item.viewedAt || item.viewedDate,
           };
         } catch (err) {
@@ -184,6 +184,7 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
         }
       });
       const details = await Promise.all(detailPromises);
+      // 최신순 정렬 (API가 최신순으로 준다고 가정하고 reverse 제거)
       mappedRecent = details.filter(d => d !== null);
     }
 
@@ -406,11 +407,12 @@ export const removeLike = createAsyncThunk(
 /**
  * Async Thunk: 최근 본 상품 저장
  *
- * @param {Object} payload - { userId, prdNo, prdSubCate }
+ * @param {Object} payload - { userId, prdNo, prdSubCate, productDetails }
+ * productDetails: UI 업데이트를 위한 상품 상세 정보 (선택)
  */
 export const saveRecentProduct = createAsyncThunk(
   'user/saveRecentProduct',
-  async ({ userId, prdNo, prdSubCate }, { rejectWithValue }) => {
+  async ({ userId, prdNo, prdSubCate, productDetails }, { rejectWithValue }) => {
     // 프론트에서 prdSubCate 없이 호출하는 실수를 방지
     if (!prdSubCate) {
       console.warn('[saveRecentProduct] prdSubCate가 없음 — 상품 상세 로드 이후에 호출해야 합니다.');
@@ -421,7 +423,8 @@ export const saveRecentProduct = createAsyncThunk(
       await api.post(getEndpoints(userId).recentProducts, null, {
         params: { prdNo, prdSubCate },
       });
-      return { prdNo };
+      // 성공 시 productDetails가 있으면 리턴하여 리듀서에서 상태 업데이트
+      return { prdNo, productDetails };
     } catch (error) {
       console.error('최근 본 상품 저장 실패:', error);
       return rejectWithValue(error.response?.data || '최근 본 상품 저장 실패');
@@ -513,6 +516,16 @@ const userSlice = createSlice({
       .addCase(fetchMyPageData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // saveRecentProduct
+      .addCase(saveRecentProduct.fulfilled, (state, action) => {
+        const { prdNo, productDetails } = action.payload;
+        if (productDetails) {
+          // 이미 목록에 있으면 제거 (최상단으로 이동하기 위해)
+          const filtered = state.recentProducts.filter(p => p.prdNo !== prdNo && p.id !== prdNo);
+          // 새 상품 추가
+          state.recentProducts = [productDetails, ...filtered];
+        }
       })
       // createClaim
       .addCase(createClaim.fulfilled, (state, action) => {

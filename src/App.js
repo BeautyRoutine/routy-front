@@ -9,6 +9,7 @@ import Home from 'pages/Home';
 import MyPage from './pages/MyPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ProductListPage from './pages/ProductListPage';
+import RankingPage from './pages/RankingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import LogoutPage from './pages/LogoutPage';
@@ -112,6 +113,7 @@ function App() {
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/products/:prdNo" element={<ProductDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />
+          <Route path="/ranking" element={<RankingPage />} />
           <Route path="/admin/*" element={<AdminHome />} />
           <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
           <Route path="/signup" element={isLoggedIn ? <Navigate to="/" replace /> : <SignupPage />} />
