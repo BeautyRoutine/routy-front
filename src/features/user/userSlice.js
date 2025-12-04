@@ -158,18 +158,34 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
     // 최근 본 상품 매핑
     const rawRecent = recentRes.data || {};
     const recentList = rawRecent.data || rawRecent || [];
-    const mappedRecent = Array.isArray(recentList)
-      ? recentList.map(item => ({
-          id: item.productId || item.id,
-          name: item.productName || item.name,
-          brand: item.brandName || item.brand || item.productCompany,
-          price: item.price || 0,
-          salePrice: item.salePrice,
-          discount: item.discountRate || item.discount,
-          image: item.imageUrl || item.image,
-          viewedDate: item.viewedAt || item.viewedDate,
-        }))
-      : [];
+
+    let mappedRecent = [];
+    if (Array.isArray(recentList) && recentList.length > 0) {
+      const detailPromises = recentList.map(async item => {
+        const id = item.productId || item.id || item.prdNo;
+        if (!id) return null;
+        try {
+          const detailRes = await api.get(`/api/products/${id}`);
+          const p = detailRes.data.data || detailRes.data;
+          return {
+            id: p.prdNo,
+            prdNo: p.prdNo,
+            name: p.prdName,
+            brand: p.prdCompany,
+            price: p.prdPrice,
+            salePrice: p.salePrice,
+            discount: p.discountRate || p.discount,
+            image: p.prdImg ? `/images/${p.prdImg}` : null,
+            viewedDate: item.viewedAt || item.viewedDate,
+          };
+        } catch (err) {
+          console.error(`Failed to fetch detail for product ${id}`, err);
+          return null;
+        }
+      });
+      const details = await Promise.all(detailPromises);
+      mappedRecent = details.filter(d => d !== null);
+    }
 
     // 클레임 데이터 매핑
     const rawClaims = claimsRes.data || {};
@@ -383,6 +399,32 @@ export const removeLike = createAsyncThunk(
       return { productId, type };
     } catch (error) {
       return rejectWithValue(error.response?.data || '좋아요 삭제에 실패했습니다.');
+    }
+  },
+);
+
+/**
+ * Async Thunk: 최근 본 상품 저장
+ *
+ * @param {Object} payload - { userId, prdNo, prdSubCate }
+ */
+export const saveRecentProduct = createAsyncThunk(
+  'user/saveRecentProduct',
+  async ({ userId, prdNo, prdSubCate }, { rejectWithValue }) => {
+    // 프론트에서 prdSubCate 없이 호출하는 실수를 방지
+    if (!prdSubCate) {
+      console.warn('[saveRecentProduct] prdSubCate가 없음 — 상품 상세 로드 이후에 호출해야 합니다.');
+      return rejectWithValue('prdSubCate is required');
+    }
+
+    try {
+      await api.post(getEndpoints(userId).recentProducts, null, {
+        params: { prdNo, prdSubCate },
+      });
+      return { prdNo };
+    } catch (error) {
+      console.error('최근 본 상품 저장 실패:', error);
+      return rejectWithValue(error.response?.data || '최근 본 상품 저장 실패');
     }
   },
 );

@@ -8,11 +8,11 @@ const RecentViewedProducts = () => {
   const { recentProducts } = useSelector(state => state.user);
   const products = recentProducts || [];
 
-  const handleProductClick = id => {
-    navigate(`/product/${id}`);
+  const handleProductClick = prdNo => {
+    navigate(`/products/${prdNo}`);
   };
 
-  const handleDelete = id => {
+  const handleDelete = prdNo => {
     // TODO: 최근 본 상품 삭제 API 연동 필요 (현재 백엔드 컨트롤러에 DELETE 메서드 없음)
     alert('삭제 기능은 준비 중입니다.');
   };
@@ -44,11 +44,11 @@ const RecentViewedProducts = () => {
         <div className="recent-items">
           {products.map(item => (
             <div key={item.id} className="recent-item">
-              <div className="col-product" onClick={() => handleProductClick(item.id)} style={{ cursor: 'pointer' }}>
+              <div className="col-product" onClick={() => handleProductClick(item.prdNo)} style={{ cursor: 'pointer' }}>
                 <img src={item.image} alt={item.name} className="item-thumb" />
                 <div className="item-text">
-                  <span className="item-brand">{item.brand}</span>
                   <span className="item-name">{item.name}</span>
+                  <span className="item-brand">{item.brand}</span>
                 </div>
               </div>
               <div className="col-price">
@@ -69,7 +69,7 @@ const RecentViewedProducts = () => {
                   className="btn-delete"
                   onClick={e => {
                     e.stopPropagation();
-                    handleDelete(item.id);
+                    handleDelete(item.prdNo);
                   }}
                 >
                   삭제

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import api from 'lib/apiClient';
+import { saveRecentProduct } from 'features/user/userSlice';
 import ProductImageGallery from 'components/user/details/ProductImageGallery';
 import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
@@ -11,7 +12,8 @@ import ProductIngredientAnalysis from 'components/user/details/ProductIngredient
 
 const ProductDetailPage = () => {
   const { prdNo } = useParams(); // URL의 :prdNo 값을 가져옴 (예: 101)
-  const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl); //백엔드 주소 가져오기, 미리 apiBaseUrl 지정해둠
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector(state => state.user);
 
   const [productData, setProductData] = useState(null); //  데이터를 담을 state
   const [loading, setLoading] = useState(true); // 로딩 중인지 체크
@@ -22,22 +24,27 @@ const ProductDetailPage = () => {
       //비동기
       try {
         setLoading(true); //로딩 시작
-        //get 요청 주소 : http://localhost:8080/api/products/101
-        const productRes = await axios.get(`${apiBaseUrl}/products/${prdNo}`);
-        const reviewRes = await axios.get(`${apiBaseUrl}/products/${prdNo}/reviews`);
-        // 백엔드 API (상품, 리뷰, 성분)
-        // const [productRes, reviewRes, ingredientRes] = await Promise.all([
-        //axios.get(`/api/products/${prdNo}`),
-        //axios.get(`/api/products/${prdNo}/reviews`),
-        //axios.get(`/api/products/${prdNo}/ingredients`),
-        // ]);
+        //get 요청 주소 : /api/products/101
+        const productRes = await api.get(`/api/products/${prdNo}`);
+        const reviewRes = await api.get(`/api/products/${prdNo}/reviews`);
+
+        const productObj = productRes.data.data;
+
+        // 최근 본 상품 저장 로직 추가
+        if (currentUser?.userId && prdNo && productObj?.prdSubCate) {
+          dispatch(
+            saveRecentProduct({
+              userId: currentUser.userId,
+              prdNo,
+              prdSubCate: productObj.prdSubCate,
+            }),
+          );
+        }
 
         // 데이터 구조 만들기
         const combinedData = {
-          productInfo: productRes.data.data, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
+          productInfo: productObj, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
           reviewInfo: reviewRes.data.data || { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 리뷰 데이터
-          // ingredientInfo: ingredientRes.data.data, // 성분 데이터
-          // reviewInfo: { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 일단 더미
           ingredientInfo: { totalCount: 0, ingredients: [] }, // 일단 더미
           purchaseInfo: {}, // 하드코딩인거도 수정해야하는데
         };
@@ -56,7 +63,7 @@ const ProductDetailPage = () => {
       //상품번호가 있을때만 서버요청
       fetchData();
     }
-  }, [prdNo, apiBaseUrl]);
+  }, [prdNo, currentUser, dispatch]);
 
   // 로딩 중일 때 화면 돌아가기
   if (loading) {

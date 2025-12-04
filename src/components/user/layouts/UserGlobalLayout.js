@@ -40,10 +40,12 @@ const UserGlobalLayout = ({
     api
       .get(`/api/users/${userId}/recent-products`)
       .then(response => {
-        // API 응답이 배열이라고 가정
-        if (Array.isArray(response.data)) {
+        const rawData = response.data;
+        const list = Array.isArray(rawData) ? rawData : rawData?.data || [];
+
+        if (Array.isArray(list)) {
           // SideSticky가 기대하는 포맷(id, title, image)으로 매핑
-          const mappedItems = response.data.map(item => ({
+          const mappedItems = list.map(item => ({
             id: item.productId || item.id,
             title: item.productName || item.name,
             image: item.imageUrl || item.image,
@@ -80,6 +82,7 @@ const UserGlobalLayout = ({
         onRequireLogin={onRequireLogin}
         onCartClick={onCartClick}
         onScrollTop={handleScrollTop}
+        onNavigate={onNavigate}
       />
     </>
   );

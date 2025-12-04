@@ -18,8 +18,8 @@ export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localh
 // 실제 백엔드와 연결할 때는 문자열만 교체하면 된다.
 export const ENDPOINTS = {
   // 카테고리 관련 (상단 네비, 드롭다운)
-  topCategories: '/api/categories/top',
-  categoryTree: '/api/categories/tree',
+  topCategories: '/api/categories/main', // 메인 카테고리 (통합)
+  categoryTree: '/api/categories/main', // 메인 카테고리 (통합)
 
   // 검색 패널 관련
   // userId가 필요한 경우 컴포넌트에서 replace 처리하거나 동적으로 생성해야 함.
