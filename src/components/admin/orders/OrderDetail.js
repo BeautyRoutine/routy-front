@@ -26,7 +26,7 @@ const OrderDetail = () => {
   useEffect(() => {
     const loadOrder = async () => {
       dispatch(clearSelectedItem());
-      const existence = itemList.find(e => e.ODNO === parseInt(odNo));
+      const existence = itemList.find(e => e.odNo === parseInt(odNo));
       setLoading(true);
       try {
         if (existence) {
@@ -65,28 +65,28 @@ const OrderDetail = () => {
               <tbody>
                 <tr>
                   <th className="bg-light">주문번호</th>
-                  <td>{selectedItem.ODNO}</td>
+                  <td>{selectedItem.odNo}</td>
                   <th className="bg-light">결제일</th>
-                  <td>{selectedItem.ODREGDATE}</td>
+                  <td>{selectedItem.odRegdate}</td>
                 </tr>
                 <tr>
                   <th className="bg-light">상품가격 / 택배비</th>
                   <td>
-                    {Number(selectedItem.ODPRDPRICE).toLocaleString()} 원 /{' '}
-                    {Number(selectedItem.ODDELVPRICE).toLocaleString()} 원
+                    {Number(selectedItem.odPrdPrice).toLocaleString()} 원 /{' '}
+                    {Number(selectedItem.odDelvPrice).toLocaleString()} 원
                   </td>
                   <th className="bg-light">총 결제금액</th>
-                  <td>{Number(selectedItem.ODPRDPRICE + selectedItem.ODDELVPRICE).toLocaleString()} 원</td>
+                  <td>{Number(selectedItem.odPrdPrice + selectedItem.odDelvPrice).toLocaleString()} 원</td>
                 </tr>
                 <tr>
                   <th className="bg-light">결제자 성명(ID) / 닉네임</th>
                   <td colSpan="3">
-                    {selectedItem.USERNAME}({selectedItem.USERID}) / {selectedItem.USERNICK}
+                    {selectedItem.userName}({selectedItem.userId}) / {selectedItem.userNick}
                   </td>
                 </tr>
                 <tr>
                   <th className="bg-light">결제자 연락처</th>
-                  <td colSpan="3">{selectedItem.USERHP}</td>
+                  <td colSpan="3">{selectedItem.userHp}</td>
                 </tr>
               </tbody>
             </table>
@@ -97,7 +97,7 @@ const OrderDetail = () => {
               배송 정보
               <button
                 className="btn btn-sm btn-success"
-                onClick={() => navigate(`/admin/order/delivery/add?od_no=${selectedItem.ODNO}`)}
+                onClick={() => navigate(`/admin/order/delivery/add?od_no=${selectedItem.odNo}`)}
               >
                 <i class="bi bi-plus-square" /> 택배 추가
               </button>
@@ -112,31 +112,31 @@ const OrderDetail = () => {
               <tbody>
                 <tr>
                   <th className="bg-light">수령인</th>
-                  <td>{selectedItem.ODNAME}</td>
+                  <td>{selectedItem.odName}</td>
                   <th className="bg-light">수령인 연락처</th>
-                  <td>{selectedItem.ODHP}</td>
+                  <td>{selectedItem.odHp}</td>
                 </tr>
                 <tr>
                   <th className="bg-light">지번 주소</th>
                   <td colSpan="3">
-                    {selectedItem.ODJIBUNADDR
-                      ? `(${selectedItem.ODZIP}) ${selectedItem.ODJIBUNADDR}, ${selectedItem.ODDETAILADDR}`
+                    {selectedItem.odJibunAddr
+                      ? `(${selectedItem.odZip}) ${selectedItem.odJibunAddr}, ${selectedItem.odDetailAddr}`
                       : '없음'}
                   </td>
                 </tr>
                 <tr>
                   <th className="bg-light">도로명 주소</th>
                   <td colSpan="3">
-                    {selectedItem.ODROADADDR
-                      ? `(${selectedItem.ODZIP}) ${selectedItem.ODROADADDR}, ${selectedItem.ODDETAILADDR}`
+                    {selectedItem.odRoadAddr
+                      ? `(${selectedItem.odZip}) ${selectedItem.odRoadAddr}, ${selectedItem.odDetailAddr}`
                       : '없음'}
                   </td>
                 </tr>
                 <tr>
                   <th className="bg-light">택배 출입방법</th>
-                  <td>{getDeliveryKeyText(selectedItem.ODDELVKEYTYPE, selectedItem.ODDELVKEY)}</td>
+                  <td>{getDeliveryKeyText(selectedItem.odDelvKeyType, selectedItem.odDelvKey)}</td>
                   <th className="bg-light">택배 요청사항</th>
-                  <td>{selectedItem.ODDELVMSG}</td>
+                  <td>{selectedItem.odDelvMsg}</td>
                 </tr>
               </tbody>
             </table>
