@@ -16,7 +16,7 @@ function PaymentSuccessPage() {
     async function confirmPayment() {
       try {
         // 1. 백엔드로 승인 요청 보내기
-        const response = await fetch('/api/payments/confirm', {
+        const response = await fetch('http://localhost:8080/api/payments/confirm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
