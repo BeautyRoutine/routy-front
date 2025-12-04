@@ -11,15 +11,17 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
   if (!ingredientInfo) return null;
 
   const {
-    goodEffects, // 내 피부타입에 좋은 효과 (List<String>)
-    myFavoriteIngredients, // 내가 즐겨찾는 성분 이름 (List<String>)
-    allergenIngredients, // 알레르기 성분 이름 (List<String>)
-    dangerIngredients, // 주의 성분 이름 (List<String>)
-    allIngredients, // 전체 성분 리스트 (List<Object>)
-    totalCount, // 총 성분 수 (int)
+    goodEffects, // 내 피부타입에 좋은 효과
+    myFavoriteIngredients, // 내가 즐겨찾는 성분 이름
+    myAvoidIngredients, //싫어하는 성분 이름
+    allergenIngredients, // 알레르기 성분 이름
+    dangerIngredients, // 주의 성분 이름
+    allIngredients, // 전체 성분 리스트
+    totalCount, // 총 성분 수
   } = ingredientInfo;
   const allergens = allergenIngredients || [];
   const dangers = dangerIngredients || [];
+  const avoidIngredients = myAvoidIngredients || [];
   return (
     //성분분석 전체 구조, 제목
     <div className="ingredient-section my-5">
@@ -51,18 +53,20 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
               )}
             </div>
 
-            {/* 주의 성분 (있는 경우에만 표시) */}
-            {dangers.length > 0 && (
+            {/*기피 성분 */}
+            {avoidIngredients.length > 0 && (
               <>
-                {/* 포장지로 묶어주기 */}{' '}
-                <div className="sub-label" style={{ marginTop: '20px' }}>
-                  주의 성분
+                <div className="sub-label" style={{ marginTop: '20px', color: '#dc3545' }}>
+                  🚫 내 기피 성분 발견!
                 </div>
-                {/*주의성분 있으면 map으로 주의성분 나열 */}
                 <div className="badge-group">
-                  {dangers.map((name, index) => (
-                    <span key={index} className="custom-badge badge-orange">
-                      ⚠️ {name}
+                  {avoidIngredients.map((name, index) => (
+                    <span
+                      key={index}
+                      className="custom-badge badge-red"
+                      style={{ backgroundColor: '#ffebee', color: '#c62828', border: '1px solid #ffcdd2' }}
+                    >
+                      ✋ {name}
                     </span>
                   ))}
                 </div>
