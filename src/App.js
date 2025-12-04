@@ -59,7 +59,7 @@ function App() {
     navigate('/cart');
   };
 
-  const handleNavigate = page => {
+  const handleNavigate = (page, param) => {
     const routes = {
       home: '/',
       admin: '/admin',
@@ -69,8 +69,18 @@ function App() {
       customerservice: '/customerservice',
       category: '/category',
       ranking: '/ranking',
-      product: '/product',
+      product: '/products',
     };
+
+    if (page === 'product' && param) {
+      navigate(`/products/${param}`);
+      return;
+    }
+
+    if (page === 'search' && param) {
+      navigate(`/products?search=${encodeURIComponent(param)}`);
+      return;
+    }
 
     if (routes[page]) {
       navigate(routes[page]);

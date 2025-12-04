@@ -15,8 +15,8 @@ const SideSticky = ({
   onRequireLogin,
   onCartClick,
   onScrollTop,
+  onNavigate,
 }) => {
-
   // ------------------------------
   // localStorage 최근 본 상품 불러오기
   // ------------------------------
@@ -107,12 +107,19 @@ const SideSticky = ({
 
                   return (
                     <li key={key} className="recent-item">
-                      {thumb ? (
-                        <img src={thumb} alt={item.title} className="recent-thumb" />
-                      ) : (
-                        // 이미지가 없으면 타이틀 첫 글자를 원형 플레이스홀더로 노출한다.
-                        <span className="recent-thumb placeholder">{item.title?.[0] ?? '?'}</span>
-                      )}
+                      <button
+                        type="button"
+                        className="recent-item-button"
+                        onClick={() => onNavigate?.('product', item.id)}
+                      >
+                        {thumb ? (
+                          <img src={thumb} alt={item.title} className="recent-thumb" />
+                        ) : (
+                          // 이미지가 없으면 타이틀 첫 글자를 원형 플레이스홀더로 노출한다.
+                          <span className="recent-thumb placeholder">{item.title?.[0] ?? '?'}</span>
+                        )}
+                        <span className="recent-title">{item.title}</span>
+                      </button>
                     </li>
                   );
                 })}
@@ -131,4 +138,3 @@ const SideSticky = ({
 };
 
 export default SideSticky;
-

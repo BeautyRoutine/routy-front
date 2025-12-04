@@ -18,19 +18,6 @@ const ProductDetailPage = () => {
   const [productData, setProductData] = useState(null); //  데이터를 담을 state
   const [loading, setLoading] = useState(true); // 로딩 중인지 체크
 
-  // 최근 본 상품 저장
-  useEffect(() => {
-    if (currentUser && currentUser.userId && prdNo) {
-      // prdSubCate는 상품 정보에 포함되어 있을 수 있으나,
-      // 현재 시점(진입 시점)에서는 알기 어려울 수 있음.
-      // 일단 필수값인 prdNo만 보냄. 필요하다면 상품 정보 로드 후 호출해야 함.
-      // 하지만 "진입할 때마다"라고 했으므로 여기서 호출.
-      // 만약 서브카테고리가 필수라면 상품 로드 후 호출로 위치를 옮겨야 함.
-      // 요청사항: "prdSubCate: 서브 카테고리 번호 (선택)" -> 선택이므로 prdNo만 보냄.
-      dispatch(saveRecentProduct({ userId: currentUser.userId, prdNo }));
-    }
-  }, [currentUser, prdNo, dispatch]);
-
   // 연결작업
   useEffect(() => {
     const fetchData = async () => {
@@ -41,9 +28,22 @@ const ProductDetailPage = () => {
         const productRes = await api.get(`/api/products/${prdNo}`);
         const reviewRes = await api.get(`/api/products/${prdNo}/reviews`);
 
+        const productObj = productRes.data.data;
+
+        // 최근 본 상품 저장 로직 추가
+        if (currentUser?.userId && prdNo && productObj?.prdSubCate) {
+          dispatch(
+            saveRecentProduct({
+              userId: currentUser.userId,
+              prdNo,
+              prdSubCate: productObj.prdSubCate,
+            }),
+          );
+        }
+
         // 데이터 구조 만들기
         const combinedData = {
-          productInfo: productRes.data.data, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
+          productInfo: productObj, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
           reviewInfo: reviewRes.data.data || { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 리뷰 데이터
           ingredientInfo: { totalCount: 0, ingredients: [] }, // 일단 더미
           purchaseInfo: {}, // 하드코딩인거도 수정해야하는데
@@ -63,7 +63,7 @@ const ProductDetailPage = () => {
       //상품번호가 있을때만 서버요청
       fetchData();
     }
-  }, [prdNo]);
+  }, [prdNo, currentUser, dispatch]);
 
   // 로딩 중일 때 화면 돌아가기
   if (loading) {
