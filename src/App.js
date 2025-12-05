@@ -13,6 +13,9 @@ import RankingPage from './pages/RankingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import LogoutPage from './pages/LogoutPage';
+import CheckoutPage from './pages/CheckoutPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailPage from './pages/PaymentFailPage';
 import AdminHome from 'pages/admin/AdminHome';
 import Footer from 'components/user/layouts/footer';
 import ScrollToTop from 'components/common/ScrollToTop';
@@ -120,7 +123,12 @@ function App() {
       <main className="app-body" style={{ paddingTop: !isAdmin ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+
+          {/* 장바구니 & 결제 페이지 */}
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/fail" element={<PaymentFailPage />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/products/:prdNo" element={<ProductDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />

@@ -26,13 +26,18 @@ export function CartSummary({ summary, selectedCount, onNavigate }) {
   const finalAmount = summary.finalPaymentAmount;
   const totalAmount = summary.totalAmount;
 
+  // 구매 버튼 핸들러
+  const handleCheckout = () => {
+    if (selectedCount === 0) {
+      alert('상품을 선택해주세요.');
+      return;
+    }
+    onNavigate('/checkout', { state: { summary } });
+  };
+
   // 구매 버튼
   const CheckoutButton = () => (
-    <button
-      className="btn btn-primary btn-pill btn-lg"
-      disabled={selectedCount === 0}
-      onClick={() => onNavigate('/checkout')}
-    >
+    <button className="btn btn-primary btn-pill btn-lg" disabled={selectedCount === 0} onClick={handleCheckout}>
       상품 구매하기
     </button>
   );
