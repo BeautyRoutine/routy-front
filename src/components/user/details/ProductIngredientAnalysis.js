@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
+
 import { Row, Col } from 'react-bootstrap';
 import './ProductIngredientAnalysis.css';
 
+import SkinTypeAnalysisBox from './SkinTypeAnalysisBox';
+
 //ingredientInfo 받아옴
-const IngredientAnalysis = ({ ingredientInfo }) => {
+const IngredientAnalysis = ({ ingredientInfo, productInfo }) => {
   //전체 성분표 체크
   const [isOpen, setIsOpen] = useState(false);
 
   //성분 없으면 null
   if (!ingredientInfo) return null;
 
+  const prdNo = productInfo.prdNo;
+
   const {
-    goodEffects, // 내 피부타입에 좋은 효과
+    // goodEffects, // 내 피부타입에 좋은 효과
     myFavoriteIngredients, // 내가 즐겨찾는 성분 이름
-    myAvoidIngredients, //싫어하는 성분 이름
+    // myAvoidIngredients, //싫어하는 성분 이름
     allergenIngredients, // 알레르기 성분 이름
     dangerIngredients, // 주의 성분 이름
     allIngredients, // 전체 성분 리스트
@@ -22,7 +27,7 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
   //에러방지용
   const allergens = allergenIngredients || [];
   const dangers = dangerIngredients || [];
-  const avoidIngredients = myAvoidIngredients || [];
+  // const avoidIngredients = myAvoidIngredients || [];
   return (
     //성분분석 전체 구조, 제목
     <div className="ingredient-section my-5">
@@ -32,49 +37,7 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
 
       <Row className="g-4">
         {/* 피부타입 분석*/}
-        <Col md={6}>
-          <div className="analysis-box bg-blue-soft">
-            <div className="box-title">
-              <span>✅</span> 내 피부타입 분석
-            </div>
-
-            {/* 좋은 성분 */}
-            <div className="sub-label">좋은 성분</div>
-            <div className="badge-group">
-              {/* 좋은 성분 배열 길이가 0 보다 길면,map으로 ing에 주르륵 담고 */}
-              {goodEffects && goodEffects.length > 0 ? (
-                goodEffects.map((effect, index) => (
-                  <span key={index} className="custom-badge badge-green">
-                    <span style={{ fontSize: '10px' }}>✔️</span> {effect}
-                  </span>
-                ))
-              ) : (
-                //기능 없음
-                <span style={{ color: '#aaa', fontSize: '13px' }}>특별한 기능성 성분이 없습니다.</span>
-              )}
-            </div>
-
-            {/*기피 성분 */}
-            {avoidIngredients.length > 0 && (
-              <>
-                <div className="sub-label" style={{ marginTop: '20px', color: '#dc3545' }}>
-                  🚫 내 기피 성분 발견!
-                </div>
-                <div className="badge-group">
-                  {avoidIngredients.map((name, index) => (
-                    <span
-                      key={index}
-                      className="custom-badge badge-red"
-                      style={{ backgroundColor: '#ffebee', color: '#c62828', border: '1px solid #ffcdd2' }}
-                    >
-                      ✋ {name}
-                    </span>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </Col>
+        <SkinTypeAnalysisBox prdNo={prdNo} />
 
         {/*즐겨찾는 성분*/}
         <Col md={6}>

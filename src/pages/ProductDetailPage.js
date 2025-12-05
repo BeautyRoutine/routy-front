@@ -127,7 +127,7 @@ const ProductDetailPage = () => {
       {/*성분 분석 */}
       <Row className="mt-5">
         <Col>
-          <ProductIngredientAnalysis ingredientInfo={ingredientInfo} />
+          <ProductIngredientAnalysis ingredientInfo={ingredientInfo} productInfo={productInfo} />
         </Col>
       </Row>
 
