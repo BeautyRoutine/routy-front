@@ -18,6 +18,7 @@ const CategorySelect = ({ mainCate, subCate, onChange }) => {
       try {
         // 메인 카테고리 조회 (서브 카테고리 정보도 포함되어 있다고 가정)
         const response = await api.get('/api/categories/main');
+        console.log('카테고리 API 응답:', response.data);
         setCategories(response.data || {});
       } catch (error) {
         console.error('카테고리 목록을 불러오는데 실패했습니다:', error);

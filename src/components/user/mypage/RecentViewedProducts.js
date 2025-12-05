@@ -62,7 +62,7 @@ const RecentViewedProducts = () => {
                   <span className="normal-price">{item.price.toLocaleString()}원</span>
                 )}
               </div>
-              <div className="col-date">{item.viewedDate}</div>
+              <div className="col-date">{item.viewedDate ? new Date(item.viewedDate).toLocaleDateString() : '-'}</div>
               <div className="col-manage">
                 <button className="btn-cart">장바구니</button>
                 <button

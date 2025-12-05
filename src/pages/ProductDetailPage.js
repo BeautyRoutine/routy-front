@@ -40,11 +40,25 @@ const ProductDetailPage = () => {
 
         // 최근 본 상품 저장 로직 추가
         if (currentUser?.userId && prdNo && productObj?.prdSubCate) {
+          // UI 즉시 업데이트를 위한 상세 정보 구성
+          const productDetails = {
+            id: productObj.prdNo,
+            prdNo: productObj.prdNo,
+            name: productObj.prdName,
+            brand: productObj.prdCompany,
+            price: productObj.prdPrice,
+            salePrice: productObj.salePrice,
+            discount: productObj.discountRate || productObj.discount,
+            image: productObj.prdImg ? `${api.defaults.baseURL}/images/product/${productObj.prdImg}` : null,
+            viewedDate: new Date().toISOString(),
+          };
+
           dispatch(
             saveRecentProduct({
               userId: currentUser.userId,
               prdNo,
               prdSubCate: productObj.prdSubCate,
+              productDetails, // 추가된 파라미터
             }),
           );
         }
