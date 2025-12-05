@@ -86,6 +86,10 @@ function App() {
     if (routes[page]) {
       navigate(routes[page]);
     }
+    if (page === 'category' && param) {
+      navigate(`/products?category=${param}`);
+      return;
+    }
   };
 
   return (
