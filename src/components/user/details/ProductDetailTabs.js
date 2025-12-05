@@ -29,7 +29,12 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
               {/* 이미지가 있으면 map 사용해서 전부 출력(아마 이미지는 1개일듯)*/}
               {productInfo.images.detail && productInfo.images.detail.length > 0 ? (
                 productInfo.images.detail.map((imgSrc, index) => (
-                  <img key={index} src={imgSrc} alt={`상세 이미지 ${index + 1}`} className="detail-image" />
+                  <img
+                    key={index}
+                    src={`${process.env.PUBLIC_URL}/images/product/${imgSrc}`}
+                    alt={`상세 이미지 ${index + 1}`}
+                    className="detail-image"
+                  />
                 ))
               ) : (
                 <div className="py-5 text-muted bg-light text-center">상세 이미지가 없습니다.</div>
@@ -61,35 +66,35 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
                     </colgroup>
                     <tbody>
                       <tr>
-                        <th>용량 또는 중량</th>
+                        <th className="bg-light">용량 또는 중량</th>
                         <td>{productInfo.prdVolume}ml</td>
                       </tr>
                       <tr>
-                        <th>제품 주요 사양</th>
+                        <th className="bg-light">제품 주요 사양</th>
                         <td>모든 피부용</td>
                       </tr>
                       <tr>
-                        <th>사용기한</th>
+                        <th className="bg-light">사용기한</th>
                         <td>제조일로부터 36개월</td>
                       </tr>
                       <tr>
-                        <th>사용방법</th>
+                        <th className="bg-light">사용방법</th>
                         <td>상세페이지 참조</td>
                       </tr>
                       <tr>
-                        <th>제조국</th>
+                        <th className="bg-light">제조국</th>
                         <td>대한민국</td>
                       </tr>
                       <tr>
-                        <th>제조사</th>
+                        <th className="bg-light">제조사</th>
                         <td>{productInfo.prdCompany}</td>
                       </tr>
                       <tr>
-                        <th>주요성분</th>
+                        <th className="bg-light">주요성분</th>
                         <td>상세페이지 참조</td>
                       </tr>
                       <tr>
-                        <th>품질보증기준</th>
+                        <th className="bg-light">품질보증기준</th>
                         <td>공정거래위원회 고시 소비자분쟁해결기준에 의거 보상</td>
                       </tr>
                     </tbody>

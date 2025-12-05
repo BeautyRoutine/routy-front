@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/apiClient';
-import { ENDPOINTS } from '../components/user/layouts/headerConstants';
+import { API_BASE_URL, ENDPOINTS } from '../components/user/layouts/headerConstants';
 import './RankingPage.css';
 
 // -------------------------------
@@ -78,7 +78,7 @@ const RankingPage = () => {
         // 피부타입 필터는 현재 API 파라미터에서 제외됨
 
         // 1. 랭킹 리스트 조회
-        const response = await api.get('/api/products/ranking', { params });
+        const response = await api.get(`${API_BASE_URL}/api/products/ranking`, { params });
         const initialList = response.data.data || [];
 
         setRankingList(initialList); // 상세조회 제거 — 랭킹 API의 이미지 URL 그대로 사용
@@ -98,8 +98,9 @@ const RankingPage = () => {
   };
 
   const getImageUrl = img => {
-    if (!img) return '/images/product/no-image.png'; // 기본 이미지
-    return img; // BE에서 완성된 URL 그대로 사용
+    if (!img) return `${process.env.PUBLIC_URL}/images/product/no-image.png`; // 기본 이미지
+    const res = `${process.env.PUBLIC_URL}/images/product/${img}`;
+    return res; // BE에서 완성된 URL 그대로 사용
   };
 
   return (
@@ -170,8 +171,8 @@ const RankingPage = () => {
                     className="card-img-top rounded-4"
                     style={{ width: '300px', height: '300px', objectFit: 'cover' }}
                     onError={e => {
-                      if (e.target.src.endsWith('/images/product/no-image.png')) return;
-                      e.target.src = '/images/product/no-image.png';
+                      if (e.target.src.endsWith(`${process.env.PUBLIC_URL}/images/product/no-image.png`)) return;
+                      e.target.src = `${process.env.PUBLIC_URL}/images/product/no-image.png`;
                     }}
                   />
                 </div>
