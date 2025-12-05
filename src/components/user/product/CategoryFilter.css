@@ -1,8 +1,88 @@
+/* 전체 박스 */
 .left-filter-box {
   border-radius: 14px;
-  background: #fafafa;
   border: 1px solid #eee;
+  overflow: hidden;
+  background: #ffffff;
 }
+
+/* 필터 제목 헤더 */
+.filter-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #eee;
+  background: linear-gradient(90deg, #11cdd4, #11999e);
+}
+
+.filter-header h6 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: white; /* 글씨는 흰색이 잘 보임 */
+}
+
+/* 본문 */
+.filter-content {
+  padding: 20px;
+  background: #ffffff;
+}
+
+/* 리스트 항목 */
 .left-filter-box ul li {
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+
+.left-filter-box ul li:hover {
+  background: #f6f6f6;
+}
+
+/* 브랜드 드롭다운 */
+.brand-dropdown-header {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.brand-dropdown-header:hover {
+  background: #f2f2f2;
+}
+
+.brand-dropdown {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.brand-list li {
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.brand-list li:hover {
+  background: #f2f2f2;
+}
+.filter-apply-btn {
+  padding: 12px 0;
+  border: none;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(90deg, #11cdd4, #11999e);
+  transition: 0.2s ease;
+}
+
+.filter-apply-btn:hover {
+  opacity: 0.9;
 }

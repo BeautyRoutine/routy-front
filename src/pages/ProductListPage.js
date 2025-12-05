@@ -11,33 +11,48 @@ const ProductListPage = () => {
   const [sort, setSort] = useState('popular');
 
   const [searchParams] = useSearchParams();
-  const limit = searchParams.get('limit') || 20;
-  const skin = searchParams.get('skin') || null;
 
+  // 필터 값들 (의존성 관리를 위해 미리 변수로 추출)
+  const min_price = searchParams.get('min_price') || null;
+  const max_price = searchParams.get('max_price') || null;
+  const brand = searchParams.get('brand') || null;      // CSV
+  const skin = searchParams.get('skin') || null;
   const maincate = searchParams.get('maincate') || null;
   const subcate = searchParams.get('subcate') || null;
+
+  const limit = searchParams.get('limit') || 20;
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await api.get('/api/products/list/skin_cate', {
+        const res = await api.get('/api/products/list', {
           params: {
             limit,
+            maincate,
+            subcate,
+            min_price,
+            max_price,
+            brand,
             skin,
-            maincate, // ★★ 백엔드 요구 파라미터 이름
-            subcate, // ★★ 백엔드 요구 파라미터 이름
           },
         });
 
-        const list = res.data.data || [];
-        setProducts(list);
+        setProducts(res.data.data || []);
       } catch (err) {
         console.error(err);
       }
     };
 
     loadProducts();
-  }, [limit, skin, maincate, subcate]); // ★ 카테고리 변경되면 재로딩
+  }, [
+    limit,
+    maincate,
+    subcate,
+    min_price,
+    max_price,
+    brand,
+    skin,
+  ]); // 모든 search params가 변하면 API 재실행
 
   return (
     <div className="container mt-4 product-page-container">
@@ -50,13 +65,15 @@ const ProductListPage = () => {
 
         <div className="col-9">
           <div className="mb-3">
-            <SortBar total={products.length} sort={sort} onSortChange={value => setSort(value)} />
+            <SortBar total={products.length} sort={sort} onSortChange={setSort} />
           </div>
 
           <ProductGrid products={products} />
 
           <div className="text-center mt-4">
-            <button className="btn btn-outline-primary rounded-pill px-4">상품 더보기</button>
+            <button className="btn btn-outline-primary rounded-pill px-4">
+              상품 더보기
+            </button>
           </div>
         </div>
       </div>
@@ -65,3 +82,4 @@ const ProductListPage = () => {
 };
 
 export default ProductListPage;
+
