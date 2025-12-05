@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock3, ShoppingCart, ChevronUp } from 'lucide-react';
+import { Clock3, ChevronUp } from 'lucide-react';
 
 import './SideSticky.css';
 
