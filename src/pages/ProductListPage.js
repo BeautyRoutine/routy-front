@@ -14,10 +14,20 @@ const ProductListPage = () => {
   const limit = searchParams.get('limit') || 20;
   const skin = searchParams.get('skin') || null;
 
+  const maincate = searchParams.get('maincate') || null;
+  const subcate = searchParams.get('subcate') || null;
+
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await api.get('/api/products/list/skin_cate', { params: { limit, skin } });
+        const res = await api.get('/api/products/list/skin_cate', {
+          params: {
+            limit,
+            skin,
+            maincate, // ★★ 백엔드 요구 파라미터 이름
+            subcate, // ★★ 백엔드 요구 파라미터 이름
+          },
+        });
 
         const list = res.data.data || [];
         setProducts(list);
@@ -27,27 +37,22 @@ const ProductListPage = () => {
     };
 
     loadProducts();
-  }, [limit, skin]);
+  }, [limit, skin, maincate, subcate]); // ★ 카테고리 변경되면 재로딩
 
   return (
     <div className="container mt-4 product-page-container">
-      {/* 상단 전체 상품 개수 */}
       <p className="fw-bold mb-3 text-muted">전체 {products.length}개 상품</p>
 
       <div className="row">
-        {/* 왼쪽 필터 */}
         <div className="col-3">
           <CategoryFilter />
         </div>
 
-        {/* 오른쪽 전체 콘텐츠 (정렬 + 상품) */}
         <div className="col-9">
-          {/* 정렬바 */}
           <div className="mb-3">
             <SortBar total={products.length} sort={sort} onSortChange={value => setSort(value)} />
           </div>
 
-          {/* 상품 목록 */}
           <ProductGrid products={products} />
 
           <div className="text-center mt-4">
