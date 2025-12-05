@@ -19,6 +19,7 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
     allIngredients, // 전체 성분 리스트
     totalCount, // 총 성분 수
   } = ingredientInfo;
+  //에러방지용
   const allergens = allergenIngredients || [];
   const dangers = dangerIngredients || [];
   const avoidIngredients = myAvoidIngredients || [];
@@ -84,6 +85,7 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
 
             <div className="sub-label">포함된 성분</div>
             <div className="badge-group">
+              {/*내가 좋아하는 성분 있으면 */}
               {myFavoriteIngredients && myFavoriteIngredients.length > 0 ? (
                 myFavoriteIngredients.map((ingName, index) => (
                   <span key={index} className="custom-badge badge-purple">

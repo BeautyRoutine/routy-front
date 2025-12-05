@@ -25,7 +25,7 @@ const ProductDetailPage = () => {
       try {
         setLoading(true); //로딩 시작
 
-        // currentUser가 없으면 null 처리가 되도록 옵셔널 체이닝 사용
+        // 로그인 안한 상태면 null 상태니 ?.으로 있는지 체크, 없으면 undefined->null
         const analysisParams = {
           userId: currentUser?.userId || null,
           userSkin: currentUser?.userSkin || null, // 유저 피부타입 (예: 'OILY', 'DRY')
@@ -34,6 +34,7 @@ const ProductDetailPage = () => {
         //get 요청 주소 : /api/products/101
         const productRes = await api.get(`/api/products/${prdNo}`);
         const reviewRes = await api.get(`/api/products/${prdNo}/reviews`);
+        //유저 검색 조건 추가해야되서 params으로
         const ingredientRes = await api.get(`/api/products/${prdNo}/analysis`, { params: analysisParams });
         const productObj = productRes.data.data;
 
