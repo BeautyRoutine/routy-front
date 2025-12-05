@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import api from "../../../lib/apiClient"; // ★ 반드시 수정 필요: 네 프로젝트 경로에 맞게
 import "./CategoryFilter.css";
 
 const CategoryFilter = () => {
@@ -12,22 +13,35 @@ const CategoryFilter = () => {
   // 브랜드 상태
   const [brandOpen, setBrandOpen] = useState(false);
   const [brandSearch, setBrandSearch] = useState("");
+  const [brandList, setBrandList] = useState([]); // ★ DB 브랜드 목록
   const [selectedBrands, setSelectedBrands] = useState(
     (searchParams.get("brand") || "").split(",").filter(Boolean)
   );
 
-  const allBrands = ["이니스프리", "닥터지", "라네즈", "더샘", "토니모리"];
-  const filteredBrands = allBrands.filter((b) =>
+  // ★ 브랜드 목록을 DB에서 가져옴
+  useEffect(() => {
+    api
+      .get("/api/products/brand/list")
+      .then((res) => {
+        setBrandList(res.data.data || []);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  // 브랜드 검색 필터링
+  const filteredBrands = brandList.filter((b) =>
     b.toLowerCase().includes(brandSearch.toLowerCase())
   );
 
   const toggleBrand = (brand) => {
     let updated = [];
+
     if (selectedBrands.includes(brand)) {
       updated = selectedBrands.filter((b) => b !== brand);
     } else {
       updated = [...selectedBrands, brand];
     }
+
     setSelectedBrands(updated);
   };
 
@@ -41,8 +55,8 @@ const CategoryFilter = () => {
     { key: "sensitive", label: "민감성" },
   ];
 
+  // 필터 적용 (기존 파라미터 유지)
   const applyFilter = () => {
-    // ★ 기존 QueryString 유지
     const params = new URLSearchParams(searchParams);
 
     // 가격
