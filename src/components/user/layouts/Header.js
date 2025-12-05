@@ -359,7 +359,8 @@ export function Header({
           title: item.title,
           message: item.message,
           type: item.type,
-          unread: item.unread === 'Y',
+          // DB IS_READ='Y' -> API 'Y' (읽음). 따라서 'N'이어야 안 읽음.
+          unread: (item.readYn || item.isRead || item.unread) === 'N',
           timeAgo: moment(item.createdAt).fromNow(),
           createdAt: item.createdAt,
         }));
@@ -633,10 +634,13 @@ export function Header({
   // 알림 전체 읽음
   const markAllNotificationsRead = useCallback(async () => {
     if (!userId) return;
+
+    // Optimistic update: UI 먼저 업데이트
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    setAutoNotificationCount(0);
+
     try {
       await api.post(`/api/users/${userId}/notifications/read`);
-      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-      setAutoNotificationCount(0);
     } catch (error) {
       console.error('전체 읽음 처리 실패:', error);
     }
@@ -646,10 +650,13 @@ export function Header({
   const markNotificationRead = useCallback(
     async notiId => {
       if (!userId) return;
+
+      // Optimistic update: UI 먼저 업데이트
+      setNotifications(prev => prev.map(n => (n.id === notiId ? { ...n, unread: false } : n)));
+      // useEffect가 notifications 변경을 감지하여 배지 카운트를 업데이트하므로 수동 업데이트 불필요
+
       try {
         await api.post(`/api/users/${userId}/notifications/${notiId}/read`);
-        setNotifications(prev => prev.map(n => (n.id === notiId ? { ...n, unread: false } : n)));
-        setAutoNotificationCount(prev => Math.max(0, prev - 1));
       } catch (error) {
         console.error('알림 읽음 처리 실패:', error);
       }
@@ -662,15 +669,12 @@ export function Header({
     async (e, notiId) => {
       e.stopPropagation();
       if (!userId) return;
+
+      // Optimistic update: UI 먼저 업데이트
+      setNotifications(prev => prev.filter(n => n.id !== notiId));
+
       try {
         await api.delete(`/api/users/${userId}/notifications/${notiId}`);
-        setNotifications(prev => {
-          const target = prev.find(n => n.id === notiId);
-          if (target && target.unread) {
-            setAutoNotificationCount(c => Math.max(0, c - 1));
-          }
-          return prev.filter(n => n.id !== notiId);
-        });
       } catch (error) {
         console.error('알림 삭제 실패:', error);
       }
