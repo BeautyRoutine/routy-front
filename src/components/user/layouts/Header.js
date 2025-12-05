@@ -23,6 +23,7 @@ import {
   FALLBACK_RECENT_SEARCHES,
   FALLBACK_SIMILAR_SKIN,
 } from './headerConstants';
+import { CATEGORY_CODE } from './categoryCode';
 
 // API 응답(Map<ID, {mainStr, sub: Map<ID, Name>}>)을 UI 포맷으로 변환
 function transformCategoryData(data) {
@@ -1004,7 +1005,7 @@ export function Header({
                       className="category-title"
                       onClick={() => {
                         setCategoryOpen(false);
-                        onNavigate?.('category');
+                        onNavigate?.('category', CATEGORY_CODE[category.title]);
                       }}
                     >
                       {category.title}
@@ -1017,7 +1018,7 @@ export function Header({
                             type="button"
                             onClick={() => {
                               setCategoryOpen(false);
-                              onNavigate?.('category');
+                              onNavigate?.('category', CATEGORY_CODE[name]);
                             }}
                           >
                             {name}
