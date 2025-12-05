@@ -61,6 +61,12 @@ function App() {
   };
 
   const handleNavigate = (page, param) => {
+    // ★★★ 전체 URL 직접 이동 처리 ★★★
+    if (typeof page === 'string' && page.startsWith('/')) {
+      navigate(page);
+      return;
+    }
+
     const routes = {
       home: '/',
       admin: '/admin',
@@ -83,12 +89,13 @@ function App() {
       return;
     }
 
-    if (routes[page]) {
-      navigate(routes[page]);
-    }
     if (page === 'category' && param) {
       navigate(`/products?category=${param}`);
       return;
+    }
+
+    if (routes[page]) {
+      navigate(routes[page]);
     }
   };
 

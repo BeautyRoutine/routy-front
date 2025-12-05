@@ -14,8 +14,8 @@ const ProductListPage = () => {
   const limit = searchParams.get('limit') || 20;
   const skin = searchParams.get('skin') || null;
 
-  // ★ 카테고리(서브 카테고리) 파라미터 추가
-  const category = searchParams.get('category') || null;
+  const maincate = searchParams.get('maincate') || null;
+  const subcate = searchParams.get('subcate') || null;
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -24,7 +24,8 @@ const ProductListPage = () => {
           params: {
             limit,
             skin,
-            sub_cate: category,   // ★ 백엔드 요구 파라미터 이름
+            maincate,   // ★★ 백엔드 요구 파라미터 이름
+            subcate,    // ★★ 백엔드 요구 파라미터 이름
           },
         });
 
@@ -36,7 +37,7 @@ const ProductListPage = () => {
     };
 
     loadProducts();
-  }, [limit, skin, category]);  // ★ category 변화 시 다시 로딩
+  }, [limit, skin, maincate, subcate]);  // ★ 카테고리 변경되면 재로딩
 
   return (
     <div className="container mt-4 product-page-container">
@@ -49,19 +50,13 @@ const ProductListPage = () => {
 
         <div className="col-9">
           <div className="mb-3">
-            <SortBar 
-              total={products.length} 
-              sort={sort} 
-              onSortChange={value => setSort(value)} 
-            />
+            <SortBar total={products.length} sort={sort} onSortChange={value => setSort(value)} />
           </div>
 
           <ProductGrid products={products} />
 
           <div className="text-center mt-4">
-            <button className="btn btn-outline-primary rounded-pill px-4">
-              상품 더보기
-            </button>
+            <button className="btn btn-outline-primary rounded-pill px-4">상품 더보기</button>
           </div>
         </div>
       </div>

@@ -1005,7 +1005,7 @@ export function Header({
                       className="category-title"
                       onClick={() => {
                         setCategoryOpen(false);
-                        onNavigate?.('category', CATEGORY_CODE[category.title]);
+                        onNavigate?.(`/products?maincate=${CATEGORY_CODE[category.title]}`);
                       }}
                     >
                       {category.title}
@@ -1018,7 +1018,7 @@ export function Header({
                             type="button"
                             onClick={() => {
                               setCategoryOpen(false);
-                              onNavigate?.('category', CATEGORY_CODE[name]);
+                              onNavigate?.(`/products?subcate=${CATEGORY_CODE[name]}`);
                             }}
                           >
                             {name}
