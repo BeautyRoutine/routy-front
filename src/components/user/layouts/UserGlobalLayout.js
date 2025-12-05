@@ -48,11 +48,10 @@ const UserGlobalLayout = ({
         if (Array.isArray(list)) {
           // SideSticky가 기대하는 포맷(id, title, image)으로 매핑
           const mappedItems = list.map(item => {
-            const imgPath = item.imageUrl || item.image || item.prdImg;
             return {
-              id: item.productId || item.id,
-              title: item.productName || item.name,
-              image: imgPath ? `${api.defaults.baseURL}/images/product/${imgPath}` : null,
+              id: item.prdNo,
+              title: item.prdName,
+              image: item.prdImg ? `${process.env.PUBLIC_URL}/images/product/${item.prdImg}` : null,
             };
           });
           // 최신순 정렬 (API가 최신순으로 준다고 가정하고 reverse 제거)
