@@ -4,9 +4,13 @@ import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
 import api from '../lib/apiClient';
 
+import { LoadingOverlay } from 'components/common/commonUtils';
+
 const SignupPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     userId: '',
@@ -101,10 +105,21 @@ const SignupPage = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+
+      // ✅ 첫 번째 에러 필드로 스크롤 이동
+      const firstErrorField = Object.keys(newErrors)[0];
+      const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        errorElement.focus();
+      }
+
       return;
     }
 
     try {
+      setLoading(true);
+
       const signupData = {
         userId: formData.userId,
         userPw: formData.userPw,
@@ -142,6 +157,8 @@ const SignupPage = () => {
         alert('회원가입 중 오류가 발생했습니다.');
       }
       console.error('Signup error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -156,6 +173,8 @@ const SignupPage = () => {
         padding: '40px 20px',
       }}
     >
+      <LoadingOverlay show={loading} />
+
       <div
         style={{
           background: 'white',
