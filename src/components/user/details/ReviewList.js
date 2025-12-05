@@ -11,14 +11,23 @@ const ReviewList = ({ reviewInfo }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
 
-  // 현재 페이지 번호 -작동 안됨 현재
-  //const [activePage, setActivePage] = useState(1);
+  const [activePage, setActivePage] = useState(1);
 
   // 데이터가 없으면 아무것도 안 그림
   if (!reviewInfo || !reviewInfo.reviews) return null;
 
   //구조분해할당
   const { reviews, summary } = reviewInfo;
+
+  //페이지 변경
+  const handlePageChange = pageNumber => {
+    setActivePage(pageNumber);
+    console.log(`페이지 변경 요청: ${pageNumber}, 정렬: ${sortOption}`);
+    // api 받아와야함
+  };
+
+  //페이지수
+  const totalPages = summary.totalCount ? Math.ceil(summary.totalCount / 10) : 0;
 
   // 별점 그리기 헬퍼
   const renderStars = rating => {
@@ -173,14 +182,33 @@ const ReviewList = ({ reviewInfo }) => {
 
       {/* 페이지네이션 */}
       <div className="d-flex justify-content-center mt-5">
-        <Pagination>
-          <Pagination.First />
-          <Pagination.Prev />
-          <Pagination.Item active>{1}</Pagination.Item>
-          <Pagination.Item>{2}</Pagination.Item>
-          <Pagination.Next />
-          <Pagination.Last />
-        </Pagination>
+        {totalPages > 0 && (
+          <Pagination>
+            {/* << 맨 처음으로 */}
+            <Pagination.First onClick={() => handlePageChange(1)} disabled={activePage === 1} />
+            {/* < 이전 */}
+            <Pagination.Prev onClick={() => handlePageChange(activePage - 1)} disabled={activePage === 1} />
+
+            {/* 숫자 버튼 자동 생성 */}
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const pageNum = idx + 1;
+              return (
+                <Pagination.Item
+                  key={pageNum}
+                  active={pageNum === activePage}
+                  onClick={() => handlePageChange(pageNum)}
+                >
+                  {pageNum}
+                </Pagination.Item>
+              );
+            })}
+
+            {/* > 다음 */}
+            <Pagination.Next onClick={() => handlePageChange(activePage + 1)} disabled={activePage === totalPages} />
+            {/* >> 맨 끝으로 */}
+            <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={activePage === totalPages} />
+          </Pagination>
+        )}
       </div>
 
       <ReviewDetailModal show={showModal} onHide={() => setShowModal(false)} review={selectedReview} />
