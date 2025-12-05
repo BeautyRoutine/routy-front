@@ -575,6 +575,8 @@ export function Header({
   };
 
   const handleSearchKeyDown = event => {
+    if (event.nativeEvent.isComposing) return; // IME 입력 중이면 무시
+
     if (event.key === 'Enter') {
       event.preventDefault();
       handleSearchSubmit();

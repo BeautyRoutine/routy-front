@@ -107,4 +107,11 @@ export function getKakaoUrl() {
   return `${base}/auth/kakao/login`;
 }
 
+// 상품 검색
+export const searchProducts = keyword => {
+  return api.get('/api/search', {
+    params: { keyword },
+  });
+};
+
 export default api;
