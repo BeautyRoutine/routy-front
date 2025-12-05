@@ -8,7 +8,6 @@ export {
   DEMO_RECENT_SEARCHES as FALLBACK_RECENT_SEARCHES,
   DEMO_SIMILAR_SKIN as FALLBACK_SIMILAR_SKIN,
   DEMO_RECENT_ITEMS,
-  DEMO_CART_COUNT,
 } from '../data/headerMocks';
 
 // 공통 API 루트: .env 없이 개발 시에도 동작하도록 기본값을 둔다.
