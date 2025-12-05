@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import "./CategoryFilter.css";
 
 const CategoryFilter = () => {
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // 가격 상태
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+  const [minPrice, setMinPrice] = useState(searchParams.get("min_price") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("max_price") || "");
 
   // 브랜드 상태
   const [brandOpen, setBrandOpen] = useState(false);
   const [brandSearch, setBrandSearch] = useState("");
-  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState(
+    (searchParams.get("brand") || "").split(",").filter(Boolean)
+  );
 
   const allBrands = ["이니스프리", "닥터지", "라네즈", "더샘", "토니모리"];
   const filteredBrands = allBrands.filter((b) =>
@@ -20,15 +22,17 @@ const CategoryFilter = () => {
   );
 
   const toggleBrand = (brand) => {
+    let updated = [];
     if (selectedBrands.includes(brand)) {
-      setSelectedBrands(selectedBrands.filter((b) => b !== brand));
+      updated = selectedBrands.filter((b) => b !== brand);
     } else {
-      setSelectedBrands([...selectedBrands, brand]);
+      updated = [...selectedBrands, brand];
     }
+    setSelectedBrands(updated);
   };
 
   // 피부 타입 (단일 선택)
-  const [skinType, setSkinType] = useState(null);
+  const [skinType, setSkinType] = useState(searchParams.get("skin") || null);
 
   const skinOptions = [
     { key: "dry", label: "건성" },
@@ -37,14 +41,29 @@ const CategoryFilter = () => {
     { key: "sensitive", label: "민감성" },
   ];
 
-  // 필터 적용 → QueryString 반영
   const applyFilter = () => {
-    const params = new URLSearchParams();
+    // ★ 기존 QueryString 유지
+    const params = new URLSearchParams(searchParams);
 
-    if (minPrice) params.append("min_price", minPrice);
-    if (maxPrice) params.append("max_price", maxPrice);
+    // 가격
+    if (minPrice) params.set("min_price", minPrice);
+    else params.delete("min_price");
 
-    navigate(`/products?${params.toString()}`);
+    if (maxPrice) params.set("max_price", maxPrice);
+    else params.delete("max_price");
+
+    // 브랜드
+    if (selectedBrands.length > 0) {
+      params.set("brand", selectedBrands.join(","));
+    } else {
+      params.delete("brand");
+    }
+
+    // 피부 타입
+    if (skinType) params.set("skin", skinType);
+    else params.delete("skin");
+
+    setSearchParams(params);
   };
 
   return (
@@ -54,9 +73,7 @@ const CategoryFilter = () => {
         <h6 className="fw-bold">필터</h6>
       </div>
 
-      {/* 필터 내용 */}
       <div className="filter-content">
-
         {/* 가격대 */}
         <h6 className="small fw-bold mt-2">가격대</h6>
         <div className="d-flex align-items-center gap-2 mt-2 mb-4">
@@ -79,7 +96,6 @@ const CategoryFilter = () => {
 
         {/* 브랜드 */}
         <h6 className="small fw-bold">브랜드</h6>
-
         <div
           className="brand-dropdown-header mt-2"
           onClick={() => setBrandOpen(!brandOpen)}
@@ -99,11 +115,7 @@ const CategoryFilter = () => {
 
             <ul className="list-unstyled small brand-list">
               {filteredBrands.map((brand) => (
-                <li
-                  key={brand}
-                  onClick={() => toggleBrand(brand)}
-                  style={{ cursor: "pointer" }}
-                >
+                <li key={brand} onClick={() => toggleBrand(brand)}>
                   <input
                     type="checkbox"
                     checked={selectedBrands.includes(brand)}
@@ -120,26 +132,17 @@ const CategoryFilter = () => {
         <h6 className="small fw-bold mt-3">피부 타입</h6>
         <ul className="list-unstyled small mt-2 mb-2">
           {skinOptions.map((opt) => (
-            <li
-              key={opt.key}
-              onClick={() => setSkinType(opt.key)}
-              style={{ cursor: "pointer" }}
-            >
-              <input
-                type="checkbox"
-                readOnly
-                checked={skinType === opt.key}
-              />{" "}
+            <li key={opt.key} onClick={() => setSkinType(opt.key)}>
+              <input type="checkbox" readOnly checked={skinType === opt.key} />{" "}
               {opt.label}
             </li>
           ))}
         </ul>
 
-        {/* 필터 적용 버튼 */}
+        {/* 적용 버튼 */}
         <button className="filter-apply-btn w-100 mt-3" onClick={applyFilter}>
           필터 적용
         </button>
-
       </div>
     </div>
   );
