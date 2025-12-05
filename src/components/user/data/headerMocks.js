@@ -30,40 +30,7 @@ export const DEMO_CATEGORY_TREE = [
   },
 ];
 
-export const DEMO_NOTIFICATIONS = [
-  {
-    id: 'delivery',
-    title: '배송 완료',
-    message: '하이드레이팅 세럼이 배송 완료되었습니다.',
-    timeAgo: '5분 전',
-    type: 'delivery',
-    unread: true,
-  },
-  {
-    id: 'like',
-    title: '좋아요 알림',
-    message: '15명의 회원님이 리뷰를 좋아합니다.',
-    timeAgo: '1시간 전',
-    type: 'like',
-    unread: true,
-  },
-  {
-    id: 'comment',
-    title: '새 댓글',
-    message: '회원님의 리뷰에 댓글이 달렸습니다.',
-    timeAgo: '2시간 전',
-    type: 'comment',
-    unread: false,
-  },
-  {
-    id: 'promotion',
-    title: '특별 할인',
-    message: '좋아하는 제품이 20% 할인 중입니다!',
-    timeAgo: '1일 전',
-    type: 'promotion',
-    unread: true,
-  },
-];
+export const DEMO_NOTIFICATIONS = [];
 
 export const DEMO_COUNTS = {
   notifications: DEMO_NOTIFICATIONS.filter(item => item.unread).length,
@@ -102,5 +69,3 @@ export const DEMO_RECENT_ITEMS = [
     image: 'https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=160&q=80',
   },
 ];
-
-export const DEMO_CART_COUNT = 3;
