@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../../../lib/apiClient';
+import moment from 'moment';
+import 'moment/locale/ko';
 import {
   Menu,
   ChevronRight,
@@ -14,12 +16,12 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import './Header.css';
+import NotificationModal from './NotificationModal';
 import logoImage from 'logo.svg';
 import {
   ENDPOINTS,
   FALLBACK_TOP,
   FALLBACK_COUNTS,
-  FALLBACK_NOTIFICATIONS,
   FALLBACK_RECENT_SEARCHES,
   FALLBACK_SIMILAR_SKIN,
 } from './headerConstants';
@@ -127,9 +129,10 @@ export function Header({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   // 알림 벨 드롭다운과 배지 숫자, 리스트 상태.
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const [autoNotificationCount, setAutoNotificationCount] = useState(FALLBACK_COUNTS.notifications);
   const [autoCartCount, setAutoCartCount] = useState(FALLBACK_COUNTS.cart);
-  const [notifications, setNotifications] = useState(FALLBACK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   // 검색 패널 캐시 및 열림 제어
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -200,7 +203,7 @@ export function Header({
   useEffect(() => {
     if (!isLoggedIn) {
       setNotificationPanelOpen(false);
-      setNotifications(FALLBACK_NOTIFICATIONS);
+      setNotifications([]);
     }
   }, [isLoggedIn]);
 
@@ -342,6 +345,28 @@ export function Header({
     }
   }, [userMenuOpen]);
 
+  // 알림 패널 열릴 때 목록 조회
+  useEffect(() => {
+    if (!notificationPanelOpen || !isLoggedIn || !userId) return;
+
+    api
+      .get(`/api/users/${userId}/notifications`)
+      .then(response => {
+        const list = response.data?.data || [];
+        const formattedList = list.map(item => ({
+          id: item.notiId,
+          title: item.title,
+          message: item.message,
+          type: item.type,
+          unread: item.unread === 'Y',
+          timeAgo: moment(item.createdAt).fromNow(),
+          createdAt: item.createdAt,
+        }));
+        setNotifications(formattedList);
+      })
+      .catch(err => console.error('알림 목록 조회 실패:', err));
+  }, [notificationPanelOpen, isLoggedIn, userId]);
+
   // 로그인 이후 알림/장바구니 카운트를 API에서 읽어온다
   useEffect(() => {
     if (!isLoggedIn || !userId) {
@@ -361,17 +386,13 @@ export function Header({
         .get(`/api/users/${userId}/notifications/count`, { signal: controller.signal })
         .then(response => {
           const result = response.data;
-          const value =
-            typeof result === 'number'
-              ? result
-              : result && typeof result === 'object'
-              ? result.count ?? result.total ?? result.value ?? FALLBACK_COUNTS.notifications
-              : FALLBACK_COUNTS.notifications;
+          // Spec: { resultCode: 200, data: { count: 2 } }
+          const value = result?.data?.count ?? 0;
           setAutoNotificationCount(value);
         })
         .catch(error => {
           console.error('알림 수 불러오기 실패:', error);
-          setAutoNotificationCount(FALLBACK_COUNTS.notifications);
+          setAutoNotificationCount(0);
         });
     } else {
       setAutoNotificationCount(notificationCount);
@@ -393,13 +414,17 @@ export function Header({
       api
         .get(`/api/users/${userId}/cart/count`, { signal: controller.signal })
         .then(response => {
+          // 응답 구조: { resultCode: 200, resultMsg: "SUCCESS", data: { count: 3 } }
           const result = response.data;
-          const value =
-            typeof result === 'number'
-              ? result
-              : result && typeof result === 'object'
-              ? result.count ?? result.total ?? result.value ?? FALLBACK_COUNTS.cart
-              : FALLBACK_COUNTS.cart;
+          let value = 0;
+
+          if (result && result.data && typeof result.data.count === 'number') {
+            value = result.data.count;
+          } else if (typeof result === 'number') {
+            value = result;
+          } else {
+            value = FALLBACK_COUNTS.cart;
+          }
           setAutoCartCount(value);
         })
         .catch(error => {
@@ -468,12 +493,7 @@ export function Header({
     return () => abort && abort();
   }, [loadCategories]);
 
-  const markAllNotificationsRead = () => {
-    setNotifications(prev => prev.map(item => ({ ...item, unread: false })));
-    if (typeof notificationCount !== 'number') {
-      setAutoNotificationCount(0);
-    }
-  };
+  /* markAllNotificationsRead removed - duplicate declaration */
 
   // ---------------------------------
   // 검색 패널 관련 헬퍼 및 핸들러
@@ -608,6 +628,66 @@ export function Header({
   const handleToggleSaveRecent = () => {
     setSearchSavingEnabled(prev => !prev);
   };
+
+  // 알림 전체 읽음
+  const markAllNotificationsRead = useCallback(async () => {
+    if (!userId) return;
+    try {
+      await api.post(`/api/users/${userId}/notifications/read`);
+      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+      setAutoNotificationCount(0);
+    } catch (error) {
+      console.error('전체 읽음 처리 실패:', error);
+    }
+  }, [userId]);
+
+  // 개별 알림 읽음
+  const markNotificationRead = useCallback(
+    async notiId => {
+      if (!userId) return;
+      try {
+        await api.post(`/api/users/${userId}/notifications/${notiId}/read`);
+        setNotifications(prev => prev.map(n => (n.id === notiId ? { ...n, unread: false } : n)));
+        setAutoNotificationCount(prev => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error('알림 읽음 처리 실패:', error);
+      }
+    },
+    [userId],
+  );
+
+  // 개별 알림 삭제
+  const deleteNotification = useCallback(
+    async (e, notiId) => {
+      e.stopPropagation();
+      if (!userId) return;
+      try {
+        await api.delete(`/api/users/${userId}/notifications/${notiId}`);
+        setNotifications(prev => {
+          const target = prev.find(n => n.id === notiId);
+          if (target && target.unread) {
+            setAutoNotificationCount(c => Math.max(0, c - 1));
+          }
+          return prev.filter(n => n.id !== notiId);
+        });
+      } catch (error) {
+        console.error('알림 삭제 실패:', error);
+      }
+    },
+    [userId],
+  );
+
+  // 전체 알림 삭제
+  const deleteAllNotifications = useCallback(async () => {
+    if (!userId) return;
+    try {
+      await api.delete(`/api/users/${userId}/notifications`);
+      setNotifications([]);
+      setAutoNotificationCount(0);
+    } catch (error) {
+      console.error('전체 알림 삭제 실패:', error);
+    }
+  }, [userId]);
 
   const preventMouseDownBlur = event => {
     event.preventDefault();
@@ -771,38 +851,67 @@ export function Header({
                       <div ref={notificationPanelRef} className="notification-panel">
                         <div className="notification-panel__header">
                           <span>알림</span>
-                          <button type="button" onClick={markAllNotificationsRead}>
-                            모두 읽음
-                          </button>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="button" onClick={markAllNotificationsRead}>
+                              모두 읽음
+                            </button>
+                            <button type="button" onClick={deleteAllNotifications}>
+                              전체 삭제
+                            </button>
+                          </div>
                         </div>
                         <ul className="notification-panel__list">
-                          {notifications.map(item => {
-                            const meta = notificationTypeMeta(item.type);
-                            return (
-                              <li key={item.id} className={`notification-item ${item.unread ? 'unread' : ''}`}>
-                                <div
-                                  className="notification-item__icon"
-                                  style={{ background: meta.background }}
-                                  aria-hidden="true"
+                          {notifications.length > 0 ? (
+                            notifications.map(item => {
+                              const meta = notificationTypeMeta(item.type);
+                              return (
+                                <li
+                                  key={item.id}
+                                  className={`notification-item ${item.unread ? 'unread' : ''}`}
+                                  onClick={() => markNotificationRead(item.id)}
+                                  style={{ cursor: 'pointer' }}
                                 >
-                                  {meta.icon}
-                                </div>
-                                <div className="notification-item__content">
-                                  <div className="notification-item__title">{item.title}</div>
-                                  <div className="notification-item__message">{item.message}</div>
-                                  <div className="notification-item__time">{item.timeAgo}</div>
-                                </div>
-                                {item.unread && <span className="notification-item__badge" aria-hidden="true" />}
-                              </li>
-                            );
-                          })}
+                                  <div
+                                    className="notification-item__icon"
+                                    style={{ background: meta.background }}
+                                    aria-hidden="true"
+                                  >
+                                    {meta.icon}
+                                  </div>
+                                  <div className="notification-item__content">
+                                    <div className="notification-item__title">{item.title}</div>
+                                    <div className="notification-item__message">{item.message}</div>
+                                    <div className="notification-item__time">{item.timeAgo}</div>
+                                  </div>
+                                  <div className="notification-item__actions">
+                                    {item.unread && <span className="notification-item__badge" aria-hidden="true" />}
+                                    <button
+                                      type="button"
+                                      onClick={e => deleteNotification(e, item.id)}
+                                      className="notification-item__delete"
+                                      aria-label="삭제"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                </li>
+                              );
+                            })
+                          ) : (
+                            <li
+                              className="notification-item"
+                              style={{ justifyContent: 'center', padding: '20px', color: '#999' }}
+                            >
+                              알림이 없습니다.
+                            </li>
+                          )}
                         </ul>
                         <button
                           type="button"
                           className="notification-panel__footer"
                           onClick={() => {
                             setNotificationPanelOpen(false);
-                            onNavigate?.('notifications');
+                            setNotificationModalOpen(true);
                           }}
                         >
                           알림 전체보기
@@ -810,6 +919,15 @@ export function Header({
                       </div>
                     )}
                   </div>
+                  <NotificationModal
+                    isOpen={notificationModalOpen}
+                    onClose={() => setNotificationModalOpen(false)}
+                    notifications={notifications}
+                    onMarkRead={markNotificationRead}
+                    onMarkAllRead={markAllNotificationsRead}
+                    onDelete={deleteNotification}
+                    onDeleteAll={deleteAllNotifications}
+                  />
                   <button
                     type="button"
                     className="icon-button"
@@ -979,6 +1097,7 @@ export function Header({
                       기획전: 'exhibition',
                       세일: 'sale',
                       기프트카드: 'giftcard',
+                      MyRouty: 'myrouty',
                     };
                     if (routes[item]) {
                       onNavigate?.(routes[item]);

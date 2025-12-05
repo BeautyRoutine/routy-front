@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Header } from './Header';
 import SideSticky from './SideSticky';
 import api from '../../../lib/apiClient';
-import { DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from './headerConstants';
+import { DEMO_RECENT_ITEMS } from './headerConstants';
 
 /**
  * 사용자용 전역 레이아웃. Header와 사이드 스티키를 묶어 렌더링하며,
@@ -22,6 +22,7 @@ const UserGlobalLayout = ({
   onCartClick,
 }) => {
   const [recentItems, setRecentItems] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
   const { currentUser } = useSelector(state => state.user);
   const userId = currentUser?.userId;
 
@@ -33,10 +34,11 @@ const UserGlobalLayout = ({
   useEffect(() => {
     if (!isLoggedIn || !userId) {
       setRecentItems([]);
+      setCartCount(0);
       return;
     }
 
-    // /api/users/{userId}/recent-products
+    // 1. 최근 본 상품 조회
     api
       .get(`/api/users/${userId}/recent-products`)
       .then(response => {
@@ -64,6 +66,23 @@ const UserGlobalLayout = ({
         // API 실패 시 데모 데이터 폴백 (개발 편의용)
         setRecentItems(DEMO_RECENT_ITEMS);
       });
+
+    // 2. 장바구니 개수 조회
+    api
+      .get(`/api/users/${userId}/cart/count`)
+      .then(response => {
+        // 응답 구조: { resultCode: 200, resultMsg: "SUCCESS", data: { count: 3 } }
+        const result = response.data;
+        if (result && result.data && typeof result.data.count === 'number') {
+          setCartCount(result.data.count);
+        } else {
+          setCartCount(0);
+        }
+      })
+      .catch(error => {
+        console.error('장바구니 개수 로드 실패:', error);
+        setCartCount(0);
+      });
   }, [isLoggedIn, userId]);
 
   return (
@@ -78,13 +97,12 @@ const UserGlobalLayout = ({
         onNavigate={onNavigate}
         userRole={userRole}
         onRoleChange={onRoleChange}
+        cartCount={cartCount}
       />
       <SideSticky
         isLoggedIn={isLoggedIn}
         recentItems={recentItems}
-        cartCount={DEMO_CART_COUNT}
         onRequireLogin={onRequireLogin}
-        onCartClick={onCartClick}
         onScrollTop={handleScrollTop}
         onNavigate={onNavigate}
       />

@@ -59,6 +59,7 @@ const LoginPage = () => {
         localStorage.setItem('token', response.data.token);
 
         const user = {
+          userNo: response.data.userNo,
           userId: response.data.userId,
           userName: response.data.userName,
           userLevel: response.data.userLevel,
