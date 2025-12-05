@@ -24,10 +24,18 @@ const ProductDetailPage = () => {
       //비동기
       try {
         setLoading(true); //로딩 시작
+
+        // 로그인 안한 상태면 null 상태니 ?.으로 있는지 체크, 없으면 undefined->null
+        const analysisParams = {
+          userId: currentUser?.userId || null,
+          userSkin: currentUser?.userSkin || null, // 유저 피부타입 (예: 'OILY', 'DRY')
+        };
+
         //get 요청 주소 : /api/products/101
         const productRes = await api.get(`/api/products/${prdNo}`);
         const reviewRes = await api.get(`/api/products/${prdNo}/reviews`);
-
+        //유저 검색 조건 추가해야되서 params으로
+        const ingredientRes = await api.get(`/api/products/${prdNo}/analysis`, { params: analysisParams });
         const productObj = productRes.data.data;
 
         // 최근 본 상품 저장 로직 추가
@@ -45,7 +53,7 @@ const ProductDetailPage = () => {
         const combinedData = {
           productInfo: productObj, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
           reviewInfo: reviewRes.data.data || { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 리뷰 데이터
-          ingredientInfo: { totalCount: 0, ingredients: [] }, // 일단 더미
+          ingredientInfo: ingredientRes.data.data,
           purchaseInfo: {}, // 하드코딩인거도 수정해야하는데
         };
 

@@ -10,18 +10,19 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
   //성분 없으면 null
   if (!ingredientInfo) return null;
 
-  //ingredientInfo 내부 ingredients, totalcount 꺼내놓기.
-  const { ingredients, totalCount } = ingredientInfo;
-
-  // 알레르기 유발 성분 있으면 1이니까 필터에 걸림.
-  const allergens = ingredients.filter(ing => ing.ingAllergen === 1);
-
-  // 20가지 주의 성분 (위험 성분)
-  const dangers = ingredients.filter(ing => ing.ingDanger === 1);
-
-  // 좋은 성분 (기능성 성분)  기능성 칸에 내용이 있으면 필터
-  const goodIngredients = ingredients.filter(ing => ing.ingFunctional !== null);
-
+  const {
+    goodEffects, // 내 피부타입에 좋은 효과
+    myFavoriteIngredients, // 내가 즐겨찾는 성분 이름
+    myAvoidIngredients, //싫어하는 성분 이름
+    allergenIngredients, // 알레르기 성분 이름
+    dangerIngredients, // 주의 성분 이름
+    allIngredients, // 전체 성분 리스트
+    totalCount, // 총 성분 수
+  } = ingredientInfo;
+  //에러방지용
+  const allergens = allergenIngredients || [];
+  const dangers = dangerIngredients || [];
+  const avoidIngredients = myAvoidIngredients || [];
   return (
     //성분분석 전체 구조, 제목
     <div className="ingredient-section my-5">
@@ -41,31 +42,32 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
             <div className="sub-label">좋은 성분</div>
             <div className="badge-group">
               {/* 좋은 성분 배열 길이가 0 보다 길면,map으로 ing에 주르륵 담고 */}
-              {goodIngredients.length > 0 ? (
-                goodIngredients.map(ing => (
-                  <span key={ing.ingNo} className="custom-badge badge-green">
-                    {/*그 번호에 맞는 이름 출력.*/}
-                    <span style={{ fontSize: '10px' }}>✔️</span> {ing.ingName}
+              {goodEffects && goodEffects.length > 0 ? (
+                goodEffects.map((effect, index) => (
+                  <span key={index} className="custom-badge badge-green">
+                    <span style={{ fontSize: '10px' }}>✔️</span> {effect}
                   </span>
                 ))
               ) : (
-                //아니면 기능성이 없대요
+                //기능 없음
                 <span style={{ color: '#aaa', fontSize: '13px' }}>특별한 기능성 성분이 없습니다.</span>
               )}
             </div>
 
-            {/* 주의 성분 (있는 경우에만 표시) */}
-            {dangers.length > 0 && (
+            {/*기피 성분 */}
+            {avoidIngredients.length > 0 && (
               <>
-                {/* 포장지로 묶어주기 */}{' '}
-                <div className="sub-label" style={{ marginTop: '20px' }}>
-                  주의 성분
+                <div className="sub-label" style={{ marginTop: '20px', color: '#dc3545' }}>
+                  🚫 내 기피 성분 발견!
                 </div>
-                {/*주의성분 있으면 map으로 주의성분 나열 */}
                 <div className="badge-group">
-                  {dangers.map(ing => (
-                    <span key={ing.ingNo} className="custom-badge badge-orange">
-                      ⚠️ {ing.ingName}
+                  {avoidIngredients.map((name, index) => (
+                    <span
+                      key={index}
+                      className="custom-badge badge-red"
+                      style={{ backgroundColor: '#ffebee', color: '#c62828', border: '1px solid #ffcdd2' }}
+                    >
+                      ✋ {name}
                     </span>
                   ))}
                 </div>
@@ -83,14 +85,14 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
 
             <div className="sub-label">포함된 성분</div>
             <div className="badge-group">
-              {/* 기능성 2개를 현재 즐겨찾는 성분으로 가정. 추후 수정필요 */}
-              {goodIngredients.slice(0, 2).map(ing => (
-                <span key={ing.ingNo} className="custom-badge badge-purple">
-                  ♥ {ing.ingName}
-                </span>
-              ))}
-              {/* 즐겨찾기 성분없으면(0이라면) 없다고 출력 */}
-              {goodIngredients.length === 0 && (
+              {/*내가 좋아하는 성분 있으면 */}
+              {myFavoriteIngredients && myFavoriteIngredients.length > 0 ? (
+                myFavoriteIngredients.map((ingName, index) => (
+                  <span key={index} className="custom-badge badge-purple">
+                    ♥ {ingName}
+                  </span>
+                ))
+              ) : (
                 <span style={{ color: '#aaa', fontSize: '13px' }}>즐겨찾는 성분이 없습니다.</span>
               )}
             </div>
@@ -112,7 +114,7 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
             ) : (
               <>
                 <h6 className="text-danger fw-bold mb-2">⚠️ 알레르기 주의</h6>
-                <small className="text-muted">{allergens.length}개 포함됨</small>
+                <small className="text-muted">{allergenIngredients.length}개 포함됨</small>
               </>
             )}
           </div>
@@ -132,7 +134,7 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
                 <h6 className="text-warning fw-bold mb-2" style={{ color: '#e67700' }}>
                   ⚠️ 20대 주의성분
                 </h6>
-                <small className="text-muted">{dangers.length}개 포함</small>
+                <small className="text-muted">{dangerIngredients.length}개 포함</small>
               </>
             )}
           </div>
@@ -155,7 +157,7 @@ const IngredientAnalysis = ({ ingredientInfo }) => {
         </button>
       </div>
       {/*전체 내역 출력, join(', ')로 전부 쉼표넣어서 한 문장으로 만들어줌 */}
-      {isOpen && <div className="full-list-container">{ingredients.map(ing => ing.ingName).join(', ')}</div>}
+      {isOpen && <div className="full-list-container">{allIngredients.map(ing => ing.ingName).join(', ')}</div>}
     </div>
   );
 };

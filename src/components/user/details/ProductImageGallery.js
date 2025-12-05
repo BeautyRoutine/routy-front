@@ -39,7 +39,7 @@ function ProductImageGallery({ images }) {
             onClick={() => handleThumbnailClick(index)}
           >
             {/*실제 사진 출력 코드, 대체 텍스트도. */}
-            <img src={`/images/product/${imageSrc}`} alt={`상품 썸네일 ${index + 1}`} />
+            <img src={`${process.env.PUBLIC_URL}/images/product/${imageSrc}`} alt={`상품 썸네일 ${index + 1}`} />
           </div>
         ))}
       </div>
