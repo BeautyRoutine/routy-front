@@ -11,33 +11,39 @@ const ProductListPage = () => {
   const [sort, setSort] = useState('popular');
 
   const [searchParams] = useSearchParams();
-  const limit = searchParams.get('limit') || 20;
-  const skin = searchParams.get('skin') || null;
 
+  // 필터 값들
+  const min_price = searchParams.get('min_price') || null;
+  const max_price = searchParams.get('max_price') || null;
+
+  const skin = searchParams.get('skin') || null;
   const maincate = searchParams.get('maincate') || null;
   const subcate = searchParams.get('subcate') || null;
+
+  const limit = searchParams.get('limit') || 20;
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await api.get('/api/products/list/skin_cate', {
+        const res = await api.get('/api/products/list', {
           params: {
-            limit,
+            min_price,
+            max_price,
             skin,
-            maincate, // ★★ 백엔드 요구 파라미터 이름
-            subcate, // ★★ 백엔드 요구 파라미터 이름
+            maincate,
+            subcate,
+            limit,
           },
         });
 
-        const list = res.data.data || [];
-        setProducts(list);
+        setProducts(res.data.data || []);
       } catch (err) {
         console.error(err);
       }
     };
 
     loadProducts();
-  }, [limit, skin, maincate, subcate]); // ★ 카테고리 변경되면 재로딩
+  }, [min_price, max_price, skin, maincate, subcate, limit]);
 
   return (
     <div className="container mt-4 product-page-container">
