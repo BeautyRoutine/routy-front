@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import api from 'app/api';
 
 function PaymentSuccessPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isConfirming, setIsConfirming] = useState(true);
   const [result, setResult] = useState(null);
+
+  const hasCalledRef = useRef(false);
 
   const getParam = key => {
     return searchParams.get(key) || new URLSearchParams(window.location.search).get(key);
@@ -16,24 +19,16 @@ function PaymentSuccessPage() {
   const amount = getParam('amount');
 
   useEffect(() => {
+    if (hasCalledRef.current) return;
     async function confirmPayment() {
       try {
+        hasCalledRef.current = true;
         // 백엔드로 승인 요청
-        const response = await fetch('http://localhost:8080/api/payments/confirm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            paymentKey,
-            orderId,
-            amount: Number(amount),
-          }),
+        await api.post('/api/payments/confirm', {
+          paymentKey,
+          orderId,
+          amount: Number(amount),
         });
-
-        // 응답 처리
-        if (!response.ok) {
-          const errorMessage = await response.text();
-          throw new Error(errorMessage || '결제 승인 API 호출 실패');
-        }
 
         // 성공 시
         setResult({

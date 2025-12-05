@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 import './CheckoutPage.css';
+import api from 'app/api';
 
 const CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
 
@@ -13,7 +14,7 @@ export default function CheckoutPage() {
   const [shippingInfo, setShippingInfo] = useState({
     receiverName: '',
     receiverPhone: '',
-    zipCode: '', 
+    zipCode: '',
     roadAddress: '',
     detailAddress: '',
     deliveryMsg: '',
@@ -22,10 +23,12 @@ export default function CheckoutPage() {
   const { items, selectedItemIds } = useSelector(state => state.cart);
   const selectedItems = items.filter(item => selectedItemIds[item.cartItemId]);
 
+  const { currentUser } = useSelector(state => state.user);
+
   // 금액 계산 로직
   const productTotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const deliveryFee = productTotal >= 30000 ? 0 : 3000;
-  const totalAmount = productTotal + deliveryFee; 
+  const totalAmount = productTotal + deliveryFee;
 
   // 토스 SDK 초기화
   useEffect(() => {
@@ -48,6 +51,12 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     if (!tossPayments) return;
 
+    if (!currentUser || !currentUser.userId) {
+      alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
+      navigate('/login');
+      return;
+    }
+
     // 유효성 검사
     if (!shippingInfo.receiverName || !shippingInfo.roadAddress || !shippingInfo.receiverPhone) {
       alert('필수 배송 정보를 모두 입력해주세요.');
@@ -62,7 +71,7 @@ export default function CheckoutPage() {
 
       // OrderSaveRequestDTO 규격에 맞춘 데이터
       const orderData = {
-        userNo: 1, // 나중에 로그인 정보에서 가져와야 함
+        userId: currentUser.userId,
         receiverName: shippingInfo.receiverName,
         receiverPhone: shippingInfo.receiverPhone,
         zipCode: parseInt(shippingInfo.zipCode) || 0, // 숫자로 변환
@@ -70,8 +79,8 @@ export default function CheckoutPage() {
         detailAddress: shippingInfo.detailAddress,
         deliveryMsg: shippingInfo.deliveryMsg,
 
-        totalAmount: totalAmount, 
-        deliveryFee: deliveryFee, 
+        totalAmount: totalAmount,
+        deliveryFee: deliveryFee,
         orderName: orderName,
 
         items: selectedItems.map(item => ({
@@ -82,19 +91,8 @@ export default function CheckoutPage() {
       };
 
       // 1. 주문 생성 요청
-      const response = await fetch('http://localhost:8080/api/payments/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        throw new Error('주문서 생성에 실패했습니다.');
-      }
-
-      // 주문번호(odNo) 받기
-      const odNo = await response.json();
-      console.log('생성된 주문번호:', odNo);
+      const response = await api.post('/api/payments/order', orderData);
+      const odNo = response.data;
 
       // 주문번호를 최소 8자리 문자열로 변환 (예: 1 -> "00000001")
       // 토스 요구사항(6자 이상) 충족 + 백엔드 호환(숫자로 파싱 가능)
