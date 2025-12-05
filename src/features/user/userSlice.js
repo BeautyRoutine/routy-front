@@ -162,11 +162,18 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
     let mappedRecent = [];
     if (Array.isArray(recentList) && recentList.length > 0) {
       const detailPromises = recentList.map(async item => {
-        const id = item.productId || item.id || item.prdNo;
+        const id = item.prdNo;
         if (!id) return null;
+
+        const listTitle = item.prdName;
+        const listImage = item.prdImg;
+
         try {
           const detailRes = await api.get(`/api/products/${id}`);
           const p = detailRes.data.data || detailRes.data;
+
+          const detailImage = p.prdImg || listImage;
+
           return {
             id: p.prdNo,
             prdNo: p.prdNo,
@@ -175,12 +182,22 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
             price: p.prdPrice,
             salePrice: p.salePrice,
             discount: p.discountRate || p.discount,
-            image: p.prdImg ? `${api.defaults.baseURL}/images/product/${p.prdImg}` : null,
-            viewedDate: item.viewedAt || item.viewedDate,
+            image: detailImage ? `${process.env.PUBLIC_URL}/images/product/${detailImage}` : null,
+            viewedDate: item.viewedAt || new Date().toISOString(),
           };
         } catch (err) {
-          console.error(`Failed to fetch detail for product ${id}`, err);
-          return null;
+          console.warn(`Failed to fetch detail for product ${id}, using list data`, err);
+          return {
+            id: id,
+            prdNo: id,
+            name: listTitle,
+            brand: '',
+            price: 0,
+            salePrice: 0,
+            discount: 0,
+            image: listImage ? `${process.env.PUBLIC_URL}/images/product/${listImage}` : null,
+            viewedDate: item.viewedAt || new Date().toISOString(),
+          };
         }
       });
       const details = await Promise.all(detailPromises);

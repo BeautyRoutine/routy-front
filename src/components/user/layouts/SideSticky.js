@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock3, ShoppingCart, ChevronUp } from 'lucide-react';
+import { Clock3, ChevronUp } from 'lucide-react';
 
 import './SideSticky.css';
 
@@ -8,15 +8,7 @@ import './SideSticky.css';
  * 최근 본 상품 패널, 장바구니 진입 버튼, 맨 위로 이동 버튼을 제공하는 컴포넌트다.
  * Header 아래에서 전역으로 렌더링되며, 로그인 상태와 클릭 핸들러를 외부에서 주입받는다.
  */
-const SideSticky = ({
-  isLoggedIn = false,
-  recentItems = [],
-  cartCount = 0,
-  onRequireLogin,
-  onCartClick,
-  onScrollTop,
-  onNavigate,
-}) => {
+const SideSticky = ({ isLoggedIn = false, recentItems = [], onRequireLogin, onScrollTop, onNavigate }) => {
   // ------------------------------
   // localStorage 최근 본 상품 불러오기
   // ------------------------------
@@ -60,29 +52,8 @@ const SideSticky = ({
     setIsRecentOpen(prev => !prev);
   };
 
-  /**
-   * 장바구니 버튼은 로그인 시에만 실제 라우팅 콜백을 호출한다.
-   * 비로그인 사용자는 동일하게 로그인 안내 콜백으로 유도한다.
-   */
-  const handleCartClick = () => {
-    if (!isLoggedIn) {
-      onRequireLogin?.();
-      return;
-    }
-    onCartClick?.();
-  };
-
   return (
     <div className="side-sticky">
-      {/* 장바구니 버튼 - 항상 최상단에 위치하며 뱃지는 아이콘 우측 상단에 얹힌다. */}
-      <button type="button" className="sticky-card cart" onClick={handleCartClick}>
-        <span className="cart-icon">
-          <ShoppingCart size={18} />
-          {cartCount > 0 && <span className="count-badge cart-badge">{cartCount}</span>}
-        </span>
-        <span className="sticky-card-title cart-title">장바구니</span>
-      </button>
-
       {/* 최근 본 상품 카드 - 로그인 시에만 펼칠 수 있고, 이미지는 세로 목록으로 노출된다. */}
       <div className={`recent-wrapper ${isRecentOpen ? 'open' : ''}`}>
         <div className="recent-icon" aria-hidden="true">
