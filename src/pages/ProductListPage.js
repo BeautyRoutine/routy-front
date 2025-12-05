@@ -24,8 +24,8 @@ const ProductListPage = () => {
           params: {
             limit,
             skin,
-            maincate,   // ★★ 백엔드 요구 파라미터 이름
-            subcate,    // ★★ 백엔드 요구 파라미터 이름
+            maincate, // ★★ 백엔드 요구 파라미터 이름
+            subcate, // ★★ 백엔드 요구 파라미터 이름
           },
         });
 
@@ -37,7 +37,7 @@ const ProductListPage = () => {
     };
 
     loadProducts();
-  }, [limit, skin, maincate, subcate]);  // ★ 카테고리 변경되면 재로딩
+  }, [limit, skin, maincate, subcate]); // ★ 카테고리 변경되면 재로딩
 
   return (
     <div className="container mt-4 product-page-container">
