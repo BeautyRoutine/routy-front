@@ -1,3 +1,7 @@
+/**
+ * ORDERS 테이블 관련 특정 필드값의 텍스트 변환값을 반환하는 용도.
+ */
+
 // 배송 출입방법 텍스트 변환
 export const getDeliveryKeyText = (type, key) => {
   if (type === 2) return '자유출입가능';

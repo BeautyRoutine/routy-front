@@ -9,31 +9,31 @@ const OrderListItem = ({ item }) => {
 
   const handleClick = () => {
     dispatch(selectItem(item));
-    navigate(`/admin/order/list/${item.ODNO}`);
+    navigate(`/admin/order/list/${item.odNo}`);
   };
 
   return (
     <tr onClick={handleClick} style={{ cursor: 'pointer' }}>
-      <td>{item.ODNO}</td>
+      <td>{item.odNo}</td>
       <td>
-        {item.USERNAME}({item.USERNICK})
+        {item.userName}({item.userNick})
         <br />
-        <small className="text-muted">{item.USERID}</small>
+        <small className="text-muted">{item.userId}</small>
       </td>
       <td>
-        {item.ODNAME}
+        {item.odName}
         <br />
-        <small className="text-muted">{item.ODHP}</small>
+        <small className="text-muted">{item.odHp}</small>
       </td>
       <td>
-        {item.ODPRDPRICE.toLocaleString()}원<br />
-        <small className="text-muted">{item.ODDELVPRICE.toLocaleString()}</small>원
+        {item.odPrdPrice.toLocaleString()}원<br />
+        <small className="text-muted">{item.odDelvPrice.toLocaleString()}</small>원
       </td>
-      <td>{(item.ODPRDPRICE + item.ODDELVPRICE).toLocaleString()}원</td>
+      <td>{(item.odPrdPrice + item.odDelvPrice).toLocaleString()}원</td>
       <td>
-        {item.ODREGDATE.split(' ')[0]}
+        {item.odRegdate.split(' ')[0]}
         <br />
-        {item.ODREGDATE.split(' ')[1]}
+        {item.odRegdate.split(' ')[1]}
       </td>
     </tr>
   );

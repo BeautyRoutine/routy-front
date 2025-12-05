@@ -11,7 +11,7 @@ const OrderPrdTable = ({ odInfo, apiBaseUrl }) => {
     const loadProducts = async () => {
       if (!odInfo) return; // 주문데이터 없으면 패스
       try {
-        const odNo = odInfo.ODNO || odInfo.odNo;
+        const odNo = odInfo.odNo;
         const response = await axios.get(`${apiBaseUrl}/orders/detail_product/${odNo}`);
         console.log(`${apiBaseUrl}/orders/detail_product/${odNo}`);
         console.log(response);
