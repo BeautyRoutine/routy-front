@@ -62,6 +62,7 @@ const LoginPage = () => {
           userId: response.data.userId,
           userName: response.data.userName,
           userLevel: response.data.userLevel,
+          userSkin: response.data.userSkin,
         };
         localStorage.setItem('user', JSON.stringify(user));
 
