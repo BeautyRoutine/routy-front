@@ -6,6 +6,7 @@ import { CartPage } from './pages/CartPage';
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 import SkinProfileSetupPage from './pages/SkinProfileSetupPage';
 import Home from 'pages/Home';
+import MyRoutyPage from './pages/MyRoutyPage';
 import MyPage from './pages/MyPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ProductListPage from './pages/ProductListPage';
@@ -80,6 +81,7 @@ function App() {
       category: '/category',
       ranking: '/ranking',
       product: '/products',
+      myrouty: '/myrouty',
     };
 
     if (page === 'product' && param) {
@@ -130,6 +132,7 @@ function App() {
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/fail" element={<PaymentFailPage />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/myrouty" element={<MyRoutyPage />} />
           <Route path="/products/:prdNo" element={<ProductDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/ranking" element={<RankingPage />} />
