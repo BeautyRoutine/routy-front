@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 import './CheckoutPage.css';
@@ -9,6 +9,7 @@ const CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [tossPayments, setTossPayments] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [shippingInfo, setShippingInfo] = useState({
@@ -21,14 +22,19 @@ export default function CheckoutPage() {
   });
 
   const { items, selectedItemIds } = useSelector(state => state.cart);
-  const selectedItems = items.filter(item => selectedItemIds[item.cartItemId]);
+
+  const directPurchaseItems = location.state?.selectedItems;
+  const directPurchaseSummary = location.state?.summary;
+
+  const selectedItems = directPurchaseItems || items.filter(item => selectedItemIds[item.cartItemId]);
 
   const { currentUser } = useSelector(state => state.user);
 
   // 금액 계산 로직
-  const productTotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const deliveryFee = productTotal >= 30000 ? 0 : 3000;
-  const totalAmount = productTotal + deliveryFee;
+  const productTotal =
+    directPurchaseSummary?.totalAmount || selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = directPurchaseSummary?.deliveryFee || (productTotal >= 30000 ? 0 : 3000);
+  const totalAmount = directPurchaseSummary?.finalPaymentAmount || productTotal + deliveryFee;
 
   // 토스 SDK 초기화
   useEffect(() => {
@@ -84,7 +90,7 @@ export default function CheckoutPage() {
         orderName: orderName,
 
         items: selectedItems.map(item => ({
-          prdNo: item.productId,
+          prdNo: item.productId || item.prdNo,
           quantity: item.quantity,
           price: item.price,
         })),
@@ -189,8 +195,8 @@ export default function CheckoutPage() {
             {/* 상품 정보 */}
             <div className="section-card">
               <h2>주문 상품 ({selectedItems.length}개)</h2>
-              {selectedItems.map(item => (
-                <div key={item.cartItemId} className="order-item-row">
+              {selectedItems.map((item, index) => (
+                <div key={item.cartItemId || index} className="order-item-row">
                   <div className="item-info">
                     <span className="item-name">
                       [{item.brand}] {item.name}

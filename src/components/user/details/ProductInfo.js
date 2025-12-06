@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
+import api from 'app/api';
 import './ProductInfo.css';
 
 // product, reviewSummary props로 받기
 function ProductInfo({ product, reviewSummary }) {
+  const navigate = useNavigate();
+
   //제품 구매 수량 기억용 state, 기본값1
   const [quantity, setQuantity] = useState(1);
 
@@ -15,6 +18,53 @@ function ProductInfo({ product, reviewSummary }) {
     // 새 수량이 1일때만 업데이트, 0이나 음수 방지
     if (newQuantity >= 1) {
       setQuantity(newQuantity);
+    }
+  };
+
+  // 장바구니 추가
+  const handleAddtoCart = async () => {
+    try {
+      await api.post('/api/cart/items', {
+        productId: product.prdNo,
+        quantity: quantity,
+      });
+      alert('장바구니에 추가되었습니다.');
+    } catch (error) {
+      console.error('장바구니 추가 실패:', error);
+      alert('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  // 바로 구매
+  const handleBuyNow = () => {
+    try {
+      const itemPrice = product.salePrice || product.prdPrice;
+      const totalAmount = itemPrice * quantity;
+      const deliveryFee = totalAmount >= 30000 ? 0 : 3000;
+
+      navigate('/checkout', {
+        state: {
+          selectedItems: [
+            {
+              productId: product.prdNo,
+              prdNo: product.prdNo,
+              name: product.prdName,
+              brand: product.prdCompany,
+              price: itemPrice,
+              quantity: quantity,
+              imageUrl: product.prdImg,
+            },
+          ],
+          summary: {
+            totalAmount: totalAmount,
+            deliveryFee: deliveryFee,
+            finalPaymentAmount: totalAmount + deliveryFee,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('바로 구매 실패:', error);
+      alert('바로 구매에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -86,8 +136,12 @@ function ProductInfo({ product, reviewSummary }) {
         <button className="wishlist-btn">♡ 좋아요</button>
         {/* 장바구니, 바로구매 버튼 */}
         <div className="buy-buttons">
-          <button className="btn-custom btn-cart">장바구니</button>
-          <button className="btn-custom btn-buy">바로구매</button>
+          <button className="btn-custom btn-cart" onClick={handleAddtoCart}>
+            장바구니
+          </button>
+          <button className="btn-custom btn-buy" onClick={handleBuyNow}>
+            바로구매
+          </button>
         </div>
       </div>
     </div>
