@@ -1,16 +1,34 @@
 .promo-card {
   border-radius: 12px;
   transition: transform 0.3s ease-in-out;
+  overflow: hidden;
+  position: relative;
 }
 
 .promo-card:hover {
   transform: translateY(-5px);
 }
 
-.promo-img {
-  width: 80px;
-  height: 80px;
+.promo-bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  z-index: 0;
+}
+
+.promo-overlay {
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.2);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
 }
 
 /* ✅ Swiper 전체 구조 */
@@ -22,11 +40,11 @@
 /* ✅ 진행바를 카드 아래쪽 중앙으로 이동 */
 .promoSwiper .swiper-pagination-progressbar {
   position: absolute !important;
-  top: auto !important;        /* 상단 위치 제거 */
-  bottom: 10px !important;     /* 카드 아래로 이동 */
+  top: auto !important; /* 상단 위치 제거 */
+  bottom: 10px !important; /* 카드 아래로 이동 */
   left: 50% !important;
   transform: translateX(-50%);
-  width: 40%;                  /* 길이 조정 */
+  width: 40%; /* 길이 조정 */
   height: 4px;
   background: #eee;
   border-radius: 10px;

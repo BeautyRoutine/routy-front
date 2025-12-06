@@ -12,141 +12,36 @@ import {
   Droplet,
   Lightbulb,
   Bell,
-  Sparkles,
-  X,
-  Plus,
-  Save,
   ChevronDown,
   ChevronUp,
+  Settings,
+  Trash2,
+  Package,
+  Plus,
 } from 'lucide-react';
 import './MyRoutyPage.css';
 
-const RoutineModal = ({ isOpen, onClose, date, onSave, initialData }) => {
-  const [activities, setActivities] = useState([]);
-  const [newActivity, setNewActivity] = useState('');
-  const [memo, setMemo] = useState('');
-
-  useEffect(() => {
-    if (isOpen && initialData) {
-      setActivities(initialData.activities || []);
-      setMemo(initialData.memo || '');
-    } else if (isOpen) {
-      setActivities([]);
-      setMemo('');
-    }
-  }, [isOpen, initialData]);
-
-  // 모달이 열려있을 때 배경 스크롤 방지
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const handleAddActivity = () => {
-    if (newActivity.trim()) {
-      setActivities([...activities, newActivity.trim()]);
-      setNewActivity('');
-    }
-  };
-
-  const handleKeyPress = e => {
-    if (e.key === 'Enter') {
-      handleAddActivity();
-    }
-  };
-
-  const handleSave = () => {
-    onSave(date.format('YYYY-MM-DD'), { activities, memo });
-    onClose();
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>
-          <X size={24} />
-        </button>
-
-        <div className="modal-header">
-          <Sparkles className="modal-header-icon" size={24} />
-          <h2>{date.format('YYYY년 M월 D일 dddd')}</h2>
-        </div>
-        <p className="modal-subtitle">오늘의 스킨케어 루틴을 기록하세요.</p>
-
-        <div className="modal-section">
-          <label>스킨케어 활동 추가</label>
-          <div className="routine-input-group">
-            <input
-              type="text"
-              placeholder="활동 입력 (예: 각질 제거, 마스크 팩)"
-              value={newActivity}
-              onChange={e => setNewActivity(e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
-            <button className="add-btn" onClick={handleAddActivity}>
-              <Plus size={18} />
-              추가
-            </button>
-          </div>
-        </div>
-
-        <div className="modal-section">
-          <label>오늘의 루틴</label>
-          <div className="routine-list-container">
-            {activities.length === 0 ? (
-              <div className="empty-state">
-                <Sparkles size={48} className="empty-icon" />
-                <p>아직 등록된 활동이 없습니다</p>
-              </div>
-            ) : (
-              <ul className="routine-list">
-                {activities.map((activity, index) => (
-                  <li key={index} className="routine-item">
-                    <span className="routine-bullet"></span>
-                    {activity}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
-        <div className="modal-section">
-          <label>메모</label>
-          <textarea
-            placeholder="오늘의 피부 상태나 느낌을 기록하세요..."
-            value={memo}
-            onChange={e => setMemo(e.target.value)}
-            rows={4}
-          />
-        </div>
-
-        <div className="modal-footer">
-          <button className="save-btn" onClick={handleSave}>
-            <Save size={18} />
-            저장
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+const MOCK_MY_PRODUCTS = [
+  { id: 1, name: '그린 마일드 업 선 플러스' },
+  { id: 2, name: '히알루론산 앰플 세럼' },
+  { id: 3, name: '시카 리페어 크림' },
+  { id: 4, name: '약산성 클렌징 폼' },
+  { id: 5, name: '비타민 C 브라이트닝 세럼' },
+];
 
 const MyRoutyPage = () => {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(moment());
   const [selectedDate, setSelectedDate] = useState(moment());
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [routines, setRoutines] = useState({});
-  const [isRecommendationOpen, setIsRecommendationOpen] = useState(true);
+
+  // My Products State
+  const [myProducts, setMyProducts] = useState([]);
+  const [newProductName, setNewProductName] = useState('');
+  const [isProductListOpen, setIsProductListOpen] = useState(false);
+
+  const [weatherLocation, setWeatherLocation] = useState('서울');
+  const [isEditingWeather, setIsEditingWeather] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -154,11 +49,24 @@ const MyRoutyPage = () => {
       alert('로그인이 필요한 서비스입니다.');
       navigate('/login');
     }
+
+    // Load data from localStorage
+    const storedProducts = localStorage.getItem('myProducts');
+    if (storedProducts) {
+      setMyProducts(JSON.parse(storedProducts));
+    } else {
+      setMyProducts(MOCK_MY_PRODUCTS);
+      localStorage.setItem('myProducts', JSON.stringify(MOCK_MY_PRODUCTS));
+    }
+
+    const storedRoutines = localStorage.getItem('routines');
+    if (storedRoutines) {
+      setRoutines(JSON.parse(storedRoutines));
+    }
   }, [navigate]);
 
   const startOfMonth = currentDate.clone().startOf('month');
   const startDate = startOfMonth.clone().startOf('week');
-  // 6주 고정 (6 * 7 = 42일)
   const endDate = startDate.clone().add(41, 'days');
 
   const calendarDays = [];
@@ -179,30 +87,45 @@ const MyRoutyPage = () => {
 
   const handleDateClick = date => {
     setSelectedDate(date);
-    setIsModalOpen(true);
-  };
-
-  const handleSaveRoutine = (dateStr, data) => {
-    setRoutines(prev => ({
-      ...prev,
-      [dateStr]: data,
-    }));
+    navigate(`/my-routy/edit/${date.format('YYYY-MM-DD')}`);
   };
 
   const isSelected = date => selectedDate && date.isSame(selectedDate, 'day');
   const isToday = date => date.isSame(moment(), 'day');
   const isCurrentMonth = date => date.isSame(currentDate, 'month');
-  const hasRoutine = date => !!routines[date.format('YYYY-MM-DD')];
+
+  const getRoutineStatus = date => {
+    const dateStr = date.format('YYYY-MM-DD');
+    const routine = routines[dateStr];
+    if (!routine) return null;
+
+    const hasReaction = routine.usedProducts?.some(
+      p => p.reactions && p.reactions.length > 0 && !p.reactions.includes('none'),
+    );
+
+    return { hasRoutine: true, hasReaction };
+  };
+
+  const handleAddProduct = () => {
+    if (newProductName.trim()) {
+      const newId = Math.max(...myProducts.map(p => p.id), 0) + 1;
+      const updatedProducts = [...myProducts, { id: newId, name: newProductName.trim() }];
+      setMyProducts(updatedProducts);
+      localStorage.setItem('myProducts', JSON.stringify(updatedProducts));
+      setNewProductName('');
+    }
+  };
+
+  const handleRemoveProduct = id => {
+    if (window.confirm('이 제품을 삭제하시겠습니까?')) {
+      const updatedProducts = myProducts.filter(p => p.id !== id);
+      setMyProducts(updatedProducts);
+      localStorage.setItem('myProducts', JSON.stringify(updatedProducts));
+    }
+  };
 
   return (
     <div className="my-routy-container">
-      <RoutineModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        date={selectedDate}
-        onSave={handleSaveRoutine}
-        initialData={routines[selectedDate.format('YYYY-MM-DD')]}
-      />
       {/* Left Section: Calendar */}
       <div className="calendar-section">
         <div className="calendar-header">
@@ -231,21 +154,24 @@ const MyRoutyPage = () => {
             </div>
           ))}
 
-          {calendarDays.map((date, index) => (
-            <div
-              key={index}
-              className={`calendar-day 
-                ${!isCurrentMonth(date) ? 'other-month' : ''}
-                ${isSelected(date) ? 'selected' : ''}
-                ${isToday(date) ? 'today' : ''}
-                ${date.day() === 0 ? 'sunday' : date.day() === 6 ? 'saturday' : ''}
-              `}
-              onClick={() => handleDateClick(date)}
-            >
-              {date.format('D')}
-              {hasRoutine(date) && <div className="routine-dot"></div>}
-            </div>
-          ))}
+          {calendarDays.map((date, index) => {
+            const status = getRoutineStatus(date);
+            return (
+              <div
+                key={index}
+                className={`calendar-day 
+                  ${!isCurrentMonth(date) ? 'other-month' : ''}
+                  ${isSelected(date) ? 'selected' : ''}
+                  ${isToday(date) ? 'today' : ''}
+                  ${date.day() === 0 ? 'sunday' : date.day() === 6 ? 'saturday' : ''}
+                `}
+                onClick={() => handleDateClick(date)}
+              >
+                {date.format('D')}
+                {status?.hasRoutine && <div className={`routine-dot ${status.hasReaction ? 'reaction' : ''}`}></div>}
+              </div>
+            );
+          })}
         </div>
 
         <div className="calendar-footer">
@@ -253,6 +179,10 @@ const MyRoutyPage = () => {
             <div className="legend-item">
               <div className="legend-dot record"></div>
               <span>루틴 기록</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot reaction"></div>
+              <span>피부 반응</span>
             </div>
             <div className="legend-item">
               <div className="legend-dot today"></div>
@@ -271,13 +201,32 @@ const MyRoutyPage = () => {
       <div className="info-section">
         {/* Weather Card */}
         <div className="info-card weather-card">
-          <div className="weather-header">
-            <Cloud size={18} />
-            <span>오늘의 날씨</span>
+          <div className="weather-header" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Cloud size={18} style={{ marginRight: '8px' }} />
+              <span>오늘의 날씨</span>
+            </div>
+            <Settings
+              size={16}
+              style={{ cursor: 'pointer', opacity: 0.6 }}
+              onClick={() => setIsEditingWeather(!isEditingWeather)}
+            />
           </div>
           <div className="weather-content">
             <div>
-              <div className="weather-desc">서울</div>
+              {isEditingWeather ? (
+                <input
+                  type="text"
+                  value={weatherLocation}
+                  onChange={e => setWeatherLocation(e.target.value)}
+                  onBlur={() => setIsEditingWeather(false)}
+                  onKeyPress={e => e.key === 'Enter' && setIsEditingWeather(false)}
+                  autoFocus
+                  className="weather-location-input"
+                />
+              ) : (
+                <div className="weather-desc">{weatherLocation}</div>
+              )}
               <div className="weather-temp">22°C</div>
               <div className="weather-desc">맑음</div>
             </div>
@@ -321,47 +270,43 @@ const MyRoutyPage = () => {
           </div>
         </div>
 
-        {/* Recommendations Card */}
-        <div className="info-card recommendation-card">
+        {/* My Products Management Card */}
+        <div className="info-card product-manage-card">
           <div
             className="recommendation-header"
-            onClick={() => setIsRecommendationOpen(!isRecommendationOpen)}
+            onClick={() => setIsProductListOpen(!isProductListOpen)}
             style={{ cursor: 'pointer', justifyContent: 'space-between' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Sparkles size={18} />
-              <span>추천 제품</span>
+              <Package size={18} />
+              <span>내 제품 관리</span>
             </div>
-            {isRecommendationOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            {isProductListOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </div>
-          {isRecommendationOpen && (
-            <div className="product-list">
-              <div className="product-item">
-                <div className="product-icon">
-                  <Droplet size={20} />
-                </div>
-                <div className="product-info">
-                  <div className="product-name">수분 에센스</div>
-                  <div className="product-desc">건조한 피부에 충분한 수분 공급</div>
-                </div>
+          {isProductListOpen && (
+            <div className="product-manage-content">
+              <div className="product-add-row">
+                <input
+                  type="text"
+                  placeholder="제품명 입력"
+                  value={newProductName}
+                  onChange={e => setNewProductName(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && handleAddProduct()}
+                  className="product-add-input"
+                />
+                <button onClick={handleAddProduct} className="product-add-btn">
+                  <Plus size={16} />
+                </button>
               </div>
-              <div className="product-item">
-                <div className="product-icon" style={{ backgroundColor: '#fff0f6', color: '#e64980' }}>
-                  <Droplet size={20} />
-                </div>
-                <div className="product-info">
-                  <div className="product-name">하이드레이팅 크림</div>
-                  <div className="product-desc">겨울철 필수 보습 크림</div>
-                </div>
-              </div>
-              <div className="product-item">
-                <div className="product-icon" style={{ backgroundColor: '#ebfbee', color: '#40c057' }}>
-                  <Droplet size={20} />
-                </div>
-                <div className="product-info">
-                  <div className="product-name">진정 토너</div>
-                  <div className="product-desc">예민한 피부 진정 효과</div>
-                </div>
+              <div className="product-list-manage">
+                {myProducts.map(product => (
+                  <div key={product.id} className="product-manage-item">
+                    <span className="product-manage-name">{product.name}</span>
+                    <button onClick={() => handleRemoveProduct(product.id)} className="product-delete-btn">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           )}

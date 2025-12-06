@@ -15,27 +15,39 @@ const ProductListPage = () => {
   // 필터 값들 (의존성 관리를 위해 미리 변수로 추출)
   const min_price = searchParams.get('min_price') || null;
   const max_price = searchParams.get('max_price') || null;
-  const brand = searchParams.get('brand') || null;      // CSV
+  const brand = searchParams.get('brand') || null; // CSV
   const skin = searchParams.get('skin') || null;
   const maincate = searchParams.get('maincate') || null;
   const subcate = searchParams.get('subcate') || null;
 
   const limit = searchParams.get('limit') || 20;
+  const searchKeyword = searchParams.get('search') || null;
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await api.get('/api/products/list', {
-          params: {
-            limit,
-            maincate,
-            subcate,
-            min_price,
-            max_price,
-            brand,
-            skin,
-          },
-        });
+        let res;
+        if (searchKeyword) {
+          // 검색어가 있을 경우 검색 API 호출
+          res = await api.get('/api/search', {
+            params: {
+              keyword: searchKeyword,
+            },
+          });
+        } else {
+          // 검색어가 없을 경우 기존 상품 목록 API 호출
+          res = await api.get('/api/products/list', {
+            params: {
+              limit,
+              maincate,
+              subcate,
+              min_price,
+              max_price,
+              brand,
+              skin,
+            },
+          });
+        }
 
         setProducts(res.data.data || []);
       } catch (err) {
@@ -44,15 +56,7 @@ const ProductListPage = () => {
     };
 
     loadProducts();
-  }, [
-    limit,
-    maincate,
-    subcate,
-    min_price,
-    max_price,
-    brand,
-    skin,
-  ]); // 모든 search params가 변하면 API 재실행
+  }, [limit, maincate, subcate, min_price, max_price, brand, skin, searchKeyword]); // 모든 search params가 변하면 API 재실행
 
   return (
     <div className="container mt-4 product-page-container">
@@ -70,10 +74,8 @@ const ProductListPage = () => {
 
           <ProductGrid products={products} />
 
-          <div className="text-center mt-4">
-            <button className="btn btn-outline-primary rounded-pill px-4">
-              상품 더보기
-            </button>
+          <div className="text-center my-5">
+            <button className="btn btn-outline-primary rounded-pill px-4">상품 더보기</button>
           </div>
         </div>
       </div>
@@ -82,4 +84,3 @@ const ProductListPage = () => {
 };
 
 export default ProductListPage;
-

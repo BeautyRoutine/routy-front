@@ -7,42 +7,47 @@ import 'swiper/css/autoplay';
 import './PromoCarousel.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
+import banner1 from '../../../assets/banner/banner-1.jpg';
+import banner2 from '../../../assets/banner/banner-2.jpg';
+import banner3 from '../../../assets/banner/banner-3.png';
+import banner4 from '../../../assets/banner/banner-4.jpg';
+import banner5 from '../../../assets/banner/banner-5.jpg';
 
 const PromoCarousel = () => {
   const cards = [
-    { 
-      title: '메이크업 신상',
-      subtitle: '트렌디한 컬러 라인',
-      desc: '지금 바로 만나보세요',
-      img: '/images/makeup.jpg',
+    {
+      title: '피부 맞춤 솔루션',
+      subtitle: '나만의 루틴 찾기',
+      desc: 'AI 피부 분석으로 시작하세요',
+      img: banner1,
       bg: 'bg-danger',
     },
     {
-      title: '네이버 직원들이',
-      subtitle: '월급 털어 사는 스토어',
-      desc: '스토어의 발견',
-      img: '/images/store.jpg',
+      title: '베스트 셀러',
+      subtitle: '이달의 인기 제품',
+      desc: '많은 분들이 선택했어요',
+      img: banner2,
       bg: 'bg-primary',
     },
     {
-      title: '네이버+스토어에서',
-      subtitle: 'MLB 시청권이 무료',
-      desc: '지금 받으러 가기',
-      img: '/images/mlb.jpg',
+      title: '신규 회원 혜택',
+      subtitle: '첫 구매 할인',
+      desc: '지금 가입하고 혜택받기',
+      img: banner3,
       bg: 'bg-success',
     },
     {
-      title: '세럼 특가',
-      subtitle: '고농축 영양 세럼',
-      desc: '피부 속부터 탄탄하게',
-      img: '/images/serum.jpg',
+      title: '시즌 특가',
+      subtitle: '환절기 피부 관리',
+      desc: '최대 50% 할인',
+      img: banner4,
       bg: 'bg-warning',
     },
     {
-      title: '스킨케어 위크',
-      subtitle: '베스트 셀러 모음',
-      desc: '지금 바로 보기',
-      img: '/images/skincare.jpg',
+      title: '리뷰 이벤트',
+      subtitle: '생생한 후기',
+      desc: '포인트 적립 기회',
+      img: banner5,
       bg: 'bg-info',
     },
   ];
@@ -71,15 +76,13 @@ const PromoCarousel = () => {
       >
         {cards.map((card, index) => (
           <SwiperSlide key={index}>
-            <div className={`card text-white ${card.bg} border-0 promo-card h-100`}>
-              <div className="card-body d-flex flex-column justify-content-between">
+            <div className="card text-white border-0 promo-card h-100">
+              <img src={card.img} alt={card.title} className="promo-bg-img" />
+              <div className="promo-overlay">
                 <div>
                   <h5 className="card-title fw-bold">{card.title}</h5>
                   <p className="card-text mb-1">{card.subtitle}</p>
                   <small className="opacity-75">{card.desc}</small>
-                </div>
-                <div className="text-end">
-                  <img src={card.img} alt={card.title} className="promo-img rounded" />
                 </div>
               </div>
             </div>

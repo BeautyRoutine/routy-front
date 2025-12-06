@@ -83,7 +83,7 @@ function ProductInfo({ product, reviewSummary }) {
       {/* 버튼들*/}
       <div className="action-buttons-group">
         {/* 찜하기 버튼 */}
-        <button className="wishlist-btn">♡ 찜하기</button>
+        <button className="wishlist-btn">♡ 좋아요</button>
         {/* 장바구니, 바로구매 버튼 */}
         <div className="buy-buttons">
           <button className="btn-custom btn-cart">장바구니</button>

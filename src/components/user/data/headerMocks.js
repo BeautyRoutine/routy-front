@@ -37,7 +37,7 @@ export const DEMO_COUNTS = {
   cart: 2,
 };
 
-export const DEMO_RECENT_SEARCHES = ['덤패치', '니들패치', '코팩', '장벽크림'];
+export const DEMO_RECENT_SEARCHES = [];
 
 export const DEMO_SIMILAR_SKIN = [
   { keyword: '라스트핑', trend: 'up' },
