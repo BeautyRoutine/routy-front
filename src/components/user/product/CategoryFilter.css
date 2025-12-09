@@ -86,3 +86,19 @@
 .filter-apply-btn:hover {
   opacity: 0.9;
 }
+/* 필터 초기화 버튼 */
+.filter-reset-btn {
+  padding: 10px 0;
+  border: 1px solid #ddd;
+  background: #f8f8f8;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  margin-top: 6px;
+}
+
+.filter-reset-btn:hover {
+  background: #e6e6e6;
+}
