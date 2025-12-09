@@ -13,7 +13,7 @@ import {
   Check,
 } from 'lucide-react';
 import { searchIngredients } from '../../../lib/apiClient';
-import '../../../styles/MyPage.css';
+import './IngredientAddModal.css';
 
 const IngredientAddModal = ({ isOpen, onClose, onAdd, onRemove, currentIngredients }) => {
   const [view, setView] = useState('search'); // 'search' | 'detail'
@@ -167,41 +167,47 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd, onRemove, currentIngredien
 
     return (
       <div className="ingredient-detail-view">
-        <header className="detail-header">
-          <button className="back-btn" onClick={handleBack}>
+        <div
+          className="detail-header"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            padding: '16px 24px',
+            borderBottom: '1px solid #f0f0f0',
+          }}
+        >
+          <button className="detail-back-btn" onClick={handleBack}>
             <ArrowLeft size={24} />
           </button>
-          <h2>성분 정보</h2>
-          <div style={{ width: 24 }}></div> {/* Spacer for centering */}
-        </header>
 
-        <div className="detail-content">
-          <div className="detail-title-section">
-            <h3>{ingredient.name}</h3>
-            <p className="eng-name">{ingredient.engName}</p>
+          <div style={{ width: '100%' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#333', marginBottom: '4px', margin: 0 }}>
+              {ingredient.name}
+            </h2>
+            <p className="eng-name" style={{ fontSize: '14px', color: '#888', margin: 0 }}>
+              {ingredient.engName}
+            </p>
           </div>
+        </div>
 
-          <div className="detail-actions">
+        <div className="detail-content" style={{ padding: '0 24px 16px' }}>
+          {/* Actions */}
+          <div className="detail-actions" style={{ marginTop: '16px' }}>
             <button
               className={`action-toggle-btn focus ${isFocus ? 'active' : ''}`}
               onClick={() => toggleFocus(ingredient.id)}
             >
-              <ThumbsUp size={18} />
+              <ThumbsUp size={20} />
               <span>관심있어요</span>
             </button>
             <button
               className={`action-toggle-btn avoid ${isAvoid ? 'active' : ''}`}
               onClick={() => toggleAvoid(ingredient.id)}
             >
-              <ThumbsDown size={18} />
+              <ThumbsDown size={20} />
               <span>피할래요</span>
             </button>
-          </div>
-
-          <div className="find-product-banner">
-            <Search size={18} className="banner-icon" />
-            <span>이 성분이 포함된 제품 찾기</span>
-            <ChevronRight size={18} className="banner-arrow" />
           </div>
 
           <div className="info-list">
@@ -275,7 +281,6 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd, onRemove, currentIngredien
               </div>
             </div>
           </div>
-
           <div className="detail-footer">
             <p>성분 정보는 성분의 함량과 배합방식, 개개인의 피부 타입과 환경에 따라 다르게 적용될 수 있습니다.</p>
             <div className="source-box">
@@ -293,108 +298,73 @@ const IngredientAddModal = ({ isOpen, onClose, onAdd, onRemove, currentIngredien
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content ingredient-modal add-mode" onClick={e => e.stopPropagation()}>
+    <div className="ingredient-add-overlay" onClick={onClose}>
+      <div className="ingredient-add-modal" onClick={e => e.stopPropagation()}>
         {view === 'search' ? (
           <>
-            <header className="modal-header">
+            <header className="ingredient-add-header">
               <h2>성분 추가하기</h2>
-              <button className="close-btn" onClick={onClose}>
+              <button className="ing-modal-close-btn" onClick={onClose}>
                 <X size={24} />
               </button>
             </header>
 
-            <div className="modal-body">
-              <div className="search-bar-container">
-                <div className="search-input-wrapper">
-                  <Search size={20} className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="성분명을 검색해보세요"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="search-input"
-                    autoFocus
-                  />
+            <div className="ingredient-search-wrapper">
+              <div className="search-input-box">
+                <Search size={20} />
+                <input
+                  type="text"
+                  placeholder="성분명을 검색해보세요"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="ingredient-list-area">
+              {loading ? (
+                <div className="empty-search">
+                  <p>검색 중...</p>
                 </div>
-              </div>
-
-              <div className="search-results">
-                {loading ? (
-                  <div className="empty-search">
-                    <p>검색 중...</p>
-                  </div>
-                ) : searchResults.length > 0 ? (
-                  <>
-                    <div className="ingredient-grid">
-                      {searchResults.map(item => (
-                        <div
-                          key={item.id}
-                          className="ingredient-card search-result clickable"
-                          onClick={() => handleItemClick(item)}
-                        >
-                          <div className="card-content">
-                            <span className="ingredient-name">{item.name}</span>
-                            <p className="ingredient-desc">{item.desc}</p>
-                          </div>
-                          <ChevronRight size={20} color="#ccc" />
-                        </div>
-                      ))}
+              ) : searchResults.length > 0 ? (
+                <>
+                  {searchResults.map(item => (
+                    <div key={item.id} className="ingredient-item-card" onClick={() => handleItemClick(item)}>
+                      <div className="card-content">
+                        <strong>{item.name}</strong>
+                        <p>{item.desc}</p>
+                      </div>
+                      <ChevronRight size={20} className="card-arrow" />
                     </div>
+                  ))}
 
-                    {/* Pagination Controls */}
-                    <div
-                      className="pagination-controls"
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '16px',
-                        marginTop: '20px',
-                        paddingBottom: '20px',
-                      }}
+                  {/* Pagination Controls */}
+                  <div className="pagination-controls">
+                    <button
+                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
                     >
-                      <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        style={{
-                          padding: '8px 12px',
-                          border: '1px solid #e0e0e0',
-                          borderRadius: '6px',
-                          background: currentPage === 1 ? '#f5f5f5' : 'white',
-                          color: currentPage === 1 ? '#999' : '#333',
-                          cursor: currentPage === 1 ? 'default' : 'pointer',
-                          fontSize: '13px',
-                        }}
-                      >
-                        이전
-                      </button>
-                      <span style={{ fontSize: '14px', color: '#666' }}>
-                        {currentPage} / {totalPages}
-                      </span>
-                      <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        style={{
-                          padding: '8px 12px',
-                          border: '1px solid #e0e0e0',
-                          borderRadius: '6px',
-                          background: currentPage === totalPages ? '#f5f5f5' : 'white',
-                          color: currentPage === totalPages ? '#999' : '#333',
-                          cursor: currentPage === totalPages ? 'default' : 'pointer',
-                          fontSize: '13px',
-                        }}
-                      >
-                        다음
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="empty-search">
-                    <p>{searchTerm ? '검색 결과가 없습니다.' : '성분을 검색해보세요.'}</p>
+                      이전
+                    </button>
+                    <span style={{ fontSize: '14px', color: '#666' }}>
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      다음
+                    </button>
                   </div>
-                )}
-              </div>
+                </>
+              ) : (
+                <div className="empty-search">
+                  <p>{searchTerm ? '검색 결과가 없습니다.' : '성분을 검색해보세요.'}</p>
+                </div>
+              )}
             </div>
           </>
         ) : (
