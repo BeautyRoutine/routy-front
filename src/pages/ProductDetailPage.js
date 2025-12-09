@@ -47,11 +47,15 @@ const ProductDetailPage = () => {
         const updatedReviews = prev.reviewInfo.reviews.map(review => {
           if (review.revNo === revNo) {
             //리뷰번호 체크
-            const newIsLiked = !review.isLiked;
+            //리뷰 좋아요 isliked liked 둘다 확인하기 둘중 하나라도 참이면 참
+            const currentStatus = review.liked || review.isLiked;
+
+            const newStatus = !currentStatus; //토글기능이니 반대값으로 변해야함
             return {
               ...review, //...으로 리뷰 복사해오기
-              isLiked: newIsLiked, //상태변경
-              likeCount: newIsLiked ? review.likeCount + 1 : review.likeCount - 1,
+              liked: newStatus,
+              isLiked: newStatus, //상태변경
+              likeCount: newStatus ? review.likeCount + 1 : review.likeCount - 1,
             };
           }
           return review; //클릭 안했으면 그대로

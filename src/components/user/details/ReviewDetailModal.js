@@ -63,7 +63,7 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
             <div className="modal-text-footer mt-3">
               <p className="text-muted small mb-2">리뷰가 도움이 되었나요?</p>
               <button
-                className={`like-toggle-btn ${review.isLiked ? 'liked' : ''}`}
+                className={`like-toggle-btn ${review.liked || review.isLiked ? 'liked' : ''}`}
                 style={{ width: '100%', justifyContent: 'center' }}
                 onClick={e => {
                   e.stopPropagation();

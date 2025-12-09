@@ -191,7 +191,7 @@ const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
                       {/* 하단: 좋아요*/}
                       <div className="like-btn-area">
                         <button
-                          className={`like-toggle-btn ${review.isLiked ? 'liked' : ''}`}
+                          className={`like-toggle-btn ${review.liked || review.isLiked ? 'liked' : ''}`}
                           // e 받아서 모달도 켜지는거 방지
                           onClick={e => toggleLike(e, review.revNo)}
                         >
