@@ -61,8 +61,8 @@ function ProductDetailTabs({
             </div>
 
             {/* 접이식 정보 (아코디언) */}
-            {/*기본값은 0 열려있기, 테두리 지우고 alwaysOpen으로 동시에 펼칠 수 있게. */}
-            <Accordion defaultActiveKey={['0']} flush alwaysOpen className="mt-5 product-info-accordion">
+            {/*기본값은 전부 닫기, 테두리 지우고 alwaysOpen으로 동시에 펼칠 수 있게. */}
+            <Accordion flush alwaysOpen className="mt-5 product-info-accordion">
               {/* 상품정보 제공고시, 아코디언 넘버 0 */}
               <Accordion.Item eventKey="0">
                 <Accordion.Header>상품정보 제공고시</Accordion.Header>

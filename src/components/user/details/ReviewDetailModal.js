@@ -2,8 +2,8 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 import './ReviewDetailModal.css';
 
-//show, onHide, review 받아옴? 이게 뭐길래 받아옴
-const ReviewDetailModal = ({ show, onHide, review }) => {
+//show, onHide, review  onlike 받아오기
+const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
   if (!review) return null;
 
   return (
@@ -42,11 +42,11 @@ const ReviewDetailModal = ({ show, onHide, review }) => {
             </div>
 
             {/* 옵션 정보 */}
-            <p className="text-muted small mb-4">옵션: 히알루론산 앰플 세럼 50ml</p>
+            <p className="text-muted small mb-4">옵션: 더미데이터입니다.</p>
 
             {/* 스크롤 가능한 본문 내용 */}
             <div className="modal-scroll-content">
-              <p className="review-text-full">{review.revContent || review.revGood}</p>
+              <p className="review-text-full">{review.content}</p>
 
               {/* 태그 */}
               <div className="review-tags mt-3">
@@ -65,6 +65,12 @@ const ReviewDetailModal = ({ show, onHide, review }) => {
               <button
                 className={`like-toggle-btn ${review.isLiked ? 'liked' : ''}`}
                 style={{ width: '100%', justifyContent: 'center' }}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (onLikeToggle) {
+                    onLikeToggle(review.revNo);
+                  }
+                }}
               >
                 <span>👍</span>
                 <span>{review.likeCount}</span>

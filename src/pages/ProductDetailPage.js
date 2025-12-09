@@ -32,10 +32,11 @@ const ProductDetailPage = () => {
   const handleLikeToggle = async revNo => {
     // 로그인 체크
     if (!currentUser) return alert('로그인이 필요합니다.');
-
     try {
       // API 호출
-      await api.post(`/api/reviews/${revNo}/like`);
+      await api.post(`/api/reviews/${revNo}/like`, null, {
+        params: { userNo: currentUser?.userNo || 0 },
+      });
 
       // 화면 즉시 갱신, 백엔드에 보내고, 새로받아오지 말고 프론트에서 증감하기
       setProductData(prev => {
@@ -76,7 +77,6 @@ const ProductDetailPage = () => {
       //비동기
       try {
         setLoading(true); //로딩 시작
-
         // 로그인 안한 상태면 null 상태니 ?.으로 있는지 체크, 없으면 undefined->null
         const analysisParams = {
           userId: currentUser?.userId || null,
@@ -85,7 +85,9 @@ const ProductDetailPage = () => {
 
         //get 요청 주소 : /api/products/101
         const productRes = await api.get(`/api/products/${prdNo}`);
-        const reviewRes = await api.get(`/api/products/${prdNo}/reviews`);
+        const reviewRes = await api.get(`/api/products/${prdNo}/reviews`, {
+          params: { userNo: currentUser?.userNo || 0 }, //유저 아이디 체크해서 같이 보내기
+        });
         //유저 검색 조건 추가해야되서 params으로
         const ingredientRes = await api.get(`/api/products/${prdNo}/analysis`, { params: analysisParams });
         const productObj = productRes.data.data;
@@ -171,7 +173,7 @@ const ProductDetailPage = () => {
       {/*별점, 우수리뷰 */}
       <Row className="mt-5">
         <Col>
-          <ReviewSummary reviewInfo={reviewInfo} />
+          <ReviewSummary reviewInfo={reviewInfo} onLikeToggle={handleLikeToggle} />
         </Col>
       </Row>
       <hr className="my-5" />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
@@ -13,11 +13,24 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
 
   const [activePage, setActivePage] = useState(1);
 
+  //구조분해할당
+  const { reviews, summary } = reviewInfo || {};
+
+  useEffect(() => {
+    // 모달이 열려있고(selectedReview), 목록 데이터(reviews)가 있을 때
+    if (selectedReview && reviews) {
+      // 리스트에서 현재 모달에 뜬 것과 똑같은 화면을 찾음
+      const updatedReview = reviews.find(r => r.revNo === selectedReview.revNo);
+
+      // 찾았으면 모달 데이터를 최신으로 교체
+      if (updatedReview) {
+        setSelectedReview(updatedReview);
+      }
+    }
+  }, [reviewInfo]);
+
   // 데이터가 없으면 아무것도 안 그림
   if (!reviewInfo || !reviewInfo.reviews) return null;
-
-  //구조분해할당
-  const { reviews, summary } = reviewInfo;
 
   //페이지 변경
   const handlePageChange = pageNumber => {
@@ -171,7 +184,7 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
               {/* 좋아요 */}
               <div className="like-button-area">
                 <button
-                  className={`like-btn-simple ${review.isLiked ? 'active' : ''}`}
+                  className={`like-btn-simple ${review.liked || review.isLiked ? 'active' : ''}`}
                   onClick={e => handleLikeClick(e, review.revNo)}
                 >
                   <span style={{ fontSize: '16px' }}>👍</span>
@@ -215,7 +228,12 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
         )}
       </div>
 
-      <ReviewDetailModal show={showModal} onHide={() => setShowModal(false)} review={selectedReview} />
+      <ReviewDetailModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        review={selectedReview}
+        onLikeToggle={onLikeToggle}
+      />
     </div>
   );
 };
