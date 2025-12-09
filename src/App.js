@@ -145,6 +145,78 @@ function App() {
     setIsLoggedIn(false);
     dispatch(setUser(null));
     navigate('/');
+    setIsLoggedIn(!!token);
+  }, [location.pathname]);
+
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
+  const handleSignupClick = () => {
+    navigate('/signup');
+  };
+
+  const handleLogoutClick = () => {
+    setIsLoggedIn(false);
+    navigate('/logout');
+  };
+
+  const handleRequireLogin = () => {
+    navigate('/login');
+  };
+
+  const handleCartNavigate = () => {
+    navigate('/cart');
+  };
+
+  const handleNavigate = (page, param) => {
+    // ★★★ 전체 URL 직접 이동 처리 ★★★
+    if (typeof page === 'string' && page.startsWith('/')) {
+      navigate(page);
+      return;
+    }
+
+    const routes = {
+      home: '/',
+      admin: '/admin',
+      mypage: '/mypage',
+      cart: '/cart',
+      order: '/order',
+      customerservice: '/customerservice',
+      category: '/category',
+      ranking: '/ranking',
+      product: '/products',
+      myrouty: '/myrouty',
+    };
+
+    if (page === 'product' && param) {
+      navigate(`/products/${param}`);
+      return;
+    }
+
+    if (page === 'search' && param) {
+      navigate(`/products?search=${encodeURIComponent(param)}`);
+      return;
+    }
+
+    if (page === 'category' && param) {
+      navigate(`/products?category=${param}`);
+      return;
+    }
+
+    if (page === 'orders') {
+      navigate('/mypage', { state: { view: 'order-history' } });
+      return;
+    }
+
+    if (page === 'reviews') {
+      navigate('/mypage', { state: { view: 'reviews' } });
+      return;
+    }
+
+    if (routes[page]) {
+      navigate(routes[page]);
+    }
   };
 
   return (
