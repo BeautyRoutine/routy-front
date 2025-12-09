@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -24,6 +24,7 @@ const ProductDetailPage = () => {
 
   //탭 이동용 핸들러
   const handleMoveToReview = () => {
+    console.log('부모: 탭 변경 요청 받음');
     setActiveTab('review'); // 탭을 리뷰로 변경
     tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -162,7 +163,7 @@ const ProductDetailPage = () => {
 
         <Col md={6}>
           {/*우측 6칸 차지,  상품 정보 리뷰, 버튼 등 전달 */}
-          <ProductInfo product={productInfo} reviewSummary={reviewInfo.summary} />
+          <ProductInfo product={productInfo} reviewSummary={reviewInfo.summary} onMoveToReview={handleMoveToReview} />
         </Col>
       </Row>
 
@@ -183,16 +184,18 @@ const ProductDetailPage = () => {
 
       <Row>
         <Col>
-          {/* 분해한 데이터 전달 */}
-          <ProductDetailTabs
-            activeTab={activeTab} // 현재 탭 상태
-            onTabSelect={setActiveTab} //탭 변경
-            productInfo={productInfo}
-            purchaseInfo={purchaseInfo}
-            reviewInfo={reviewInfo}
-            ingredientInfo={ingredientInfo}
-            onLikeToggle={handleLikeToggle}
-          />
+          <div ref={tabsRef} style={{ paddingTop: '20px' }}>
+            {/* 분해한 데이터 전달 */}
+            <ProductDetailTabs
+              activeTab={activeTab} // 현재 탭 상태
+              onTabSelect={setActiveTab} //탭 변경
+              productInfo={productInfo}
+              purchaseInfo={purchaseInfo}
+              reviewInfo={reviewInfo}
+              ingredientInfo={ingredientInfo}
+              onLikeToggle={handleLikeToggle}
+            />
+          </div>
         </Col>
       </Row>
     </Container>

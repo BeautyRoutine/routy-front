@@ -4,7 +4,15 @@ import './ProductDetailTabs.css';
 import ReviewList from './ReviewList';
 
 // 데이터 념겨받기
-function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientInfo }) {
+function ProductDetailTabs({
+  productInfo,
+  purchaseInfo,
+  reviewInfo,
+  ingredientInfo,
+  activeTab,
+  onTabSelect,
+  onLikeToggle,
+}) {
   // 기본값은 상품설명창, 현재 탭 기억용 state->상위페이지에서 관리
   //const [key, setKey] = useState('desc');
   //이미지 더보기

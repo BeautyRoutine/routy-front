@@ -4,7 +4,7 @@ import api from 'app/api';
 import './ProductInfo.css';
 
 // product, reviewSummary props로 받기
-function ProductInfo({ product, reviewSummary }) {
+function ProductInfo({ product, reviewSummary, onMoveToReview }) {
   const navigate = useNavigate();
 
   //제품 구매 수량 기억용 state, 기본값1
@@ -94,7 +94,15 @@ function ProductInfo({ product, reviewSummary }) {
       </div>
 
       {/* 별점, 리뷰 */}
-      <div className="review-summary">
+      <div
+        className="review-summary"
+        onClick={() => {
+          console.log('리뷰 클릭됨!'); // 이 로그가 찍히는지 개발자 도구(F12)에서 확인
+          onMoveToReview();
+        }}
+        style={{ cursor: 'pointer' }}
+        title="리뷰 보러가기"
+      >
         <span className="stars">{renderStars(reviewSummary.averageRating)}</span>
         <span className="rating-number">{reviewSummary.averageRating}</span>
         <span className="review-count">{reviewSummary.totalCount}개 리뷰</span>
@@ -116,7 +124,7 @@ function ProductInfo({ product, reviewSummary }) {
       <div className="shipping-info">
         <div className="shipping-row">
           <span>🚚</span>
-          <span>배송비: 3,000원 (50,000원 이상 무료)</span>
+          <span>배송비: 3,000원 (30,000원 이상 무료)</span>
         </div>
         <div className="shipping-row">
           <span>📦</span>
