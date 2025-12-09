@@ -51,6 +51,7 @@ const RankingPage = ({ user_skin }) => {
 
   // 피부타입 필터 상태 (UI 전용, 기능은 추후 구현)
   const [selectedSkinType, setSelectedSkinType] = useState('전체');
+  const skinTypes = ['전체', '건성', '지성', '민감성'];
   const [selectedSkinNum, setSelectedSkinNum] = useState(null);
   // user_skin prop 반영 - 메인 [내 피부 타입 맞춤 추천] 더보기 대응
   useEffect(() => {

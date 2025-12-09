@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import 'moment/locale/ko';
-import { X, ChevronLeft, ClipboardCheck, Check, Clock, Plus, Save } from 'lucide-react';
-import './MyRoutyPage.css'; // Reusing the CSS
+import { X, ChevronLeft, ChevronRight, ClipboardCheck, Check, Clock, Plus, Save } from 'lucide-react';
+import './MyRoutyPage.css';
 
 const REACTION_OPTIONS = [
   { id: 'oily', label: '유분 증가' },
@@ -13,6 +13,103 @@ const REACTION_OPTIONS = [
   { id: 'trouble', label: '트러블 의심' },
   { id: 'none', label: '반응 없음' },
 ];
+
+// Helper to truncate text
+const truncateText = (text, maxLength) => {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+};
+
+// Simple Calendar Modal Component
+const CalendarModal = ({ isOpen, onClose, onSelectDate, selectedDate }) => {
+  const [currentDate, setCurrentDate] = useState(moment());
+
+  useEffect(() => {
+    if (isOpen && selectedDate) {
+      setCurrentDate(moment(selectedDate));
+    } else if (isOpen) {
+      setCurrentDate(moment());
+    }
+  }, [isOpen, selectedDate]);
+
+  if (!isOpen) return null;
+
+  const startOfMonth = currentDate.clone().startOf('month');
+  const startDate = startOfMonth.clone().startOf('week');
+  const endDate = startDate.clone().add(41, 'days');
+
+  const calendarDays = [];
+  let day = startDate.clone();
+  while (day.isSameOrBefore(endDate, 'day')) {
+    calendarDays.push(day.clone());
+    day.add(1, 'day');
+  }
+
+  const handlePrevMonth = () => setCurrentDate(currentDate.clone().subtract(1, 'month'));
+  const handleNextMonth = () => setCurrentDate(currentDate.clone().add(1, 'month'));
+
+  return (
+    <div className="calendar-modal-overlay" onClick={onClose}>
+      <div className="calendar-popup" onClick={e => e.stopPropagation()}>
+        <div className="calendar-popup-header">
+          <div className="calendar-popup-title">
+            <Clock size={20} color="#007bff" />
+            <span>알림 날짜 설정</span>
+            <span className="calendar-popup-subtitle">재사용알림 받기</span>
+          </div>
+          <button className="calendar-popup-close" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="calendar-nav">
+          <button onClick={handlePrevMonth}>
+            <ChevronLeft size={24} />
+          </button>
+          <span className="calendar-title">{currentDate.format('YYYY년 M월')}</span>
+          <button onClick={handleNextMonth}>
+            <ChevronRight size={24} />
+          </button>
+        </div>
+
+        <div className="calendar-grid">
+          {['일', '월', '화', '수', '목', '금', '토'].map((dayName, index) => (
+            <div
+              key={dayName}
+              className={`calendar-day-name ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}`}
+            >
+              {dayName}
+            </div>
+          ))}
+          {calendarDays.map((date, index) => {
+            const isSelected = selectedDate && date.isSame(selectedDate, 'day');
+            const isToday = date.isSame(moment(), 'day');
+            const isCurrentMonth = date.isSame(currentDate, 'month');
+
+            return (
+              <div
+                key={index}
+                className={`calendar-day 
+                  ${!isCurrentMonth ? 'other-month' : ''}
+                  ${isSelected ? 'selected' : ''}
+                  ${isToday ? 'today' : ''}
+                  ${date.day() === 0 ? 'sunday' : date.day() === 6 ? 'saturday' : ''}
+                `}
+                onClick={() => {
+                  onSelectDate(date.format('YYYY-MM-DD'));
+                  onClose();
+                }}
+              >
+                {date.format('D')}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const RoutineEditPage = () => {
   const navigate = useNavigate();
@@ -26,13 +123,16 @@ const RoutineEditPage = () => {
   const [newActivity, setNewActivity] = useState('');
   const [dailyMemo, setDailyMemo] = useState('');
 
+  // Calendar Modal State
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [currentAlarmProduct, setCurrentAlarmProduct] = useState(null);
+
   useEffect(() => {
     // Load data from localStorage
     const storedProducts = localStorage.getItem('myProducts');
     if (storedProducts) {
       setMyProducts(JSON.parse(storedProducts));
     } else {
-      // Fallback or empty if not set
       setMyProducts([]);
     }
 
@@ -94,10 +194,31 @@ const RoutineEditPage = () => {
     }));
   };
 
-  const updateNotificationTime = (productId, time) => {
+  const openCalendar = productId => {
+    setCurrentAlarmProduct(productId);
+    setIsCalendarOpen(true);
+  };
+
+  const handleDateSelect = dateString => {
+    if (currentAlarmProduct) {
+      setProductReactions(prev => ({
+        ...prev,
+        [currentAlarmProduct]: {
+          ...(prev[currentAlarmProduct] || { reactions: [] }),
+          notificationTime: dateString,
+        },
+      }));
+    }
+  };
+
+  const clearNotification = (e, productId) => {
+    e.stopPropagation();
     setProductReactions(prev => ({
       ...prev,
-      [productId]: { ...(prev[productId] || { reactions: [] }), notificationTime: time },
+      [productId]: {
+        ...(prev[productId] || { reactions: [] }),
+        notificationTime: '',
+      },
     }));
   };
 
@@ -130,7 +251,6 @@ const RoutineEditPage = () => {
       dailyMemo,
     };
 
-    // Save to localStorage
     const storedRoutines = localStorage.getItem('routines');
     const routines = storedRoutines ? JSON.parse(storedRoutines) : {};
     routines[dateParam] = newData;
@@ -143,17 +263,23 @@ const RoutineEditPage = () => {
     navigate('/myrouty');
   };
 
+  const formatNotificationDate = dateString => {
+    if (!dateString) return '';
+    if (dateString.includes('후')) return dateString;
+
+    const m = moment(dateString);
+    if (!m.isValid()) return dateString;
+    return m.format('M월 D일');
+  };
+
   return (
     <div className="my-routy-container" style={{ display: 'block' }}>
       <div className="routine-edit-page">
-        <div className="page-header">
-          <button className="back-btn" onClick={handleBack}>
-            <ChevronLeft size={24} />
-          </button>
-        </div>
-
         <div className="edit-content-wrapper">
           <div className="routine-header-card">
+            <button className="header-back-btn" onClick={handleBack}>
+              <ChevronLeft size={28} color="white" />
+            </button>
             <div className="routine-header-left">
               <div className="routine-icon-wrapper">
                 <ClipboardCheck size={24} color="white" />
@@ -173,18 +299,31 @@ const RoutineEditPage = () => {
               <div className="empty-products-msg">등록된 제품이 없습니다. '내 제품 관리'에서 제품을 추가해주세요.</div>
             ) : (
               <div className="product-select-grid">
-                {myProducts.map(product => (
-                  <div
-                    key={product.id}
-                    className={`product-select-item ${selectedProductIds.includes(product.id) ? 'selected' : ''}`}
-                    onClick={() => toggleProduct(product.id)}
-                  >
-                    <div className="checkbox-circle">
-                      {selectedProductIds.includes(product.id) && <Check size={12} color="white" />}
+                {myProducts.map(product => {
+                  const categoryMap = {
+                    '그린 마일드 업 선 플러스': '선케어',
+                    '히알루론산 앰플 세럼': '앰플',
+                    '시카 리페어 크림': '크림',
+                    '약산성 클렌징 폼': '클렌징',
+                    '비타민 C 브라이트닝 세럼': '앰플',
+                  };
+                  const displayCategory = product.category || categoryMap[product.name] || '기타';
+                  return (
+                    <div
+                      key={product.id}
+                      className={`product-select-item ${selectedProductIds.includes(product.id) ? 'selected' : ''}`}
+                      onClick={() => toggleProduct(product.id)}
+                    >
+                      <span className="product-category">{displayCategory}</span>
+                      <div className="checkbox-circle">
+                        {selectedProductIds.includes(product.id) && <Check size={12} color="white" />}
+                      </div>
+                      <span className="product-name" title={product.name}>
+                        {truncateText(product.name, 7)}
+                      </span>
                     </div>
-                    <span>{product.name}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -203,57 +342,20 @@ const RoutineEditPage = () => {
                       <div className="reaction-card-header">
                         <span className="reaction-product-name">{product?.name}</span>
                         <div className="alarm-wrapper">
-                          <div
+                          <button
                             className={`alarm-btn ${reactionData.notificationTime ? 'active' : ''}`}
-                            style={{ position: 'relative', padding: 0 }}
+                            onClick={() => openCalendar(id)}
                           >
-                            <Clock
-                              size={14}
-                              style={{
-                                position: 'absolute',
-                                left: '8px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                pointerEvents: 'none',
-                              }}
-                            />
-                            <select
-                              value={reactionData.notificationTime || ''}
-                              onChange={e => updateNotificationTime(id, e.target.value)}
-                              style={{
-                                border: 'none',
-                                background: 'transparent',
-                                fontSize: '12px',
-                                color: 'inherit',
-                                padding: '4px 8px 4px 26px',
-                                cursor: 'pointer',
-                                appearance: 'none',
-                                outline: 'none',
-                                height: '100%',
-                              }}
-                            >
-                              <option value="" disabled hidden>
-                                알림 설정
-                              </option>
-                              <option value="1일 후">1일 후</option>
-                              <option value="2일 후">2일 후</option>
-                              <option value="3일 후">3일 후</option>
-                              <option value="7일 후">7일 후</option>
-                              <option value="14일 후">14일 후</option>
-                              <option value="30일 후">30일 후</option>
-                            </select>
-                          </div>
-                          {reactionData.notificationTime && (
-                            <button
-                              className="alarm-clear-btn"
-                              onClick={e => {
-                                e.preventDefault();
-                                updateNotificationTime(id, '');
-                              }}
-                            >
-                              <X size={12} />
-                            </button>
-                          )}
+                            <Clock size={14} />
+                            {reactionData.notificationTime
+                              ? `${formatNotificationDate(reactionData.notificationTime)} 알림`
+                              : '알림 설정'}
+                            {reactionData.notificationTime && (
+                              <div className="alarm-clear-btn" onClick={e => clearNotification(e, id)}>
+                                <X size={12} />
+                              </div>
+                            )}
+                          </button>
                         </div>
                       </div>
 
@@ -330,6 +432,17 @@ const RoutineEditPage = () => {
           </div>
         </div>
       </div>
+
+      <CalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        onSelectDate={handleDateSelect}
+        selectedDate={
+          currentAlarmProduct && productReactions[currentAlarmProduct]?.notificationTime
+            ? productReactions[currentAlarmProduct].notificationTime
+            : null
+        }
+      />
     </div>
   );
 };

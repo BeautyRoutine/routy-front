@@ -22,12 +22,13 @@ export const getTypeText = value => {
 
 // 배송 상태 텍스트 변환
 export const getStatusText = value => {
-  if (value === 1) return '배송준비중';
-  if (value === 2) return '집화완료';
+  if (value === 1) return '주문완료';
+  if (value === 2) return '준비중';
   if (value === 3) return '배송중';
-  if (value === 4) return '지점 도착';
-  if (value === 5) return '배송출발';
-  if (value === 6) return '배송 완료';
+  if (value === 4) return '배송완료';
+  if (value === 5) return '취소';
+  if (value === 6) return '반품';
+  if (value === 7) return '교환';
   return '';
 };
 

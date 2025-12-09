@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Settings } from 'lucide-react';
 import ProfileEditModal from '../components/user/mypage/ProfileEditModal';
 import DeliveryAddress from '../components/user/mypage/DeliveryAddress';
@@ -49,7 +49,7 @@ const buildNavSections = user => [
  */
 const MyPage = () => {
   const dispatch = useDispatch();
-  // const navigate = useNavigate();
+  const location = useLocation();
   const { profile: userProfile, ingredients, likes, orderSteps, currentUser } = useSelector(state => state.user);
 
   // UI State
@@ -58,6 +58,13 @@ const MyPage = () => {
   const [isIngredientAddModalOpen, setIsIngredientAddModalOpen] = useState(false); // 성분 추가 모달 상태
   const [viewMode, setViewMode] = useState('dashboard'); // 현재 보여줄 뷰 모드
   const [likeTab, setLikeTab] = useState('products'); // 'products' | 'brands'
+
+  // location state에 따른 viewMode 설정
+  useEffect(() => {
+    if (location.state?.view) {
+      setViewMode(location.state.view);
+    }
+  }, [location.state]);
 
   // Derived State: 사용자 정보가 변경될 때마다 네비게이션 메뉴 재생성
   const navSections = useMemo(() => buildNavSections(userProfile), [userProfile]);
@@ -121,7 +128,7 @@ const MyPage = () => {
       case 'withdrawal':
         return <MemberWithdrawal onCancel={handleShowDashboard} />;
       case 'order-history':
-        return <OrderHistory orders={[]} />; // 주문 내역 API 미구현으로 빈 배열 전달
+        return <OrderHistory userId={currentUser?.userId} />;
       case 'claim-history':
         return <ClaimHistory claims={[]} />; // 클레임 내역 API 미구현으로 빈 배열 전달
       case 'recent-views':

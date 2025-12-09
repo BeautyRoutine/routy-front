@@ -82,9 +82,14 @@ const MyReviewList = () => {
               <div style={{ width: '80px', marginRight: '20px', flexShrink: 0 }}>
                 {/* API 응답에 이미지가 없으면 플레이스홀더 사용 */}
                 <img
-                  src={review.imageUrl || 'https://via.placeholder.com/80'}
+                  src={
+                    review.imageUrl
+                      ? `${process.env.PUBLIC_URL}/images/review/${review.imageUrl}`
+                      : 'https://via.placeholder.com/80'
+                  }
                   alt={review.productName}
                   style={{ width: '100%', borderRadius: '4px', border: '1px solid #eee' }}
+                  onError={e => (e.target.src = 'https://via.placeholder.com/80')}
                 />
               </div>
               <div style={{ flex: 1 }}>

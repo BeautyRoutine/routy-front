@@ -12,11 +12,6 @@ const RecentViewedProducts = () => {
     navigate(`/products/${prdNo}`);
   };
 
-  const handleDelete = prdNo => {
-    // TODO: 최근 본 상품 삭제 API 연동 필요 (현재 백엔드 컨트롤러에 DELETE 메서드 없음)
-    alert('삭제 기능은 준비 중입니다.');
-  };
-
   return (
     <div className="recent-viewed-container">
       <h2 className="page-title">최근 본 상품</h2>
@@ -65,15 +60,6 @@ const RecentViewedProducts = () => {
               <div className="col-date">{item.viewedDate ? new Date(item.viewedDate).toLocaleDateString() : '-'}</div>
               <div className="col-manage">
                 <button className="btn-cart">장바구니</button>
-                <button
-                  className="btn-delete"
-                  onClick={e => {
-                    e.stopPropagation();
-                    handleDelete(item.prdNo);
-                  }}
-                >
-                  삭제
-                </button>
               </div>
             </div>
           ))}
