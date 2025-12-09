@@ -6,7 +6,7 @@ import axios from 'axios';
 
 import 'styles/SkinTypeAnalysisBox.css';
 
-const SkinTypeAnalysisBox = ({ prdNo = 89 }) => {
+const SkinTypeAnalysisBox = ({ prdNo }) => {
   const navigate = useNavigate();
 
   const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl);
