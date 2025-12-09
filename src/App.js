@@ -100,6 +100,16 @@ function App() {
       return;
     }
 
+    if (page === 'orders') {
+      navigate('/mypage', { state: { view: 'order-history' } });
+      return;
+    }
+
+    if (page === 'reviews') {
+      navigate('/mypage', { state: { view: 'reviews' } });
+      return;
+    }
+
     if (routes[page]) {
       navigate(routes[page]);
     }

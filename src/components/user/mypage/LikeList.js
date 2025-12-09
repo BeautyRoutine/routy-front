@@ -36,10 +36,13 @@ const LikeList = ({ likes = { products: [], brands: [] } }) => {
 
       <div className="like-content">
         <div className="list-info">
-          전체 <span className="count">{items.length}개</span> | 좋아요 상품은 최대{' '}
-          <span className="highlight">120일간</span> 보관됩니다.
-        </div>
-
+          <span>
+            전체 <span className="count">{items.length}개</span>
+          </span>
+          <span>
+            | 좋아요 상품은 최대 <span className="highlight">120일간</span> 보관됩니다.
+          </span>
+        </div>{' '}
         <div className="like-table-header">
           {activeTab === 'products' ? (
             <>
@@ -55,7 +58,6 @@ const LikeList = ({ likes = { products: [], brands: [] } }) => {
             </>
           )}
         </div>
-
         {items.length === 0 ? (
           <div className="empty-list">
             <div className="empty-icon">!</div>
