@@ -45,9 +45,9 @@ const CategoryFilter = () => {
   const [skinType, setSkinType] = useState(searchParams.get('skin') || null);
 
   const skinOptions = [
+    { key: 'all', label: '전체' },
     { key: 'dry', label: '건성' },
     { key: 'oily', label: '지성' },
-    { key: 'complex', label: '복합성' },
     { key: 'sensitive', label: '민감성' },
   ];
 
