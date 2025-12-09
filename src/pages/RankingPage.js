@@ -49,7 +49,7 @@ const RankingPage = () => {
 
   // 피부타입 필터 상태 (UI 전용, 기능은 추후 구현)
   const [selectedSkinType, setSelectedSkinType] = useState('전체');
-  const skinTypes = ['전체', '건성', '중성', '지성', '복합성', '수부지'];
+  const skinTypes = ['전체', '지성', '건성', '민감성'];
 
   // 카테고리 데이터 불러오기
   useEffect(() => {
