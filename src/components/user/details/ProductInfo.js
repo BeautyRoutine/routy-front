@@ -97,7 +97,6 @@ function ProductInfo({ product, reviewSummary, onMoveToReview }) {
       <div
         className="review-summary"
         onClick={() => {
-          console.log('리뷰 클릭됨!'); // 이 로그가 찍히는지 개발자 도구(F12)에서 확인
           onMoveToReview();
         }}
         style={{ cursor: 'pointer' }}

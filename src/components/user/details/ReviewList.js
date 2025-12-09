@@ -35,10 +35,15 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
     return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
   };
 
-  // 좋아요 클릭 핸들러 (여기서는 UI만 변경하는 척)
+  // 좋아요 클릭 핸들러
   const handleLikeClick = (e, revNo) => {
-    e.stopPropagation(); // 중요! 모달 안 뜨게 막기
-    onLikeToggle(revNo); //부모 함수 호출로 리렌더링
+    e.stopPropagation(); // 모달 방지
+    if (onLikeToggle) {
+      //함수 체크
+      onLikeToggle(revNo);
+    } else {
+      console.error('onLikeToggle 함수가 전달되지 않았습니다!');
+    }
   };
 
   // 리뷰 카드 클릭하면 실행되는 함수

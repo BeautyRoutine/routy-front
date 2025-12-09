@@ -24,7 +24,6 @@ const ProductDetailPage = () => {
 
   //탭 이동용 핸들러
   const handleMoveToReview = () => {
-    console.log('부모: 탭 변경 요청 받음');
     setActiveTab('review'); // 탭을 리뷰로 변경
     tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -35,28 +34,30 @@ const ProductDetailPage = () => {
     if (!currentUser) return alert('로그인이 필요합니다.');
 
     try {
-      // API 호출 (백엔드 명세에 따라 경로 수정 필요)
+      // API 호출
       await api.post(`/api/reviews/${revNo}/like`);
-      console.log(`API 요청: 리뷰 ${revNo} 좋아요 토글`);
 
-      // 화면 즉시 갱신
+      // 화면 즉시 갱신, 백엔드에 보내고, 새로받아오지 말고 프론트에서 증감하기
       setProductData(prev => {
+        //기존값 prev
         if (!prev) return null;
 
+        //새 배열 만들기(불변성 이슈)
         const updatedReviews = prev.reviewInfo.reviews.map(review => {
           if (review.revNo === revNo) {
+            //리뷰번호 체크
             const newIsLiked = !review.isLiked;
             return {
-              ...review,
-              isLiked: newIsLiked,
+              ...review, //...으로 리뷰 복사해오기
+              isLiked: newIsLiked, //상태변경
               likeCount: newIsLiked ? review.likeCount + 1 : review.likeCount - 1,
             };
           }
-          return review;
+          return review; //클릭 안했으면 그대로
         });
 
         return {
-          ...prev,
+          ...prev, //전체 데이터
           reviewInfo: {
             ...prev.reviewInfo,
             reviews: updatedReviews,

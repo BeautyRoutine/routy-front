@@ -156,7 +156,7 @@ function ProductDetailTabs({
               {/* (임시) 버튼 UI */}
               <Button variant="primary">리뷰 작성하기</Button>
             </div>
-            <ReviewList reviewInfo={reviewInfo} />
+            <ReviewList reviewInfo={reviewInfo} onLikeToggle={onLikeToggle} />
           </div>
         </Tab>
 
