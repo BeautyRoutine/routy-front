@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../../lib/apiClient';
 import { getStatusText } from '../../common/orderUtils';
+import ReviewWriteModal from './ReviewWriteModal';
 import './OrderHistory.css';
 
 const OrderHistory = ({ userId }) => {
@@ -9,6 +10,11 @@ const OrderHistory = ({ userId }) => {
   const [visibleOrders, setVisibleOrders] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  // Review Modal State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
   const observerRef = useRef();
   const ITEMS_PER_PAGE = 5;
 
@@ -101,6 +107,21 @@ const OrderHistory = ({ userId }) => {
     }
   };
 
+  const handleReviewClick = product => {
+    setSelectedProduct(product);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleReviewSubmit = async reviewData => {
+    console.log('Review Submit:', reviewData);
+    // TODO: Implement actual API call to save review
+    // Example: await api.post('/api/reviews', reviewData);
+
+    // For now just close the modal and show success
+    alert('리뷰가 등록되었습니다!');
+    setIsReviewModalOpen(false);
+  };
+
   return (
     <div className="order-history-container">
       <h2 className="page-title">주문/배송 조회</h2>
@@ -190,7 +211,9 @@ const OrderHistory = ({ userId }) => {
                     <span className="status-text">{getStatusText(order.orderStatus)}</span>
                     <div className="action-buttons">
                       <button className="action-btn">배송조회</button>
-                      <button className="action-btn">리뷰작성</button>
+                      <button className="action-btn review-btn" onClick={() => handleReviewClick(order)}>
+                        리뷰작성
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -204,6 +227,14 @@ const OrderHistory = ({ userId }) => {
           </div>
         )}
       </div>
+
+      {/* Review Write Modal */}
+      <ReviewWriteModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        product={selectedProduct}
+        onSubmit={handleReviewSubmit}
+      />
     </div>
   );
 };
