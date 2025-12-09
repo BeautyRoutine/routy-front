@@ -1,43 +1,39 @@
-import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import api from "../../../lib/apiClient"; // ★ 반드시 수정 필요: 네 프로젝트 경로에 맞게
-import "./CategoryFilter.css";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import api from '../../../lib/apiClient'; // ★ 반드시 수정 필요: 네 프로젝트 경로에 맞게
+import './CategoryFilter.css';
 
 const CategoryFilter = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // 가격 상태
-  const [minPrice, setMinPrice] = useState(searchParams.get("min_price") || "");
-  const [maxPrice, setMaxPrice] = useState(searchParams.get("max_price") || "");
+  const [minPrice, setMinPrice] = useState(searchParams.get('min_price') || '');
+  const [maxPrice, setMaxPrice] = useState(searchParams.get('max_price') || '');
 
   // 브랜드 상태
   const [brandOpen, setBrandOpen] = useState(false);
-  const [brandSearch, setBrandSearch] = useState("");
+  const [brandSearch, setBrandSearch] = useState('');
   const [brandList, setBrandList] = useState([]); // ★ DB 브랜드 목록
-  const [selectedBrands, setSelectedBrands] = useState(
-    (searchParams.get("brand") || "").split(",").filter(Boolean)
-  );
+  const [selectedBrands, setSelectedBrands] = useState((searchParams.get('brand') || '').split(',').filter(Boolean));
 
   // ★ 브랜드 목록을 DB에서 가져옴
   useEffect(() => {
     api
-      .get("/api/products/brand/list")
-      .then((res) => {
+      .get('/api/products/brand/list')
+      .then(res => {
         setBrandList(res.data.data || []);
       })
-      .catch((err) => console.error(err));
+      .catch(err => console.error(err));
   }, []);
 
   // 브랜드 검색 필터링
-  const filteredBrands = brandList.filter((b) =>
-    b.toLowerCase().includes(brandSearch.toLowerCase())
-  );
+  const filteredBrands = brandList.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
 
-  const toggleBrand = (brand) => {
+  const toggleBrand = brand => {
     let updated = [];
 
     if (selectedBrands.includes(brand)) {
-      updated = selectedBrands.filter((b) => b !== brand);
+      updated = selectedBrands.filter(b => b !== brand);
     } else {
       updated = [...selectedBrands, brand];
     }
@@ -46,13 +42,12 @@ const CategoryFilter = () => {
   };
 
   // 피부 타입 (단일 선택)
-  const [skinType, setSkinType] = useState(searchParams.get("skin") || null);
+  const [skinType, setSkinType] = useState(searchParams.get('skin') || null);
 
   const skinOptions = [
-    { key: "dry", label: "건성" },
-    { key: "oily", label: "지성" },
-    { key: "complex", label: "복합성" },
-    { key: "sensitive", label: "민감성" },
+    { key: 'dry', label: '건성' },
+    { key: 'oily', label: '지성' },
+    { key: 'sensitive', label: '민감성' },
   ];
 
   // 필터 적용 (기존 파라미터 유지)
@@ -60,22 +55,22 @@ const CategoryFilter = () => {
     const params = new URLSearchParams(searchParams);
 
     // 가격
-    if (minPrice) params.set("min_price", minPrice);
-    else params.delete("min_price");
+    if (minPrice) params.set('min_price', minPrice);
+    else params.delete('min_price');
 
-    if (maxPrice) params.set("max_price", maxPrice);
-    else params.delete("max_price");
+    if (maxPrice) params.set('max_price', maxPrice);
+    else params.delete('max_price');
 
     // 브랜드
     if (selectedBrands.length > 0) {
-      params.set("brand", selectedBrands.join(","));
+      params.set('brand', selectedBrands.join(','));
     } else {
-      params.delete("brand");
+      params.delete('brand');
     }
 
     // 피부 타입
-    if (skinType) params.set("skin", skinType);
-    else params.delete("skin");
+    if (skinType) params.set('skin', skinType);
+    else params.delete('skin');
 
     setSearchParams(params);
   };
@@ -96,7 +91,7 @@ const CategoryFilter = () => {
             className="form-control form-control-sm"
             placeholder="최소가격"
             value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
+            onChange={e => setMinPrice(e.target.value)}
           />
           <span>~</span>
           <input
@@ -104,16 +99,13 @@ const CategoryFilter = () => {
             className="form-control form-control-sm"
             placeholder="최대가격"
             value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
+            onChange={e => setMaxPrice(e.target.value)}
           />
         </div>
 
         {/* 브랜드 */}
         <h6 className="small fw-bold">브랜드</h6>
-        <div
-          className="brand-dropdown-header mt-2"
-          onClick={() => setBrandOpen(!brandOpen)}
-        >
+        <div className="brand-dropdown-header mt-2" onClick={() => setBrandOpen(!brandOpen)}>
           브랜드 선택 ▼
         </div>
 
@@ -124,18 +116,13 @@ const CategoryFilter = () => {
               className="form-control form-control-sm mb-2"
               placeholder="브랜드 검색"
               value={brandSearch}
-              onChange={(e) => setBrandSearch(e.target.value)}
+              onChange={e => setBrandSearch(e.target.value)}
             />
 
             <ul className="list-unstyled small brand-list">
-              {filteredBrands.map((brand) => (
+              {filteredBrands.map(brand => (
                 <li key={brand} onClick={() => toggleBrand(brand)}>
-                  <input
-                    type="checkbox"
-                    checked={selectedBrands.includes(brand)}
-                    readOnly
-                  />{" "}
-                  {brand}
+                  <input type="checkbox" checked={selectedBrands.includes(brand)} readOnly /> {brand}
                 </li>
               ))}
             </ul>
@@ -145,10 +132,9 @@ const CategoryFilter = () => {
         {/* 피부 타입 */}
         <h6 className="small fw-bold mt-3">피부 타입</h6>
         <ul className="list-unstyled small mt-2 mb-2">
-          {skinOptions.map((opt) => (
+          {skinOptions.map(opt => (
             <li key={opt.key} onClick={() => setSkinType(opt.key)}>
-              <input type="checkbox" readOnly checked={skinType === opt.key} />{" "}
-              {opt.label}
+              <input type="checkbox" readOnly checked={skinType === opt.key} /> {opt.label}
             </li>
           ))}
         </ul>

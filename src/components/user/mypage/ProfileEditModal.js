@@ -6,7 +6,7 @@ import './ProfileEditModal.css';
 
 const SOCIAL_PROVIDERS = [{ id: 'kakao', name: '카카오', icon: 'K', connected: true }];
 
-const SKIN_TYPES = ['건성', '중성', '지성', '복합성', '수부지', '선택안함'];
+const SKIN_TYPES = ['건성', '지성', '민감성', '선택안함'];
 // const SKIN_CONCERNS = ['수분 부족', '모공 케어', '탄력 개선', '미백', '트러블', '주름']; // 삭제
 
 const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {

@@ -46,7 +46,9 @@
   font-size: 13px;
   color: #666;
   margin-bottom: 15px;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .list-info .count {
