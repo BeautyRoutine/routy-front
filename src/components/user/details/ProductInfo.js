@@ -83,7 +83,7 @@ function ProductInfo({ product, reviewSummary }) {
       <p className="product-company">{product.prdCompany}</p>
       <h1 className="product-name">{product.prdName}</h1>
       <p className="text-muted" style={{ fontSize: '14px', margin: '4px 0 8px 0' }}>
-        5가지 분자 크기의 히알루론산으로 깊은 보습을 선사하는 프리미엄 세럼
+        {product.prdDesc || '상품 설명 참조'}
       </p>
 
       {/* 가격 */}

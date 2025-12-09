@@ -57,7 +57,7 @@ const ReviewSnapshot = ({ reviewInfo }) => {
 
   // --- 좋아요 기능---
   const toggleLike = (e, revNo) => {
-    e.stopPropagation(); //이게 뭐냐? 뭐길래 e를 받아서 이런 명령어가 있냐.
+    e.stopPropagation();
     //리뷰 번호받아서
     setBestReviews(
       (

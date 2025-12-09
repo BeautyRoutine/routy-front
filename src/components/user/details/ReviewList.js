@@ -3,7 +3,7 @@ import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
 
-const ReviewList = ({ reviewInfo }) => {
+const ReviewList = ({ reviewInfo, onLikeToggle }) => {
   // 정렬 상태 (latest: 최신순, rating: 평점순, like: 좋아요순)
   const [sortOption, setSortOption] = useState('latest');
 
@@ -38,8 +38,7 @@ const ReviewList = ({ reviewInfo }) => {
   // 좋아요 클릭 핸들러 (여기서는 UI만 변경하는 척)
   const handleLikeClick = (e, revNo) => {
     e.stopPropagation(); // 중요! 모달 안 뜨게 막기
-    console.log(`리뷰 ${revNo} 좋아요! (API 연결 필요)`);
-    // 실제 구현 시에는 여기서 state를 업데이트하거나 API를 호출해야 함
+    onLikeToggle(revNo); //부모 함수 호출로 리렌더링
   };
 
   // 리뷰 카드 클릭하면 실행되는 함수

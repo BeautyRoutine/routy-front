@@ -5,8 +5,8 @@ import ReviewList from './ReviewList';
 
 // 데이터 념겨받기
 function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientInfo }) {
-  // 기본값은 상품설명창, 현재 탭 기억용 state
-  const [key, setKey] = useState('desc');
+  // 기본값은 상품설명창, 현재 탭 기억용 state->상위페이지에서 관리
+  //const [key, setKey] = useState('desc');
   //이미지 더보기
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -14,8 +14,8 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
     <div className="detail-tabs-container">
       <Tabs
         id="product-detail-tabs"
-        activeKey={key} //현재 선택된 탭
-        onSelect={k => setKey(k)} //setKey로 state 변경, k는 클릭된 탭 키
+        activeKey={activeTab} //부모가 관리하는 state
+        onSelect={k => onTabSelect(k)} //부모 state 변경 함수 호출
         className="mb-3" //아래 마진 3
         justify // 탭 버튼 너비를 균등하게 배분
       >
@@ -67,35 +67,47 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
                     <tbody>
                       <tr>
                         <th className="bg-light">용량 또는 중량</th>
-                        <td>{productInfo.prdVolume}ml</td>
+                        <td>{productInfo.prdVolume_text}</td>
                       </tr>
                       <tr>
                         <th className="bg-light">제품 주요 사양</th>
-                        <td>모든 피부용</td>
+                        <td>{productInfo.prdSpec}</td>
                       </tr>
                       <tr>
                         <th className="bg-light">사용기한</th>
-                        <td>제조일로부터 36개월</td>
+                        <td>{productInfo.prdExpire}</td>
                       </tr>
                       <tr>
                         <th className="bg-light">사용방법</th>
-                        <td>상세페이지 참조</td>
+                        <td>{productInfo.prdUsage}</td>
+                      </tr>
+                      <tr>
+                        <th className="bg-light">제조자 및 제조판매업자</th>
+                        <td>{productInfo.prdManuf}</td>
                       </tr>
                       <tr>
                         <th className="bg-light">제조국</th>
-                        <td>대한민국</td>
+                        <td>{productInfo.prdOrigin}</td>
                       </tr>
                       <tr>
-                        <th className="bg-light">제조사</th>
-                        <td>{productInfo.prdCompany}</td>
+                        <th className="bg-light">식약처 심사 필 여부</th>
+                        <td>{productInfo.prdFda}</td>
                       </tr>
                       <tr>
                         <th className="bg-light">주요성분</th>
-                        <td>상세페이지 참조</td>
+                        <td>{productInfo.prdIngredients}</td>
+                      </tr>
+                      <tr>
+                        <th className="bg-light">사용시 주의사항</th>
+                        <td>{productInfo.prdCaution}</td>
                       </tr>
                       <tr>
                         <th className="bg-light">품질보증기준</th>
-                        <td>공정거래위원회 고시 소비자분쟁해결기준에 의거 보상</td>
+                        <td>{productInfo.prdQuality}</td>
+                      </tr>
+                      <tr>
+                        <th className="bg-light">소비자 상담 전화번호</th>
+                        <td>{productInfo.prdCs_phone}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -108,7 +120,7 @@ function ProductDetailTabs({ productInfo, purchaseInfo, reviewInfo, ingredientIn
                 <Accordion.Body>
                   <ul className="text-muted small" style={{ lineHeight: '1.8', paddingLeft: '20px', marginBottom: 0 }}>
                     <li>평균 배송 기간: 2-3일 (주말/공휴일 제외)</li>
-                    <li>배송비: 3,000원 (50,000원 이상 무료)</li>
+                    <li>배송비: 3,000원 (30,000원 이상 무료)</li>
                     <li>제주/도서산간 지역은 추가 배송비가 발생할 수 있습니다.</li>
                   </ul>
                 </Accordion.Body>

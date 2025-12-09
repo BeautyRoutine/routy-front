@@ -18,6 +18,56 @@ const ProductDetailPage = () => {
   const [productData, setProductData] = useState(null); //  데이터를 담을 state
   const [loading, setLoading] = useState(true); // 로딩 중인지 체크
 
+  // 탭 이동용 ref
+  const [activeTab, setActiveTab] = useState('desc'); // 기본값 상품설명
+  const tabsRef = useRef(null); // 탭 위치로 스크롤 이동하기 위해 사용
+
+  //탭 이동용 핸들러
+  const handleMoveToReview = () => {
+    setActiveTab('review'); // 탭을 리뷰로 변경
+    tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // 좋아요 핸들러
+  const handleLikeToggle = async revNo => {
+    // 로그인 체크
+    if (!currentUser) return alert('로그인이 필요합니다.');
+
+    try {
+      // API 호출 (백엔드 명세에 따라 경로 수정 필요)
+      await api.post(`/api/reviews/${revNo}/like`);
+      console.log(`API 요청: 리뷰 ${revNo} 좋아요 토글`);
+
+      // 화면 즉시 갱신
+      setProductData(prev => {
+        if (!prev) return null;
+
+        const updatedReviews = prev.reviewInfo.reviews.map(review => {
+          if (review.revNo === revNo) {
+            const newIsLiked = !review.isLiked;
+            return {
+              ...review,
+              isLiked: newIsLiked,
+              likeCount: newIsLiked ? review.likeCount + 1 : review.likeCount - 1,
+            };
+          }
+          return review;
+        });
+
+        return {
+          ...prev,
+          reviewInfo: {
+            ...prev.reviewInfo,
+            reviews: updatedReviews,
+          },
+        };
+      });
+    } catch (error) {
+      console.error('좋아요 오류:', error);
+      alert('처리에 실패했습니다.');
+    }
+  };
+
   // 연결작업
   useEffect(() => {
     const fetchData = async () => {
@@ -68,7 +118,7 @@ const ProductDetailPage = () => {
           productInfo: productObj, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
           reviewInfo: reviewRes.data.data || { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 리뷰 데이터
           ingredientInfo: ingredientRes.data.data,
-          purchaseInfo: {}, // 하드코딩인거도 수정해야하는데
+          purchaseInfo: {},
         };
 
         setProductData(combinedData); // state에 저장, 화면 갱신
@@ -135,10 +185,13 @@ const ProductDetailPage = () => {
         <Col>
           {/* 분해한 데이터 전달 */}
           <ProductDetailTabs
+            activeTab={activeTab} // 현재 탭 상태
+            onTabSelect={setActiveTab} //탭 변경
             productInfo={productInfo}
             purchaseInfo={purchaseInfo}
             reviewInfo={reviewInfo}
             ingredientInfo={ingredientInfo}
+            onLikeToggle={handleLikeToggle}
           />
         </Col>
       </Row>
