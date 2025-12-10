@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/apiClient';
 import { API_BASE_URL, ENDPOINTS } from '../components/user/layouts/headerConstants';
@@ -38,8 +38,10 @@ function transformCategoryData(data) {
   return { top, tree };
 }
 
-const RankingPage = () => {
+const RankingPage = ({ user_skin }) => {
   const navigate = useNavigate();
+
+  const skinTypes = useMemo(() => ['전체', '지성', '건성', '민감성'], []);
 
   // 카테고리 및 랭킹 데이터 상태
   const [categories, setCategories] = useState([{ id: null, name: '전체' }]);
@@ -49,7 +51,17 @@ const RankingPage = () => {
 
   // 피부타입 필터 상태 (UI 전용, 기능은 추후 구현)
   const [selectedSkinType, setSelectedSkinType] = useState('전체');
-  const skinTypes = ['전체', '지성', '건성', '민감성'];
+  const [selectedSkinNum, setSelectedSkinNum] = useState(null);
+  // user_skin prop 반영 - 메인 [내 피부 타입 맞춤 추천] 더보기 대응
+  useEffect(() => {
+    if (user_skin != null && user_skin >= 0 && user_skin < skinTypes.length) {
+      setSelectedSkinNum(user_skin);
+      setSelectedSkinType(skinTypes[user_skin]);
+    } else {
+      setSelectedSkinNum(null);
+      setSelectedSkinType('전체');
+    }
+  }, [skinTypes, user_skin]);
 
   // 카테고리 데이터 불러오기
   useEffect(() => {
@@ -71,11 +83,11 @@ const RankingPage = () => {
     const fetchRanking = async () => {
       setLoading(true);
       try {
-        const params = { limit: 20 };
-        if (selectedCategory !== null) {
-          params.category = selectedCategory;
-        }
-        // 피부타입 필터는 현재 API 파라미터에서 제외됨
+        const params = {
+          limit: 20,
+          ...(selectedCategory > 0 && { category: selectedCategory }),
+          ...(selectedSkinNum > 0 && { skin: selectedSkinNum }),
+        };
 
         // 1. 랭킹 리스트 조회
         const response = await api.get(`${API_BASE_URL}/api/products/ranking`, { params });
@@ -91,17 +103,13 @@ const RankingPage = () => {
     };
 
     fetchRanking();
-  }, [selectedCategory]);
+  }, [selectedCategory, selectedSkinType, selectedSkinNum]);
 
   const handleProductClick = id => {
     navigate(`/products/${id}`);
   };
 
-  const getImageUrl = img => {
-    if (!img) return `${process.env.PUBLIC_URL}/images/product/no-image.png`; // 기본 이미지
-    const res = `${process.env.PUBLIC_URL}/images/product/${img}`;
-    return res; // BE에서 완성된 URL 그대로 사용
-  };
+  const getImageUrl = img => `${process.env.PUBLIC_URL}/images/product/${img || 'no-image.png'}`;
 
   return (
     <div className="ranking-page container mt-4">
@@ -138,13 +146,16 @@ const RankingPage = () => {
         <div className="filter-group d-flex align-items-center">
           <span className="filter-label fw-bold me-4">피부타입별</span>
           <div className="filter-options d-flex gap-2 flex-wrap">
-            {skinTypes.map(type => (
+            {skinTypes.map((type, index) => (
               <button
                 key={type}
                 className={`btn btn-sm rounded-pill px-3 ${
                   selectedSkinType === type ? 'btn-primary' : 'btn-light text-secondary'
                 }`}
-                onClick={() => setSelectedSkinType(type)}
+                onClick={() => {
+                  setSelectedSkinType(type);
+                  setSelectedSkinNum(index);
+                }}
               >
                 {type}
               </button>
