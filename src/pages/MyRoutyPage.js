@@ -29,35 +29,36 @@ const MOCK_MY_PRODUCTS = [
   { id: 5, name: '비타민 C 브라이트닝 세럼', category: '앰플' },
 ];
 
+// 오늘 날짜 목업 루틴 기록 추가 (모듈 레벨로 이동하여 useEffect 의존성 문제 방지)
+const todayStr = '2025-12-09';
+const MOCK_TODAY_ROUTINE = {
+  usedProducts: [
+    {
+      name: '히알루론산 앰플 세럼',
+      reactions: ['촉촉함', '트러블 없음'],
+      memo: '피부가 오늘은 유난히 촉촉함. 트러블도 없음.',
+    },
+    {
+      name: '그린 마일드 업 선 플러스',
+      reactions: ['자극 없음'],
+      memo: '자극 없이 산뜻하게 마무리됨.',
+    },
+    {
+      name: '약산성 클렌징 폼',
+      reactions: [],
+      memo: '세안 후 당김 없음.',
+    },
+  ],
+  activities: ['가벼운 스트레칭', '물 2L 마시기'],
+  summary: '오늘은 피부 컨디션이 매우 좋았고, 제품 모두 만족스러웠음.',
+  alarmEnabled: true,
+  alarmTime: '3일 후 (12월 12일)',
+};
+
 const MyRoutyPage = () => {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(moment());
   const [selectedDate, setSelectedDate] = useState(moment('2025-12-09'));
-  // 오늘 날짜 목업 루틴 기록 추가
-  const todayStr = '2025-12-09';
-  const MOCK_TODAY_ROUTINE = {
-    usedProducts: [
-      {
-        name: '히알루론산 앰플 세럼',
-        reactions: ['촉촉함', '트러블 없음'],
-        memo: '피부가 오늘은 유난히 촉촉함. 트러블도 없음.',
-      },
-      {
-        name: '그린 마일드 업 선 플러스',
-        reactions: ['자극 없음'],
-        memo: '자극 없이 산뜻하게 마무리됨.',
-      },
-      {
-        name: '약산성 클렌징 폼',
-        reactions: [],
-        memo: '세안 후 당김 없음.',
-      },
-    ],
-    activities: ['가벼운 스트레칭', '물 2L 마시기'],
-    summary: '오늘은 피부 컨디션이 매우 좋았고, 제품 모두 만족스러웠음.',
-    alarmEnabled: true,
-    alarmTime: '3일 후 (12월 12일)',
-  };
   const [routines, setRoutines] = useState({ [todayStr]: MOCK_TODAY_ROUTINE });
 
   // My Products State
