@@ -42,6 +42,18 @@ const SkinProfileSetupPage = () => {
       );
 
       if (response.data.resultCode === 200) {
+        // localStorage의 user 객체 업데이트
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            user.userSkin = profile.skinType;
+            localStorage.setItem('user', JSON.stringify(user));
+          } catch (e) {
+            console.error('user 업데이트 실패:', e);
+          }
+        }
+        
         alert('피부 타입이 저장되었습니다!');
         navigate('/');
       } else {

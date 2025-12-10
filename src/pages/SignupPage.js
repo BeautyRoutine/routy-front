@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
 import api from '../lib/apiClient';
-
+import SmsVerification from '../components/user/auth/SmsVerification';
 import { LoadingOverlay } from 'components/common/commonUtils';
 
 const SignupPage = () => {
@@ -11,7 +11,8 @@ const SignupPage = () => {
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
-
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  
   const [formData, setFormData] = useState({
     userId: '',
     userPw: '',
@@ -106,7 +107,6 @@ const SignupPage = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
 
-      // ✅ 첫 번째 에러 필드로 스크롤 이동
       const firstErrorField = Object.keys(newErrors)[0];
       const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
       if (errorElement) {
@@ -131,28 +131,38 @@ const SignupPage = () => {
         userRoadAddr: formData.userRoadAddr,
         userDetailAddr: formData.userDetailAddr,
         userBirth: formData.userBirth || null,
+        phoneVerified: isPhoneVerified,
       };
 
       const response = await api.post('/api/auth/signup', signupData);
 
       if (response.data.token) {
+        // localStorage에 저장
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userId', response.data.userId);
+        localStorage.setItem('userName', response.data.userName);
+        localStorage.setItem('userLevel', response.data.userLevel || '1');
 
-        dispatch(
-          setUser({
-            userId: response.data.userId,
-            userName: response.data.userName,
-            userLevel: response.data.userLevel,
-          }),
-        );
+        // user 객체 생성
+        const user = {
+          userId: response.data.userId,
+          userName: response.data.userName,
+          userLevel: response.data.userLevel || 1,
+          userSkin: response.data.userSkin || 0,
+        };
+
+        // localStorage에 user 객체도 저장
+        localStorage.setItem('user', JSON.stringify(user));
+
+        // Redux 상태 업데이트
+        dispatch(setUser(user));
 
         alert('회원가입이 완료되었습니다!');
-        //변경: /skin-profile로 이동
         navigate('/skin-profile');
       }
     } catch (error) {
-      if (error.response?.data?.message) {
-        alert(error.response.data.message);
+      if (error.message) {
+        alert(error.message);
       } else {
         alert('회원가입 중 오류가 발생했습니다.');
       }
@@ -160,6 +170,10 @@ const SignupPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleKakaoSignup = () => {
+    window.location.href = "http://localhost:8080/auth/kakao/login";
   };
 
   return (
@@ -320,7 +334,7 @@ const SignupPage = () => {
               name="userEmail"
               value={formData.userEmail}
               onChange={handleChange}
-              placeholder="your@email.com"
+              placeholder="example@email.com"
               style={{
                 width: '100%',
                 padding: '16px 20px',
@@ -453,6 +467,14 @@ const SignupPage = () => {
               </p>
             )}
           </div>
+
+          {/* SMS 인증 */}
+          {formData.userHp && (
+            <SmsVerification
+              phoneNumber={formData.userHp}
+              onVerified={setIsPhoneVerified}
+            />
+          )}
 
           {/* 생년월일 (선택) */}
           <div style={{ marginBottom: '20px' }}>
@@ -587,52 +609,78 @@ const SignupPage = () => {
           {/* 가입하기 버튼 */}
           <button
             type="submit"
+            disabled={loading || !isPhoneVerified}
             style={{
               width: '100%',
               padding: '18px',
-              background: 'linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%)',
+              background: loading || !isPhoneVerified ? '#ccc' : 'linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '50px',
               fontSize: '16px',
               fontWeight: '700',
-              cursor: 'pointer',
+              cursor: loading || !isPhoneVerified ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s',
               marginTop: '30px',
-              boxShadow: '0 4px 15px rgba(66, 165, 245, 0.3)',
+              boxShadow: loading || !isPhoneVerified ? 'none' : '0 4px 15px rgba(66, 165, 245, 0.3)',
             }}
             onMouseEnter={e => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 20px rgba(66, 165, 245, 0.4)';
+              if (!loading && isPhoneVerified) {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 20px rgba(66, 165, 245, 0.4)';
+              }
             }}
             onMouseLeave={e => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 15px rgba(66, 165, 245, 0.3)';
+              if (!loading && isPhoneVerified) {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 15px rgba(66, 165, 245, 0.3)';
+              }
             }}
           >
-            가입하기
+            {loading ? '가입 중...' : !isPhoneVerified ? '휴대폰 인증을 완료해주세요' : '가입하기'}
           </button>
-
-          {/* 로그인 링크 */}
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <span style={{ color: '#666', fontSize: '14px' }}>아직 계정이 없으신가요? </span>
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#42A5F5',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600',
-                textDecoration: 'none',
-              }}
-            >
-              로그인
-            </button>
-          </div>
         </form>
+
+        {/* 카카오 회원가입 버튼 */}
+        <button
+          type="button"
+          onClick={handleKakaoSignup}
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '18px',
+            marginTop: '15px',
+            background: loading ? '#ddd' : '#FEE500',
+            color: '#3C1E1E',
+            borderRadius: '50px',
+            border: 'none',
+            fontSize: '16px',
+            fontWeight: '700',
+            cursor: loading ? 'not-allowed' : 'pointer',
+          }}
+        >
+          카카오로 회원가입 / 로그인
+        </button>
+
+        {/* 로그인 이동 */}
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <span style={{ color: '#666', fontSize: '14px' }}>이미 계정이 있으신가요? </span>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#42A5F5',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              textDecoration: 'none',
+            }}
+          >
+            로그인
+          </button>
+        </div>
       </div>
     </div>
   );

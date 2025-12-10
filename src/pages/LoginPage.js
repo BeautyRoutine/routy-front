@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
 import api from '../lib/apiClient';
 
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -65,12 +66,18 @@ const LoginPage = () => {
           userLevel: response.data.userLevel,
           userSkin: response.data.userSkin,
         };
-        localStorage.setItem('user', JSON.stringify(user));
 
+        localStorage.setItem('user', JSON.stringify(user));
         dispatch(setUser(user));
 
-        alert('로그인 성공!');
-        navigate('/');
+        // userSkin이 0이면 피부타입 설정 페이지로
+        if (!user.userSkin || user.userSkin === 0) {
+          alert(`${user.userName}님 환영합니다! 피부 타입을 설정해주세요.`);
+          navigate('/skin-profile');
+        } else {
+          alert(`${user.userName}님 환영합니다!`);
+          navigate('/');
+        }
       }
     } catch (error) {
       if (error.response?.status === 401) {
@@ -82,6 +89,10 @@ const LoginPage = () => {
       }
       console.error('Login error:', error);
     }
+  };
+
+  const handleKakaoLogin = () => {
+    window.location.href = "http://localhost:8080/auth/kakao/login";
   };
 
   return (
@@ -287,16 +298,29 @@ const LoginPage = () => {
               transition: 'all 0.3s',
               boxShadow: '0 4px 15px rgba(66, 165, 245, 0.3)',
             }}
-            onMouseEnter={e => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 20px rgba(66, 165, 245, 0.4)';
-            }}
-            onMouseLeave={e => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 15px rgba(66, 165, 245, 0.3)';
-            }}
           >
             아이디로 로그인
+          </button>
+
+          {/* 카카오 로그인 버튼 */}
+          <button
+            type="button"
+            onClick={handleKakaoLogin}
+            style={{
+              width: '100%',
+              padding: '18px',
+              marginTop: '20px',
+              background: '#FEE500',
+              color: '#3C1E1E',
+              border: 'none',
+              borderRadius: '50px',
+              fontSize: '16px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+            }}
+          >
+            카카오로 로그인
           </button>
 
           {/* 회원가입 링크 */}

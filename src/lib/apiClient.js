@@ -6,7 +6,7 @@ import axios from 'axios';
  * - withCredentials: 쿠키 전송 허용
  */
 const api = axios.create({
-  baseURL: 'http://localhost:8080', // /api 제거
+  baseURL: 'http://localhost:8080',
   withCredentials: true,
   timeout: 10000, // 10초 타임아웃
 });
@@ -44,7 +44,7 @@ api.interceptors.response.use(
     }
 
     // 에러 메시지 추출
-    const message = error.response?.data?.resultMsg || error.message || '알 수 없는 오류가 발생했습니다.';
+    const message = error.response?.data?.message || error.response?.data?.resultMsg || error.message || '알 수 없는 오류가 발생했습니다.';
     return Promise.reject(new Error(message));
   },
 );
@@ -55,15 +55,15 @@ api.interceptors.response.use(
 
 /**
  * 로그인
- * @param {Object} payload - { email, password }
- * @returns {Promise} ApiResponse
+ * @param {Object} payload - { userId, userPw }
+ * @returns {Promise} AuthResponse
  */
 export const login = payload => api.post('/api/auth/login', payload).then(res => res.data);
 
 /**
  * 회원가입
  * @param {Object} payload - SignupRequest
- * @returns {Promise} ApiResponse
+ * @returns {Promise} AuthResponse
  */
 export const signUp = payload => api.post('/api/auth/signup', payload).then(res => res.data);
 
@@ -97,15 +97,6 @@ export const searchIngredients = params => {
     },
   });
 };
-
-// -------------------------
-// 카카오 로그인 URL (단순 문자열)
-// -------------------------
-export function getKakaoUrl() {
-  const base = api.defaults.baseURL.replace(/\/+$/, ''); // 끝 / 제거
-  // 백엔드의 /auth/kakao/login 으로 보내면, 거기서 카카오로 redirect 해줌
-  return `${base}/auth/kakao/login`;
-}
 
 // 상품 검색
 export const searchProducts = keyword => {
