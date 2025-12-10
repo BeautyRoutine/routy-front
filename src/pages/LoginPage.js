@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
-import api, { getKakaoUrl } from '../lib/apiClient';
+import api from '../lib/apiClient';
+
 
 const LoginPage = () => {
   const navigate = useNavigate();
