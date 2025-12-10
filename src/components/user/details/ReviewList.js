@@ -27,7 +27,7 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
         setSelectedReview(updatedReview);
       }
     }
-  }, [reviewInfo]);
+  }, [reviewInfo, selectedReview]);
 
   // 데이터가 없으면 아무것도 안 그림
   if (!reviewInfo || !reviewInfo.reviews) return null;

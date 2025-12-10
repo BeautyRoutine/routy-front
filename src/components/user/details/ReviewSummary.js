@@ -59,7 +59,7 @@ const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
         setSelectedReview(updatedReview);
       }
     }
-  }, [bestReviews]); //bestReviews 바꿀때 실행
+  }, [bestReviews, selectedReview]); //bestReviews 바꿀때 실행
 
   //만약 reviewinfo가 없으면 null 반환
   if (!reviewInfo) return null;
