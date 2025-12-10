@@ -16,7 +16,6 @@ const Step1SkinType = ({ selectedValue, onSelect }) => {
 
       <div className="skin-type-grid">
         {skinTypes.map(skin => (
-        {skinTypes.map(skin => (
           <div
             key={skin.value}
             className={`skin-type-card ${selectedValue === skin.value ? 'active' : ''}`}
