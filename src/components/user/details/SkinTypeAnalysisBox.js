@@ -6,7 +6,7 @@ import axios from 'axios';
 
 import 'styles/SkinTypeAnalysisBox.css';
 
-const SkinTypeAnalysisBox = ({ prdNo = 89 }) => {
+const SkinTypeAnalysisBox = ({ prdNo }) => {
   const navigate = useNavigate();
 
   const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl);
@@ -45,7 +45,9 @@ const SkinTypeAnalysisBox = ({ prdNo = 89 }) => {
     return (
       <div className="bar-graph" onMouseEnter={() => setHoverType(type)} onMouseLeave={() => setHoverType(null)}>
         {/* 막대 */}
-        {count > 0 && <div className="bar-fill" style={{ width: `${count * 40}px`, backgroundColor: color }}></div>}
+        {count > 0 && (
+          <div className="bar-fill" style={{ width: `${count * 40}px`, maxWidth: '92%', backgroundColor: color }}></div>
+        )}
         {/* 숫자 */}
         <span className="bar-count">{count}</span>
 
@@ -55,7 +57,7 @@ const SkinTypeAnalysisBox = ({ prdNo = 89 }) => {
             <ul>
               {list.map((item, idx) => (
                 <li key={idx}>
-                  <strong>{item.EFFNAME}</strong> - {item.EFFAIM}
+                  <strong>{item.effName}</strong> - {item.ingName}
                 </li>
               ))}
             </ul>
@@ -121,12 +123,12 @@ const SkinTypeAnalysisBox = ({ prdNo = 89 }) => {
 
                   return (
                     <>
-                      <div className="d-flex flex-row align-items-center mb-2">
-                        <span className="me-2">추천 성분:</span>
+                      <div className="d-flex flex-column mb-2">
+                        <span className="me-1">추천 성분:</span>
                         {renderBar('good', effects.good, '#2196f3')}
                       </div>
-                      <div className="d-flex flex-row align-items-center">
-                        <span className="me-2">주의 성분:</span>
+                      <div className="d-flex flex-column">
+                        <span className="me-1">주의 성분:</span>
                         {renderBar('bad', effects.bad, '#f44336')}
                       </div>
                     </>
