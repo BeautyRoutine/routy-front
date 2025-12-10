@@ -7,7 +7,7 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
   if (!review) return null;
 
   return (
-    <Modal show={show} onHide={onHide} size="xl" centered className="review-modal">
+    <Modal show={show} onHide={onHide} centered dialogClassName="review-dialog">
       <Modal.Body className="p-0">
         <div className="modal-content-wrapper">
           {/* 왼쪽 이미지*/}
@@ -42,7 +42,7 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
             </div>
 
             {/* 옵션 정보 */}
-            <p className="text-muted small mb-4">옵션: 더미데이터입니다.</p>
+            <p className="text-muted small mb-4">옵션: 더미데이터입니다. 이게 문제인지 테스트중입니다.</p>
 
             {/* 스크롤 가능한 본문 내용 */}
             <div className="modal-scroll-content">
