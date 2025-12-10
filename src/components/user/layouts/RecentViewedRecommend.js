@@ -15,28 +15,40 @@ const RecentViewedRecommend = () => {
   const viewed = JSON.parse(localStorage.getItem('recentViewed') || '[]');
 
   useEffect(() => {
-    if (viewed.length === 0) return;
+    // localStorage는 useEffect 안에서만 읽는다
+    const viewed = JSON.parse(localStorage.getItem('recentViewed') || '[]');
+
+    if (viewed.length === 0) {
+      setProducts([]);
+      return;
+    }
 
     // -----------------------------
-    // 1) 최근 본 상품 중 가장 많이 본 subcate 찾기
+    // 1) 최근 본 subcate 계산
     // -----------------------------
-    const countMap = {}; // {subcate: count}
-    const cateMap = {}; // {subcate: cateName}
+    const countMap = {};
+    const cateMap = {};
 
     viewed.forEach(v => {
       const sc = v.subcate;
+      if (!sc) return;
       countMap[sc] = (countMap[sc] || 0) + 1;
       cateMap[sc] = v.cate;
     });
 
-    // subcate 중 가장 많이 본 카테고리 찾기
-    const topSubcate = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0][0]; // count DESC
+    const entries = Object.entries(countMap);
+    if (entries.length === 0) {
+      setProducts([]);
+      return;
+    }
+
+    const topSubcate = entries.sort((a, b) => b[1] - a[1])[0][0];
 
     setSubcate(Number(topSubcate));
     setCateName(cateMap[topSubcate]);
 
     // -----------------------------
-    // 2) BE 호출 (선택된 subcate 단 1개)
+    // 2) 백엔드 호출
     // -----------------------------
     axios
       .get('http://localhost:8080/api/products/list/recent', {
@@ -58,19 +70,19 @@ const RecentViewedRecommend = () => {
         setProducts(converted);
       })
       .catch(err => console.error('추천 상품 불러오기 실패:', err));
-  }, [viewed]);
+  }, []); // ← 변경: dependency 배열은 빈 배열로 고정
 
-  // 최근 본 상품 1개도 없으면 출력 X
-  if (!subcate) return null;
-
-  // 추천 상품 4개 고정
-  const filledProducts = [...products, ...Array(4 - products.length).fill(null)].slice(0, 4);
+  // 추천 4개 고정 (없으면 빈 칸)
+  const filledProducts =
+    products.length > 0 ? [...products, ...Array(4 - products.length).fill(null)].slice(0, 4) : Array(4).fill(null);
 
   return (
     <div className="container my-5">
       <div className="mb-3" style={{ textAlign: 'left' }}>
-        <h4 className="fw-bold mb-1">이러한 “{cateName}” 은 어떠세요?</h4>
-        <p className="text-muted small mb-0">최근에 본 {cateName} 제품을 기반으로 추천드려요</p>
+        <h4 className="fw-bold mb-1">{subcate ? `이러한 “${cateName}” 은 어떠세요?` : '최근 본 카테고리 기반 추천'}</h4>
+        <p className="text-muted small mb-0">
+          {subcate ? `최근에 본 ${cateName} 제품을 기반으로 추천드려요` : '최근에 본 상품을 기반으로 추천드려요'}
+        </p>
       </div>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
