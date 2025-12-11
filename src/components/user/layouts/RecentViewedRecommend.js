@@ -8,45 +8,34 @@ const RecentViewedRecommend = () => {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
-  const [cateName, setCateName] = useState('');
-  const [subcate, setSubcate] = useState(null);
 
-  // 최근 본 상품 (10~20개)
-  const viewed = JSON.parse(localStorage.getItem('recentViewed') || '[]');
+  // 로그인 정보 (localStorage)
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userId = user?.userId;
 
+  // -----------------------------------------
+  // 최근 본 상품 추천 API 호출 (userId 기반)
+  // -----------------------------------------
   useEffect(() => {
-    if (viewed.length === 0) return;
+    console.log("=== 최근 추천 컴포넌트 실행됨 ===");
+    console.log("user:", user);
 
-    // -----------------------------
-    // 1) 최근 본 상품 중 가장 많이 본 subcate 찾기
-    // -----------------------------
-    const countMap = {}; // {subcate: count}
-    const cateMap = {}; // {subcate: cateName}
+    if (!userId) {
+      console.log("로그인 안됨 → 추천 숨김");
+      setProducts([]);
+      return;
+    }
 
-    viewed.forEach(v => {
-      const sc = v.subcate;
-      countMap[sc] = (countMap[sc] || 0) + 1;
-      cateMap[sc] = v.cate;
-    });
-
-    // subcate 중 가장 많이 본 카테고리 찾기
-    const topSubcate = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0][0]; // count DESC
-
-    setSubcate(Number(topSubcate));
-    setCateName(cateMap[topSubcate]);
-
-    // -----------------------------
-    // 2) BE 호출 (선택된 subcate 단 1개)
-    // -----------------------------
     axios
-      .get('http://localhost:8080/api/products/list/recent', {
-        params: { subcates: [topSubcate] },
+      .get("http://localhost:8080/api/products/list/recent", {
+        params: { userId }
       })
       .then(res => {
-        const data = res.data.data || {};
-        const arr = data[topSubcate] || [];
+        console.log("추천 API 응답:", res.data);
 
-        const converted = arr.map(p => ({
+        const list = res.data.data || [];
+
+        const converted = list.map(p => ({
           id: p.prdNo,
           name: p.prdName,
           brand: p.prdCompany,
@@ -57,20 +46,27 @@ const RecentViewedRecommend = () => {
 
         setProducts(converted);
       })
-      .catch(err => console.error('추천 상품 불러오기 실패:', err));
-  }, [viewed]);
+      .catch(err => {
+        console.log("추천 API 오류:", err);
+      });
 
-  // 최근 본 상품 1개도 없으면 출력 X
-  if (!subcate) return null;
+  // ESLint 경고 제거: userId만 dependency로 둔다 (user는 넣으면 안 됨)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
-  // 추천 상품 4개 고정
-  const filledProducts = [...products, ...Array(4 - products.length).fill(null)].slice(0, 4);
+  // -----------------------------------------
+  // 추천 4칸 고정
+  // -----------------------------------------
+  const filledProducts =
+    products.length > 0
+      ? [...products, ...Array(4 - products.length).fill(null)].slice(0, 4)
+      : Array(4).fill(null);
 
   return (
     <div className="container my-5">
       <div className="mb-3" style={{ textAlign: 'left' }}>
-        <h4 className="fw-bold mb-1">이러한 “{cateName}” 은 어떠세요?</h4>
-        <p className="text-muted small mb-0">최근에 본 {cateName} 제품을 기반으로 추천드려요</p>
+        <h4 className="fw-bold mb-1">최근 본 카테고리 기반 추천</h4>
+        <p className="text-muted small mb-0">최근에 본 상품을 기반으로 추천드려요</p>
       </div>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
@@ -88,7 +84,8 @@ const RecentViewedRecommend = () => {
                     <h6 className="fw-semibold mb-1">{p.name}</h6>
                     <p className="text-muted small mb-1">{p.brand}</p>
                     <p className="text-warning small mb-0">
-                      ★ {p.rating} <span className="text-muted"> | {p.reviewText}</span>
+                      ★ {p.rating}
+                      <span className="text-muted"> | {p.reviewText}</span>
                     </p>
                   </div>
                 </>
