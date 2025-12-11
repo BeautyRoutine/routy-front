@@ -9,7 +9,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
-  const isLoggedIn = !!localStorage.getItem('accessToken');
+  const isLoggedIn = !!localStorage.getItem('token');
 
   // 공통 카드 변환
   const convertToCard = (list) =>
