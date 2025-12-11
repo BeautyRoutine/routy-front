@@ -9,9 +9,9 @@ const RecentViewedRecommend = () => {
 
   const [products, setProducts] = useState([]);
 
-  // 로그인 정보
+  // 로그인 정보 (localStorage)
   const user = JSON.parse(localStorage.getItem('user'));
-  const userId = user?.userId;  // **** userId 기반으로 추천할 것 ****
+  const userId = user?.userId;
 
   // -----------------------------------------
   // 최근 본 상품 추천 API 호출 (userId 기반)
@@ -27,7 +27,7 @@ const RecentViewedRecommend = () => {
     }
 
     axios
-      .get('/api/products/list/recent', {
+      .get("http://localhost:8080/api/products/list/recent", {
         params: { userId }
       })
       .then(res => {
@@ -48,9 +48,11 @@ const RecentViewedRecommend = () => {
       })
       .catch(err => {
         console.log("추천 API 오류:", err);
-        setProducts([]);
       });
-  }, [userId]); // **** ESLint 경고 해결 완료 ****
+
+  // ESLint 경고 제거: userId만 dependency로 둔다 (user는 넣으면 안 됨)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   // -----------------------------------------
   // 추천 4칸 고정
