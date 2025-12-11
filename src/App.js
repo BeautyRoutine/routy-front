@@ -145,8 +145,7 @@ function App() {
     setIsLoggedIn(false);
     dispatch(setUser(null));
     navigate('/');
-    setIsLoggedIn(!!token);
-  }, [location.pathname]);
+  };
 
   const handleLoginClick = () => {
     navigate('/login');
