@@ -11,7 +11,6 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   const isLoggedIn = !!localStorage.getItem('token');
 
-  // 공통 카드 변환
   const convertToCard = (list) =>
     list.map((p, index) => ({
       id: p.prdNo,
@@ -50,19 +49,16 @@ const SimilarSkinProducts = ({ userSkin }) => {
       }
     };
 
-    // ① 로그인 X → fallback
     if (!isLoggedIn) {
       loadFallback();
       return;
     }
 
-    // ② 로그인 O + userSkin 없음 → fallback
     if (!userSkin) {
       loadFallback();
       return;
     }
 
-    // ③ 로그인 O + userSkin 있음 → 피부 타입 추천
     loadSkinRecommend();
   }, [isLoggedIn, userSkin]);
 
@@ -78,41 +74,44 @@ const SimilarSkinProducts = ({ userSkin }) => {
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
         {products.map((p) => (
           <div key={p.id} className="col">
-            <div
-              className="card h-100 border-0 shadow-sm product-card position-relative"
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate(`/products/${p.id}`)}
-            >
-              <Heart
-                size={20}
-                className="position-absolute top-0 end-0 m-3 heart-icon"
-              />
+            <div className="card h-100 border-0 shadow-sm product-card position-relative">
+              <div className="position-relative">
+                <Heart
+                  size={22}
+                  className="position-absolute top-0 end-0 m-3 heart-icon"
+                />
+                <img src={p.img} className="card-img-top product-img" alt={p.name} />
+              </div>
 
-              <img
-                src={p.img}
-                className="card-img-top"
-                alt={p.name}
-                style={{ borderRadius: '10px' }}
-              />
-
-              <div className="card-body text-start">
+              <div className="card-body text-start pb-0">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
-
                 <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
+                <h6 className="fw-bold text-dark mb-3">{p.price.toLocaleString()}원</h6>
+              </div>
 
-                <h6 className="fw-bold text-dark">
-                  {p.price.toLocaleString()}원
-                </h6>
+              {/* 장바구니 버튼 */}
+              <div className="p-3">
+                <button className="btn cart-btn w-100">장바구니</button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
+      {/* 더 많은 추천 보기 */}
+      <div className="mt-3">
+        <button
+          className="btn btn-outline-primary rounded-pill px-4 more-btn"
+          onClick={() => navigate('/recommend/more')}
+        >
+          더 많은 추천 상품 보기
+        </button>
+      </div>
+
       {/* 로그인 유도 버튼 */}
       {!isLoggedIn && (
-        <div className="mb-2">
+        <div className="mt-3">
           <button
             className="btn btn-primary rounded-pill px-4 me-2"
             onClick={() => navigate('/login')}
@@ -132,5 +131,3 @@ const SimilarSkinProducts = ({ userSkin }) => {
 };
 
 export default SimilarSkinProducts;
-
-
