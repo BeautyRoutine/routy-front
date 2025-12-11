@@ -17,6 +17,7 @@
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 40px;
+  border: 1px solid #eee; /* Add slight border */
 }
 
 .filter-row {
@@ -107,45 +108,56 @@
 
 .list-header .col-date {
   width: 160px;
+  min-width: 160px; /* Prevent shrinking */
+  flex: 0 0 160px; /* Rigid flex width */
 }
 .list-header .col-info {
-  flex: 1;
+  width: 400px; /* Reduced from 500px */
+  min-width: 400px;
+  flex: 0 0 400px;
 }
 .list-header .col-qty {
   width: 100px;
+  min-width: 100px;
+  flex: 0 0 100px;
 }
 .list-header .col-price {
   width: 140px;
+  min-width: 140px;
+  flex: 0 0 140px;
 }
 .list-header .col-status {
   width: 140px;
+  min-width: 140px;
+  flex: 0 0 140px;
 }
 
 .order-table-row {
   display: flex;
   border-bottom: 1px solid #ddd;
+  height: 140px; /* Fixed height for consistency */
+  align-items: stretch; /* Stretch to fill height */
 }
 
 /* Left Column: Order Info */
 .order-left-col {
   width: 160px;
+  min-width: 160px; /* Prevent shrinking */
+  flex: 0 0 160px; /* Rigid flex width */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Align to top */
+  padding-top: 20px; /* Reduced from 30px */
   border-right: 1px solid #eee;
-  padding: 20px 10px;
+  padding-bottom: 20px;
   gap: 6px;
   background-color: #fff;
+  box-sizing: border-box; /* Include border in width */
 }
 
 .order-tag {
-  font-size: 11px;
-  color: #ff4800;
-  background-color: #fff0eb;
-  padding: 2px 6px;
-  border-radius: 2px;
-  margin-bottom: 4px;
+  display: none; /* Force hide any tags */
 }
 
 .order-date {
@@ -181,9 +193,11 @@
 
 .order-item-row {
   display: flex;
-  align-items: center;
-  padding: 20px 0;
+  align-items: flex-start; /* Align to top */
+  padding: 0 0;
   border-bottom: 1px solid #eee;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .order-item-row.last {
@@ -191,34 +205,59 @@
 }
 
 .order-item-row .col-info {
-  flex: 1;
+  width: 400px; /* Reduced from 500px */
+  min-width: 400px;
+  flex: 0 0 400px;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align to top */
   padding-left: 20px;
   gap: 15px;
+  height: 100%;
+  padding-top: 20px; /* Reduced from 30px */
+  box-sizing: border-box;
+  border-right: 1px solid #eee; /* Vertical divider */
 }
 
 .order-item-row .col-qty {
   width: 100px;
+  min-width: 100px;
+  flex: 0 0 100px;
   text-align: center;
   font-size: 14px;
   color: #333;
+  padding-top: 10px; /* Reduced from 20px to lift higher */
+  box-sizing: border-box;
+  border-right: 1px solid #eee; /* Vertical divider */
+  display: flex; /* Flex to center content horizontally if needed, or just block */
+  justify-content: center;
 }
 
 .order-item-row .col-price {
   width: 140px;
+  min-width: 140px;
+  flex: 0 0 140px;
   text-align: center;
-  font-size: 16px;
+  font-size: 18px; /* Larger font */
   font-weight: 700;
-  color: #333;
+  color: #5ab3ed; /* Sky Blue */
+  padding-top: 10px; /* Reduced from 20px to lift higher */
+  box-sizing: border-box;
+  border-right: 1px solid #eee; /* Vertical divider */
+  display: flex;
+  justify-content: center;
 }
 
 .order-item-row .col-status {
   width: 140px;
+  min-width: 140px;
+  flex: 0 0 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  padding-top: 10px; /* Reduced from 20px to lift higher */
+  box-sizing: border-box;
+  /* No right border for the last column */
 }
 
 /* Item Details */
@@ -229,6 +268,7 @@
   border-radius: 4px;
   background-color: #f5f5f5;
   border: 1px solid #eee;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .item-text {
@@ -236,6 +276,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  width: 260px; /* Reduced from 360px to match 400px column */
 }
 
 .item-brand {
@@ -248,6 +289,8 @@
   color: #333;
   font-weight: 600;
   line-height: 1.4;
+  word-break: keep-all; /* Ensure Korean text wraps naturally */
+  white-space: normal;
 }
 
 .item-option {
@@ -266,7 +309,7 @@
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px; /* Increased gap */
 }
 
 .action-btn {
@@ -281,7 +324,19 @@
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  justify-content: center; /* Center text */
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle shadow to make it pop */
+}
+
+.action-btn.review-btn {
+  border-color: #5ab3ed;
+  color: #5ab3ed;
+  background-color: #fff;
+}
+
+.action-btn.review-btn:hover {
+  background-color: #5ab3ed;
+  color: #fff;
 }
 
 .action-btn:hover {

@@ -22,18 +22,44 @@ import {
 import './MyRoutyPage.css';
 
 const MOCK_MY_PRODUCTS = [
-  { id: 1, name: '그린 마일드 업 선 플러스' },
-  { id: 2, name: '히알루론산 앰플 세럼' },
-  { id: 3, name: '시카 리페어 크림' },
-  { id: 4, name: '약산성 클렌징 폼' },
-  { id: 5, name: '비타민 C 브라이트닝 세럼' },
+  { id: 1, name: '그린 마일드 업 선 플러스', category: '선케어' },
+  { id: 2, name: '히알루론산 앰플 세럼', category: '앰플' },
+  { id: 3, name: '시카 리페어 크림', category: '크림' },
+  { id: 4, name: '약산성 클렌징 폼', category: '클렌징' },
+  { id: 5, name: '비타민 C 브라이트닝 세럼', category: '앰플' },
 ];
+
+// 오늘 날짜 목업 루틴 기록 추가 (모듈 레벨로 이동하여 useEffect 의존성 문제 방지)
+const todayStr = '2025-12-09';
+const MOCK_TODAY_ROUTINE = {
+  usedProducts: [
+    {
+      name: '히알루론산 앰플 세럼',
+      reactions: ['촉촉함', '트러블 없음'],
+      memo: '피부가 오늘은 유난히 촉촉함. 트러블도 없음.',
+    },
+    {
+      name: '그린 마일드 업 선 플러스',
+      reactions: ['자극 없음'],
+      memo: '자극 없이 산뜻하게 마무리됨.',
+    },
+    {
+      name: '약산성 클렌징 폼',
+      reactions: [],
+      memo: '세안 후 당김 없음.',
+    },
+  ],
+  activities: ['가벼운 스트레칭', '물 2L 마시기'],
+  summary: '오늘은 피부 컨디션이 매우 좋았고, 제품 모두 만족스러웠음.',
+  alarmEnabled: true,
+  alarmTime: '3일 후 (12월 12일)',
+};
 
 const MyRoutyPage = () => {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(moment());
-  const [selectedDate, setSelectedDate] = useState(moment());
-  const [routines, setRoutines] = useState({});
+  const [selectedDate, setSelectedDate] = useState(moment('2025-12-09'));
+  const [routines, setRoutines] = useState({ [todayStr]: MOCK_TODAY_ROUTINE });
 
   // My Products State
   const [myProducts, setMyProducts] = useState([]);
@@ -61,7 +87,10 @@ const MyRoutyPage = () => {
 
     const storedRoutines = localStorage.getItem('routines');
     if (storedRoutines) {
-      setRoutines(JSON.parse(storedRoutines));
+      const parsed = JSON.parse(storedRoutines);
+      // 오늘 날짜 목업 루틴을 병합
+      parsed[todayStr] = MOCK_TODAY_ROUTINE;
+      setRoutines(parsed);
     }
   }, [navigate]);
 
@@ -85,9 +114,16 @@ const MyRoutyPage = () => {
     setCurrentDate(currentDate.clone().add(1, 'month'));
   };
 
+  // 날짜 클릭 시: selectedDate만 변경, 기록 보기 버튼 노출
   const handleDateClick = date => {
     setSelectedDate(date);
-    navigate(`/my-routy/edit/${date.format('YYYY-MM-DD')}`);
+  };
+
+  // 루틴 기록하러 가기 버튼 클릭 시 기록 페이지 이동
+  const handleGoToRoutineRecord = () => {
+    if (selectedDate) {
+      navigate(`/my-routy/edit/${selectedDate.format('YYYY-MM-DD')}`);
+    }
   };
 
   const isSelected = date => selectedDate && date.isSame(selectedDate, 'day');
@@ -124,80 +160,173 @@ const MyRoutyPage = () => {
     }
   };
 
+  const formatNotificationDate = dateString => {
+    if (!dateString) return '';
+    if (dateString.includes('후')) return dateString;
+    const m = moment(dateString);
+    if (!m.isValid()) return dateString;
+    return m.format('M월 D일') + '에 재사용 알림';
+  };
+
   return (
     <div className="my-routy-container">
-      {/* Left Section: Calendar */}
-      <div className="calendar-section">
-        <div className="calendar-header">
-          <CalendarIcon size={20} />
-          <span>달력</span>
-          <span className="calendar-header-desc">달력을 클릭해서 루틴을 기록해보세요</span>
-        </div>
-
-        <div className="calendar-nav">
-          <button onClick={handlePrevMonth}>
-            <ChevronLeft size={24} />
-          </button>
-          <span className="calendar-title">{currentDate.format('YYYY년 M월')}</span>
-          <button onClick={handleNextMonth}>
-            <ChevronRight size={24} />
-          </button>
-        </div>
-
-        <div className="calendar-grid">
-          {['일', '월', '화', '수', '목', '금', '토'].map((dayName, index) => (
-            <div
-              key={dayName}
-              className={`calendar-day-name ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}`}
-            >
-              {dayName}
-            </div>
-          ))}
-
-          {calendarDays.map((date, index) => {
-            const status = getRoutineStatus(date);
-            return (
-              <div
-                key={index}
-                className={`calendar-day 
-                  ${!isCurrentMonth(date) ? 'other-month' : ''}
-                  ${isSelected(date) ? 'selected' : ''}
-                  ${isToday(date) ? 'today' : ''}
-                  ${date.day() === 0 ? 'sunday' : date.day() === 6 ? 'saturday' : ''}
-                `}
-                onClick={() => handleDateClick(date)}
-              >
-                {date.format('D')}
-                {status?.hasRoutine && <div className={`routine-dot ${status.hasReaction ? 'reaction' : ''}`}></div>}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="calendar-footer">
-          <div className="calendar-legend">
-            <div className="legend-item">
-              <div className="legend-dot record"></div>
-              <span>루틴 기록</span>
-            </div>
-            <div className="legend-item">
-              <div className="legend-dot reaction"></div>
-              <span>피부 반응</span>
-            </div>
-            <div className="legend-item">
-              <div className="legend-dot today"></div>
-              <span>오늘</span>
-            </div>
+      {/* Unified Dashboard Card (Calendar + Record) */}
+      <div className="dashboard-main-card">
+        {/* 1. Left Section: Calendar */}
+        <div className="calendar-section">
+          <div className="calendar-header">
+            <CalendarIcon size={20} />
+            <span>달력</span>
+            <span className="calendar-header-desc">달력을 클릭해서 루틴을 기록해보세요</span>
           </div>
 
-          <div className="selected-date-display">
-            <div className="selected-date-label">선택된 날짜</div>
-            <div className="selected-date-value">{selectedDate.format('YYYY년 M월 D일 dddd')}</div>
+          <div className="calendar-nav">
+            <button onClick={handlePrevMonth}>
+              <ChevronLeft size={24} />
+            </button>
+            <span className="calendar-title">{currentDate.format('YYYY년 M월')}</span>
+            <button onClick={handleNextMonth}>
+              <ChevronRight size={24} />
+            </button>
+          </div>
+
+          <div className="calendar-grid">
+            {['일', '월', '화', '수', '목', '금', '토'].map((dayName, index) => (
+              <div
+                key={dayName}
+                className={`calendar-day-name ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}`}
+              >
+                {dayName}
+              </div>
+            ))}
+
+            {calendarDays.map((date, index) => {
+              const status = getRoutineStatus(date);
+              return (
+                <div
+                  key={index}
+                  className={`calendar-day 
+                    ${!isCurrentMonth(date) ? 'other-month' : ''}
+                    ${isSelected(date) ? 'selected' : ''}
+                    ${isToday(date) ? 'today' : ''}
+                    ${date.day() === 0 ? 'sunday' : date.day() === 6 ? 'saturday' : ''}
+                  `}
+                  onClick={() => handleDateClick(date)}
+                >
+                  {date.format('D')}
+                  {status?.hasRoutine && <div className={`routine-dot ${status.hasReaction ? 'reaction' : ''}`}></div>}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="calendar-footer">
+            <div className="calendar-legend">
+              <div className="legend-item">
+                <div className="legend-dot record"></div>
+                <span>루틴 기록</span>
+              </div>
+              <div className="legend-item">
+                <div className="legend-dot reaction"></div>
+                <span>피부 반응</span>
+              </div>
+              <div className="legend-item">
+                <div className="legend-dot today"></div>
+                <span>오늘</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Right Section: Selected Date Record (Scrollable) */}
+        <div className="record-section">
+          {/* Header */}
+          <div className="record-header-compact">
+            <div className="record-date-label">선택된 날짜</div>
+            <div className="record-date-title">{selectedDate.format('YYYY년 M월 D일 dddd')}</div>
+          </div>
+
+          {/* Scrollable Body */}
+          <div className="record-scroll-area">
+            {(() => {
+              const dateStr = selectedDate.format('YYYY-MM-DD');
+              const routine = routines[dateStr];
+              if (!routine)
+                return (
+                  <div className="record-card no-record-card">
+                    <span>기록이 없습니다.</span>
+                  </div>
+                );
+              return (
+                <>
+                  <div className="record-card-list">
+                    {routine.usedProducts?.map((p, idx) => (
+                      <div key={idx} className="record-card">
+                        <div className="record-product-name">{p.name}</div>
+                        {p.reactions && p.reactions.length > 0 && !p.reactions.includes('none') && (
+                          <div className="record-reaction">
+                            <span>반응: </span>
+                            {p.reactions.map((r, i) => (
+                              <span key={i} className="reaction-tag">
+                                {r}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {p.memo && (
+                          <div className="record-memo">
+                            <span className="memo-label">메모:</span> {p.memo}
+                          </div>
+                        )}
+                        {p.notificationTime && (
+                          <div className="record-alarm-badge">
+                            <Bell size={12} />
+                            <span>{formatNotificationDate(p.notificationTime)}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {/* 추가 활동 */}
+                  <div className="record-extra-section">
+                    <div className="extra-title">추가 활동</div>
+                    <ul className="extra-list">
+                      {routine.activities?.map((act, i) => (
+                        <li key={i} className="extra-item">
+                          {act}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {/* 오늘의 총평 */}
+                  <div className="record-summary-section">
+                    <div className="summary-title">오늘의 총평</div>
+                    <div className="summary-content">{routine.summary || routine.dailyMemo}</div>
+                  </div>
+                  {/* 알림 설정 (Legacy or General) */}
+                  {routine.alarmEnabled && (
+                    <div className="record-alarm-section">
+                      <div className="alarm-title">재사용 알림</div>
+                      <div className="alarm-content">
+                        <span>{routine.alarmTime}에 재사용 알림</span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+
+          {/* Fixed Footer */}
+          <div className="record-footer-fixed">
+            <button className="view-record-btn improved-view-btn" onClick={handleGoToRoutineRecord}>
+              <span>루틴 기록하러 가기</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Right Section: Info Cards */}
+      {/* 3. Right Sidebar: Info Cards */}
       <div className="info-section">
         {/* Weather Card */}
         <div className="info-card weather-card">

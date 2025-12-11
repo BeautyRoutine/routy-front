@@ -7,10 +7,10 @@ import {
 } from '../../components/user/data/mypageConstants';
 
 // 피부 타입 매핑 (DB Code <-> UI Label)
-// 1:지성 / 2:건성 / 3:민감성 / 6:선택안함
+// 1:건성 / 2:지성 / 3:민감성 / 6:선택안함
 const SKIN_TYPE_MAP = {
-  1: '지성',
-  2: '건성',
+  1: '건성',
+  2: '지성',
   3: '민감성',
   6: '선택안함',
 };

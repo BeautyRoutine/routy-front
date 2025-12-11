@@ -160,7 +160,7 @@ function App() {
           onLoginClick={() => navigate('/login')}
           onSignupClick={() => navigate('/signup')}
           onLogoutClick={handleLogout}
-          onNavigate={handleNavigate}   // ★★★ 반드시 복원된 핵심 부분
+          onNavigate={handleNavigate} // ★★★ 반드시 복원된 핵심 부분
           onRoleChange={setUserRole}
           onCartClick={() => navigate('/cart')}
           onRequireLogin={() => navigate('/login')}
@@ -168,10 +168,7 @@ function App() {
       )}
 
       {/* 메인 콘텐츠 */}
-      <main
-        className="app-body"
-        style={{ paddingTop: !isAdmin && !isNoLayout ? '140px' : '0px' }}
-      >
+      <main className="app-body" style={{ paddingTop: !isAdmin && !isNoLayout ? '140px' : '0px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
 

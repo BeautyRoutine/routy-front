@@ -41,7 +41,7 @@ function transformCategoryData(data) {
 const RankingPage = ({ user_skin }) => {
   const navigate = useNavigate();
 
-  const skinTypes = useMemo(() => ['전체', '지성', '건성', '민감성'], []);
+  const skinTypes = useMemo(() => ['전체', '건성', '지성', '민감성'], []);
 
   // 카테고리 및 랭킹 데이터 상태
   const [categories, setCategories] = useState([{ id: null, name: '전체' }]);
@@ -52,6 +52,7 @@ const RankingPage = ({ user_skin }) => {
   // 피부타입 필터 상태 (UI 전용, 기능은 추후 구현)
   const [selectedSkinType, setSelectedSkinType] = useState('전체');
   const [selectedSkinNum, setSelectedSkinNum] = useState(null);
+
   // user_skin prop 반영 - 메인 [내 피부 타입 맞춤 추천] 더보기 대응
   useEffect(() => {
     if (user_skin != null && user_skin >= 0 && user_skin < skinTypes.length) {

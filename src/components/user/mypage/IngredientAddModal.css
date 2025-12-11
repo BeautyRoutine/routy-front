@@ -1,0 +1,363 @@
+.ingredient-add-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.ingredient-add-modal {
+  background-color: white;
+  width: 480px;
+  max-height: 80vh;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  border: none;
+}
+
+/* Header */
+.ingredient-add-header {
+  padding: 24px 24px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  background-color: white;
+}
+
+.ingredient-add-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.ing-modal-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border-radius: 50%;
+  /* Force static positioning to override potential global styles */
+  position: static;
+}
+
+.ing-modal-close-btn:hover {
+  background-color: #f5f5f5;
+  color: #000;
+}
+
+.detail-back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 4px; /* Reduced space between button and title */
+}
+
+.detail-back-btn:hover {
+  opacity: 0.7;
+}
+
+/* Search Bar */
+.ingredient-search-wrapper {
+  padding: 0 24px 16px;
+  flex-shrink: 0;
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-box svg {
+  position: absolute;
+  left: 14px;
+  color: #999;
+}
+
+.search-input-box input {
+  width: 100%;
+  padding: 12px 16px 12px 42px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: #333;
+}
+
+.search-input-box input:focus {
+  background-color: #fff;
+  border-color: #5ab3ed;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(90, 179, 237, 0.1);
+}
+
+.search-input-box input::placeholder {
+  color: #ccc;
+}
+
+/* List Area */
+.ingredient-list-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.ingredient-list-area::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Empty State */
+.empty-search {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  padding: 40px 0;
+}
+
+/* Ingredient Card */
+.ingredient-item-card {
+  background-color: white;
+  padding: 16px 20px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.ingredient-item-card:hover {
+  border-color: #5ab3ed;
+  background-color: #f8fbff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(90, 179, 237, 0.1);
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.card-content strong {
+  font-size: 15px;
+  color: #333;
+  font-weight: 600;
+  display: block;
+}
+
+.card-content p {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-arrow {
+  color: #ddd;
+  margin-left: 12px;
+}
+
+/* Detail View */
+.ingredient-detail-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: white;
+}
+
+.detail-header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.detail-content::-webkit-scrollbar {
+  display: none;
+}
+
+.detail-title-section {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.detail-title-section h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.detail-title-section .eng-name {
+  font-size: 14px;
+  color: #888;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px; /* Reduced margin */
+}
+
+.action-toggle-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #999;
+  transition: all 0.2s;
+}
+
+.action-toggle-btn:hover {
+  background-color: #f9f9f9;
+}
+
+.action-toggle-btn.focus.active {
+  background-color: #e6f7ff;
+  border-color: #5ab3ed;
+  color: #5ab3ed;
+}
+
+.action-toggle-btn.avoid.active {
+  background-color: #fff0f0;
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Reduced gap */
+}
+
+.info-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-box.blue {
+  background-color: #e6f7ff;
+  color: #5ab3ed;
+}
+
+.icon-box.gray {
+  background-color: #f5f5f5;
+  color: #999;
+}
+
+.info-text strong {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.info-text p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Pagination */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: white;
+  color: #666;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #5ab3ed;
+  color: #5ab3ed;
+}
+
+.pagination-btn:disabled {
+  background-color: #f5f5f5;
+  color: #ccc;
+  cursor: default;
+}
