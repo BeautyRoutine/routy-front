@@ -45,6 +45,7 @@ const CategoryFilter = () => {
   const [skinType, setSkinType] = useState(searchParams.get('skin') || null);
 
   const skinOptions = [
+    { key: 'all', label: '전체' },
     { key: 'dry', label: '건성' },
     { key: 'oily', label: '지성' },
     { key: 'sensitive', label: '민감성' },
@@ -133,14 +134,41 @@ const CategoryFilter = () => {
         <h6 className="small fw-bold mt-3">피부 타입</h6>
         <ul className="list-unstyled small mt-2 mb-2">
           {skinOptions.map(opt => (
-            <li key={opt.key} onClick={() => setSkinType(opt.key)}>
+            <li
+              key={opt.key}
+              onClick={() => setSkinType(prev => (prev === opt.key ? '' : opt.key))}
+              style={{ cursor: 'pointer' }}
+            >
               <input type="checkbox" readOnly checked={skinType === opt.key} /> {opt.label}
             </li>
           ))}
         </ul>
 
+        {/* 초기화 버튼 */}
+        <button
+          className="filter-reset-btn w-100 mt-1 mb-2"
+          onClick={() => {
+            // 상태 초기화
+            setMinPrice('');
+            setMaxPrice('');
+            setSelectedBrands([]);
+            setSkinType('');
+
+            // URL 파라미터 초기화
+            const params = new URLSearchParams(searchParams);
+
+            params.delete('min_price');
+            params.delete('max_price');
+            params.delete('brand');
+            params.delete('skin');
+
+            setSearchParams(params);
+          }}
+        >
+          필터 초기화
+        </button>
         {/* 적용 버튼 */}
-        <button className="filter-apply-btn w-100 mt-3" onClick={applyFilter}>
+        <button className="filter-apply-btn w-100 mt-1" onClick={applyFilter}>
           필터 적용
         </button>
       </div>

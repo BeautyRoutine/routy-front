@@ -58,9 +58,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0;
   background: #f1f5f9;
-  border: none;
   border-radius: 999px;
   padding: 6px 20px;
   transition: all 0.2s ease;
@@ -76,10 +75,12 @@
 }
 
 .search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #6b7280;
-  flex-shrink: 0;
-  transition: color 0.2s ease;
-  margin-left: 20px;
+  pointer-events: none;
 }
 
 .search-wrapper:focus-within .search-icon {
@@ -88,17 +89,12 @@
 
 .search-input {
   flex: 1;
-  min-width: 0;
-  height: 100%;
+  padding-left: 46px;
   border: none !important;
   background: transparent !important;
   outline: none !important;
-  box-shadow: none !important;
   font-size: 15px;
   color: #0f172a;
-  margin: 0;
-  padding: 0;
-  appearance: none;
 }
 
 .search-input:focus {

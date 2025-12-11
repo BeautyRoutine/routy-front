@@ -3,7 +3,7 @@ import { Row, Col } from 'react-bootstrap';
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewSummary.css';
 
-const ReviewSnapshot = ({ reviewInfo }) => {
+const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
   // 베스트 리뷰 선정 기준
   const MIN_TOTAL_REVIEWS = 5; // 리뷰가 최소 5개 수정가능
   const MIN_LIKES = 5; // 좋아요가 최소 5개 수정 가능
@@ -38,6 +38,7 @@ const ReviewSnapshot = ({ reviewInfo }) => {
   const [selectedReview, setSelectedReview] = useState(null);
 
   //초기값때 못받아오는 경우 여기서 리뷰 2개 받아옴
+  //좋아요 바뀔때마다 다시 계산해야할듯
   useEffect(() => {
     if (reviewInfo && reviewInfo.reviews) {
       // 여기서도 totalCount 같이 넘겨줌
@@ -45,6 +46,20 @@ const ReviewSnapshot = ({ reviewInfo }) => {
       setBestReviews(best);
     }
   }, [reviewInfo]);
+
+  //베스트 리뷰 갱신되었을때 리뷰 데이터 최신화하기
+  useEffect(() => {
+    //모달 열려있음 & 베스트 리뷰 있음
+    if (selectedReview && bestReviews.length > 0) {
+      //베스트 리뷰에서 현재 리뷰랑 동일한 리뷰 탐색
+      const updatedReview = bestReviews.find(r => r.revNo === selectedReview.revNo);
+
+      // 찾았으면 교체
+      if (updatedReview) {
+        setSelectedReview(updatedReview);
+      }
+    }
+  }, [bestReviews, selectedReview]); //bestReviews 바꿀때 실행
 
   //만약 reviewinfo가 없으면 null 반환
   if (!reviewInfo) return null;
@@ -57,23 +72,12 @@ const ReviewSnapshot = ({ reviewInfo }) => {
 
   // --- 좋아요 기능---
   const toggleLike = (e, revNo) => {
-    e.stopPropagation(); //이게 뭐냐? 뭐길래 e를 받아서 이런 명령어가 있냐.
-    //리뷰 번호받아서
-    setBestReviews(
-      (
-        prevReviews, //현재값(prevReviews)
-      ) =>
-        prevReviews.map(review => {
-          //map으로 순회해서 클릭한것만 수정
-          if (review.revNo === revNo) {
-            ///map으로 체크한 리뷰가 버튼 누른 번호랑 같으면
-            const newIsLiked = !review.isLiked; //반전
-            const newCount = newIsLiked ? review.likeCount + 1 : review.likeCount - 1; //숫자 업데이트, 좋아요 누르면 +1, 싫어요는 -1
-            return { ...review, isLiked: newIsLiked, likeCount: newCount }; //리뷰는 그대로, 좋아요랑 좋아요 수는 수정한 값으로.
-          }
-          return review;
-        }),
-    );
+    e.stopPropagation();
+    if (onLikeToggle) {
+      onLikeToggle(revNo); // 부모에게 보내기
+    } else {
+      console.error('onLikeToggle 함수가 전달되지 않음');
+    }
   };
 
   // 별점, 평균낼때도 사용
@@ -187,7 +191,7 @@ const ReviewSnapshot = ({ reviewInfo }) => {
                       {/* 하단: 좋아요*/}
                       <div className="like-btn-area">
                         <button
-                          className={`like-toggle-btn ${review.isLiked ? 'liked' : ''}`}
+                          className={`like-toggle-btn ${review.liked || review.isLiked ? 'liked' : ''}`}
                           // e 받아서 모달도 켜지는거 방지
                           onClick={e => toggleLike(e, review.revNo)}
                         >
@@ -205,9 +209,14 @@ const ReviewSnapshot = ({ reviewInfo }) => {
       </Row>
 
       {/* 모달 컴포넌트, showModal로 상태 받아옴,onHide는 닫기 전달, 리뷰 내용*/}
-      <ReviewDetailModal show={showModal} onHide={() => setShowModal(false)} review={selectedReview} />
+      <ReviewDetailModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        review={selectedReview}
+        onLikeToggle={onLikeToggle}
+      />
     </div>
   );
 };
 
-export default ReviewSnapshot;
+export default ReviewSummary;

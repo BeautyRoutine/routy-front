@@ -4,12 +4,22 @@
   padding: 40px 20px;
 }
 
-.product-card img {
-  height: 200px;
+/* 카드 세로 길이 증가 */
+.product-card {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+/* 이미지 크기 증가 */
+.product-card img,
+.product-img {
+  height: 240px;
   object-fit: cover;
+  width: 100%;
   border-radius: 10px;
 }
 
+/* 찜 하트 */
 .heart-icon {
   color: #ccc;
   cursor: pointer;
@@ -20,10 +30,14 @@
   color: #ff4b4b;
 }
 
+/* 장바구니 버튼 */
 .cart-btn {
   background: linear-gradient(135deg, #00c2b2, #00bcd4);
   color: white;
   border: none;
+  padding: 10px 0;
+  font-size: 15px;
+  border-radius: 8px;
   transition: all 0.3s ease-in-out;
 }
 
@@ -31,4 +45,10 @@
   transform: translateY(-2px);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
   background: linear-gradient(135deg, #00bcd4, #00c2b2);
+}
+
+/* 더 많은 추천 상품 보기 버튼 */
+.more-btn {
+  font-size: 14px;
+  border-width: 2px;
 }
