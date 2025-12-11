@@ -1,95 +1,125 @@
-import axios from 'axios';
+import axios from "axios";
 
-/**
- * Axios 인스턴스 생성
- * - baseURL: Spring Boot 서버 주소
- * - withCredentials: 쿠키 전송 허용
- */
+// ================================
+// Axios 인스턴스 생성
+// ================================
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: "http://localhost:8080",
   withCredentials: true,
-  timeout: 10000, // 10초 타임아웃
+  timeout: 10000,
 });
 
-/**
- * 요청 인터셉터
- * - JWT 토큰을 자동으로 헤더에 추가
- */
+// ================================
+// Refresh Token 재발급 요청 함수
+// ================================
+async function requestTokenRefresh() {
+  try {
+    const refreshToken = localStorage.getItem("refreshToken");
+    const userId = localStorage.getItem("userId");
+
+    if (!refreshToken || !userId) {
+      throw new Error("No refresh token");
+    }
+
+    const res = await axios.post("http://localhost:8080/api/auth/refresh", {
+      refreshToken,
+      userId,
+    });
+
+    return res.data; // { accessToken, refreshToken }
+  } catch (e) {
+    throw e;
+  }
+}
+
+// ================================
+// 요청 인터셉터 (accessToken 자동 포함)
+// ================================
 api.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  (config) => {
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  error => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error)
 );
 
-/**
- * 응답 인터셉터
- * - 401 에러 시 로그인 페이지로 리다이렉트
- * - 에러 메시지 통일
- */
+// ================================
+// 응답 인터셉터 (401 → refresh 또는 로그아웃)
+// ================================
 api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.status === 401) {
-      // 토큰 만료 또는 인증 실패
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      window.location.href = '/login';
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // access token 만료 → refresh 시도
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const { accessToken, refreshToken } = await requestTokenRefresh();
+
+        // 저장
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        // Authorization 업데이트 후 재요청
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        return api(originalRequest);
+      } catch (e) {
+        // 재발급 실패 → 강제 로그아웃
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("userId");
+
+        window.location.href = "/login";
+        return Promise.reject(e);
+      }
     }
 
-    // 에러 메시지 추출
-    const message = error.response?.data?.message || error.response?.data?.resultMsg || error.message || '알 수 없는 오류가 발생했습니다.';
+    // 기타 에러
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.resultMsg ||
+      error.message ||
+      "알 수 없는 오류가 발생했습니다.";
+
     return Promise.reject(new Error(message));
-  },
+  }
 );
 
-// -------------------------
-// AUTH API
-// -------------------------
+// ================================
+// AUTH 관련 API
+// ================================
 
-/**
- * 로그인
- * @param {Object} payload - { userId, userPw }
- * @returns {Promise} AuthResponse
- */
-export const login = payload => api.post('/api/auth/login', payload).then(res => res.data);
+// 로그인
+export const login = (payload) =>
+  api.post("/api/auth/login", payload).then((res) => res.data);
 
-/**
- * 회원가입
- * @param {Object} payload - SignupRequest
- * @returns {Promise} AuthResponse
- */
-export const signUp = payload => api.post('/api/auth/signup', payload).then(res => res.data);
+// 회원가입
+export const signUp = (payload) =>
+  api.post("/api/auth/signup", payload).then((res) => res.data);
 
-/**
- * 휴대폰 인증 요청
- * @param {Object} payload - { phone }
- * @returns {Promise} ApiResponse
- */
-export const requestPhoneVerify = payload => api.post('/api/auth/phone/request', payload).then(res => res.data);
+// ================================
+// 휴대폰 인증
+// ================================
+export const requestPhoneVerify = (payload) =>
+  api.post("/api/auth/phone/request", payload).then((res) => res.data);
 
-/**
- * 휴대폰 인증 확인
- * @param {Object} payload - { phone, code }
- * @returns {Promise} ApiResponse
- */
-export const confirmPhoneVerify = payload => api.post('/api/auth/phone/confirm', payload).then(res => res.data);
+export const confirmPhoneVerify = (payload) =>
+  api.post("/api/auth/phone/confirm", payload).then((res) => res.data);
 
-// -------------------------
-// 성분 관련 API
-// -------------------------
+// ================================
+// 성분 검색 (IngredientAddModal.js 용)
+// ================================
+export const searchIngredients = (params) => {
+  const { page = 1, size = 10, keyword = "" } = params || {};
 
-// 성분 검색
-export const searchIngredients = params => {
-  // params: { page, size, keyword }
-  const { page = 1, size = 10, keyword = '' } = params || {};
-  return api.get('/api/admin/ingredients', {
+  return api.get("/api/admin/ingredients", {
     params: {
       page,
       page_gap: size,
@@ -98,11 +128,11 @@ export const searchIngredients = params => {
   });
 };
 
+// ================================
 // 상품 검색
-export const searchProducts = keyword => {
-  return api.get('/api/search', {
-    params: { keyword },
-  });
-};
+// ================================
+export const searchProducts = (keyword) =>
+  api.get("/api/search", { params: { keyword } });
 
+// ================================
 export default api;
