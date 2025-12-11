@@ -27,11 +27,11 @@ import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConst
 const buildNavSections = user => [
   {
     title: '마이 쇼핑',
-    items: ['주문/배송 조회', '취소·반품/교환 내역', '최근 본 상품', '좋아요'],
+    items: ['주문/배송 조회', '최근 본 상품', '좋아요'],
   },
   {
     title: '마이 활동',
-    items: ['성분 관리', '1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황'],
+    items: ['성분 즐겨찾기', `리뷰 (${user.reviews})`],
   },
   {
     title: '마이 정보',
@@ -100,7 +100,7 @@ const MyPage = () => {
       setViewMode('recent-views');
     } else if (item === '좋아요') {
       setViewMode('like-list');
-    } else if (item === '성분 관리') {
+    } else if (item === '성분 즐겨찾기') {
       setViewMode('ingredient-management');
     } else if (item.startsWith('리뷰')) {
       // "리뷰 (N)" 형태 대응
@@ -453,28 +453,6 @@ const MyPage = () => {
                   </article>
                 ))}
               </div>
-            </section>
-
-            {/* 문의 내역 카드 */}
-            <section className="mypage-inquiry-grid">
-              <article>
-                <header>
-                  <h3>1:1 문의내역</h3>
-                  <button type="button">더보기 &gt;</button>
-                </header>
-                <div className="inquiry-content">
-                  <p className="empty-copy">최근 1개월간 문의하신 내용이 없습니다.</p>
-                </div>
-              </article>
-              <article>
-                <header>
-                  <h3>상품 Q&A 내역</h3>
-                  <button type="button">더보기 &gt;</button>
-                </header>
-                <div className="inquiry-content">
-                  <p className="empty-copy">작성하신 상품 Q&A가 없습니다.</p>
-                </div>
-              </article>
             </section>
           </>
         );
