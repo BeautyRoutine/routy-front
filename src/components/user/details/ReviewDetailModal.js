@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from 'react-bootstrap';
 import './ReviewDetailModal.css';
+import { formatUserInfo } from '../../common/reviewUtils';
 
 //show, onHide, review  onlike 받아오기
 const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
@@ -23,11 +24,33 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
           <div className="modal-text-section">
             {/* 헤더 (닫기)*/}
             <div className="modal-text-header">
-              <div className="user-info">
-                <span className="user-name">{review.userName}</span>
-                <span className="text-muted ms-2" style={{ fontSize: '12px' }}>
-                  {review.revDate}
-                </span>
+              <div className="user-info d-flex align-items-center">
+                {/*프로필 이미지 */}
+                <div className="me-2 flex-shrink-0">
+                  {/* flex-shrink-0: 이미지 찌그러짐 방지 */}
+                  {review.userImg ? (
+                    <img
+                      src={review.userImg}
+                      alt="프로필"
+                      className="profile-circle"
+                      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div
+                      className="profile-circle"
+                      style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ddd' }}
+                    ></div>
+                  )}
+                </div>
+                <div className="d-flex flex-column">
+                  <span className="user-name">{review.userName}</span>
+                  <span className="text-muted" style={{ fontSize: '12px', marginTop: '2px', display: 'block' }}>
+                    {formatUserInfo(review.userSkin, review.userColor)}
+                  </span>
+                  <span className="text-muted ms-2" style={{ fontSize: '12px' }}>
+                    {review.revDate}
+                  </span>
+                </div>
               </div>
               <button className="btn-close" onClick={onHide}></button>
             </div>

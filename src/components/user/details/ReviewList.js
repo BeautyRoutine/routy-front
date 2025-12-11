@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
+import { formatUserInfo } from '../../common/reviewUtils';
 
 const ReviewList = ({ reviewInfo, onLikeToggle }) => {
   // 정렬 상태 (latest: 최신순, rating: 평점순, like: 좋아요순)
@@ -147,6 +148,10 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
                   <div className="user-info-row">
                     <span className="user-name">{review.userName}</span>
                   </div>
+                  {/*피부 타입, 피부톤 추가 */}
+                  <span className="text-muted" style={{ fontSize: '12px', marginTop: '2px', display: 'block' }}>
+                    {formatUserInfo(review.userSkin, review.userColor)}
+                  </span>
                   <div className="user-info-row">
                     <span className="stars-small">{renderStars(review.revStar)}</span>
                     <span className="review-date-text">{review.revDate}</span>

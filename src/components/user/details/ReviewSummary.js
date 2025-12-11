@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'react-bootstrap';
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewSummary.css';
+import { formatUserInfo } from '../../common/reviewUtils';
 
 const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
   // 베스트 리뷰 선정 기준
@@ -145,6 +146,10 @@ const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
                     <div className="reviewer-info">
                       <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#ddd' }}></div>
                       <span className="reviewer-name ms-2">{review.userName}</span>
+                      <span className="text-muted" style={{ fontSize: '11px' }}>
+                        {formatUserInfo(review.userSkin, review.userColor)}
+                      </span>
+
                       <span className="review-date">{review.revDate}</span>
                     </div>
 
