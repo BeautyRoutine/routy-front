@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/apiClient';
 import { useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMyPageData } from 'features/user/userSlice';
 import CategoryFilter from '../components/user/product/CategoryFilter';
 import ProductGrid from '../components/user/product/ProductGrid';
 import SortBar from '../components/user/product/SortBar';
 import './ProductListPage.css';
 
 const ProductListPage = () => {
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector(state => state.user);
+
   const [products, setProducts] = useState([]);
   const [sort, setSort] = useState('popular');
 
@@ -57,6 +62,13 @@ const ProductListPage = () => {
 
     loadProducts();
   }, [limit, maincate, subcate, min_price, max_price, brand, skin, searchKeyword]); // 모든 search params가 변하면 API 재실행
+
+  // 좋아요 로드
+  useEffect(() => {
+    if (currentUser?.userId) {
+      dispatch(fetchMyPageData(currentUser.userId));
+    }
+  }, [currentUser?.userId, dispatch]);
 
   return (
     <div className="container mt-4 product-page-container">
