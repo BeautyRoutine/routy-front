@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { addLike, removeLike } from 'features/user/userSlice';
 import api from 'app/api';
 import './ProductInfo.css';
 
 // product, reviewSummary props로 받기
 function ProductInfo({ product, reviewSummary, onMoveToReview }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { likes } = useSelector(state => state.user);
 
   //제품 구매 수량 기억용 state, 기본값1
   const [quantity, setQuantity] = useState(1);
@@ -21,6 +25,8 @@ function ProductInfo({ product, reviewSummary, onMoveToReview }) {
     }
   };
 
+  // Redux에서 좋아요 상태 확인
+  const isLiked = likes.products?.some(item => item.productId === product.prdNo);
   // 장바구니 추가
   const handleAddtoCart = async () => {
     try {
@@ -32,6 +38,30 @@ function ProductInfo({ product, reviewSummary, onMoveToReview }) {
     } catch (error) {
       console.error('장바구니 추가 실패:', error);
       alert('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  // 좋아요 추가
+  const handleAddLike = async () => {
+    try {
+      if (isLiked) {
+        await dispatch(
+          removeLike({
+            productId: product.prdNo,
+            type: 'PRODUCT',
+          }),
+        ).unwrap();
+      } else {
+        await dispatch(
+          addLike({
+            productId: product.prdNo,
+            type: 'PRODUCT',
+          }),
+        ).unwrap();
+      }
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error);
+      alert('좋아요 처리에 실패했습니다.');
     }
   };
 
@@ -139,8 +169,10 @@ function ProductInfo({ product, reviewSummary, onMoveToReview }) {
 
       {/* 버튼들*/}
       <div className="action-buttons-group">
-        {/* 찜하기 버튼 */}
-        <button className="wishlist-btn">♡ 좋아요</button>
+        {/* 좋아요 버튼 */}
+        <button className="wishlist-btn" onClick={handleAddLike} style={{ color: isLiked ? '#ff4757' : 'inherit' }}>
+          {isLiked ? '♥' : '♡'} 좋아요
+        </button>
         {/* 장바구니, 바로구매 버튼 */}
         <div className="buy-buttons">
           <button className="btn-custom btn-cart" onClick={handleAddtoCart}>

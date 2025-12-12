@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeLike } from '../../../features/user/userSlice';
+import api from 'app/api';
 import './LikeList.css';
 
 const LikeList = ({ likes = { products: [], brands: [] } }) => {
@@ -11,6 +12,19 @@ const LikeList = ({ likes = { products: [], brands: [] } }) => {
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'brands'
 
   const items = activeTab === 'products' ? likes.products || [] : likes.brands || [];
+
+  const handleAddToCart = async productId => {
+    try {
+      await api.post('/api/cart/items', {
+        productId: productId,
+        quantity: 1,
+      });
+      alert('장바구니에 추가되었습니다.');
+    } catch (error) {
+      console.error('장바구니 추가 실패:', error);
+      alert('장바구니 추가에 실패했습니다.');
+    }
+  };
 
   const handleDelete = async productId => {
     if (window.confirm('좋아요 목록에서 삭제하시겠습니까?')) {
@@ -96,7 +110,9 @@ const LikeList = ({ likes = { products: [], brands: [] } }) => {
                       )}
                     </div>
                     <div className="col-manage">
-                      <button className="btn-cart">장바구니</button>
+                      <button className="btn-cart" onClick={() => handleAddToCart(item.productId)}>
+                        장바구니
+                      </button>
                       <button className="btn-delete" onClick={() => handleDelete(item.productId)}>
                         삭제
                       </button>

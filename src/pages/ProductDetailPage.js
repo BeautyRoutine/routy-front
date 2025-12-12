@@ -3,7 +3,7 @@ import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import api from 'lib/apiClient';
-import { saveRecentProduct } from 'features/user/userSlice';
+import { saveRecentProduct, fetchMyPageData } from 'features/user/userSlice';
 import ProductImageGallery from 'components/user/details/ProductImageGallery';
 import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
@@ -144,6 +144,13 @@ const ProductDetailPage = () => {
       fetchData();
     }
   }, [prdNo, currentUser, dispatch]);
+
+  // 좋아요 목록 로드
+  useEffect(() => {
+    if (currentUser?.userId) {
+      dispatch(fetchMyPageData(currentUser.userId));
+    }
+  }, [currentUser?.userId, dispatch]);
 
   // 로딩 중일 때 화면 돌아가기
   if (loading) {

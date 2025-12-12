@@ -102,7 +102,7 @@ export default function CheckoutPage() {
 
       // 주문번호를 최소 8자리 문자열로 변환 (예: 1 -> "00000001")
       // 토스 요구사항(6자 이상) 충족 + 백엔드 호환(숫자로 파싱 가능)
-      const orderIdVal = String(odNo).padStart(8, '0');
+    const orderIdVal = `${String(odNo).padStart(8, '0')}_${Date.now()}`;
 
       //  토스 결제창 띄우기 (orderId = odNo)
       await tossPayments.requestPayment('카드', {
