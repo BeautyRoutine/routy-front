@@ -1,16 +1,23 @@
 {
   "files": {
-    "main.css": "/routy-front/static/css/main.84d39e96.css",
-    "main.js": "/routy-front/static/js/main.88963dd1.js",
-    "static/js/453.6d5606ae.chunk.js": "/routy-front/static/js/453.6d5606ae.chunk.js",
-    "static/media/logo.svg": "/routy-front/static/media/logo.adab1e9ea23d2593880c5df637a5cd47.svg",
-    "index.html": "/routy-front/index.html",
-    "main.84d39e96.css.map": "/routy-front/static/css/main.84d39e96.css.map",
-    "main.88963dd1.js.map": "/routy-front/static/js/main.88963dd1.js.map",
-    "453.6d5606ae.chunk.js.map": "/routy-front/static/js/453.6d5606ae.chunk.js.map"
+    "main.css": "/static/css/main.d781786c.css",
+    "main.js": "/static/js/main.b215498a.js",
+    "static/js/453.6d5606ae.chunk.js": "/static/js/453.6d5606ae.chunk.js",
+    "static/media/banner-3.png": "/static/media/banner-3.e824113d368e3d9fd002.png",
+    "static/media/logo.svg": "/static/media/logo.adab1e9ea23d2593880c5df637a5cd47.svg",
+    "static/media/bootstrap-icons.woff?": "/static/media/bootstrap-icons.1295669cd4e305c97f2c.woff",
+    "static/media/bootstrap-icons.woff2?": "/static/media/bootstrap-icons.92ea18a81d737146ff04.woff2",
+    "static/media/banner-2.jpg": "/static/media/banner-2.90842687116609407602.jpg",
+    "static/media/banner-1.jpg": "/static/media/banner-1.78da58320cf3e0673a45.jpg",
+    "static/media/banner-4.jpg": "/static/media/banner-4.bcc445f5923d457902e2.jpg",
+    "static/media/banner-5.jpg": "/static/media/banner-5.4c1df695e49e226fbb6a.jpg",
+    "index.html": "/index.html",
+    "main.d781786c.css.map": "/static/css/main.d781786c.css.map",
+    "main.b215498a.js.map": "/static/js/main.b215498a.js.map",
+    "453.6d5606ae.chunk.js.map": "/static/js/453.6d5606ae.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.84d39e96.css",
-    "static/js/main.88963dd1.js"
+    "static/css/main.d781786c.css",
+    "static/js/main.b215498a.js"
   ]
 }
