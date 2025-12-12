@@ -10,7 +10,7 @@ const SkinProfileSetupPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSkinTypeSelect = (skinType) => {
+  const handleSkinTypeSelect = skinType => {
     setProfile({ skinType });
   };
 
@@ -38,7 +38,7 @@ const SkinProfileSetupPage = () => {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.data.resultCode === 200) {
@@ -53,7 +53,7 @@ const SkinProfileSetupPage = () => {
             console.error('user 업데이트 실패:', e);
           }
         }
-        
+
         alert('피부 타입이 저장되었습니다!');
         navigate('/');
       } else {
@@ -79,18 +79,10 @@ const SkinProfileSetupPage = () => {
         {error && <div className="error-message">{error}</div>}
 
         <div className="button-group">
-          <button
-            className="btn-skip"
-            onClick={handleSkip}
-            disabled={loading}
-          >
+          <button className="btn-skip" onClick={handleSkip} disabled={loading}>
             나중에
           </button>
-          <button
-            className="btn-save"
-            onClick={handleSave}
-            disabled={loading || !profile.skinType}
-          >
+          <button className="btn-save" onClick={handleSave} disabled={loading || !profile.skinType}>
             {loading ? '저장 중...' : '저장하고 계속'}
           </button>
         </div>

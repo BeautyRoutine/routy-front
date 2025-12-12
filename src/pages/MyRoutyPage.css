@@ -643,11 +643,43 @@ textarea:focus {
   font-weight: 500;
 }
 
+.record-date-title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .record-date-title {
   font-size: 22px; /* Increased font size */
   font-weight: 800;
   color: #333;
   letter-spacing: -0.02em; /* Tighter tracking */
+  flex: 1;
+}
+
+.delete-routine-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ff6b6b;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.delete-routine-btn:hover {
+  background-color: #fff5f5;
+  color: #ff4757;
+  transform: scale(1.1);
+}
+
+.delete-routine-btn:active {
+  transform: scale(0.95);
 }
 
 /* Record Scrollable Area */
@@ -796,6 +828,24 @@ textarea:focus {
   border: 1px solid transparent;
   position: relative;
   background-color: #fff;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* 달력 날짜 셀 안의 루틴 기록 점 */
+.routine-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #007bff;
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.routine-dot.record {
+  background-color: #007bff;
 }
 
 .calendar-day:hover {
@@ -844,33 +894,53 @@ textarea:focus {
 }
 
 .calendar-legend {
-  display: flex;
+  display: flex !important;
   justify-content: center;
   gap: 16px;
   font-size: 12px;
   color: #666;
+  padding: 12px 0;
+  visibility: visible;
+  opacity: 1;
 }
 
 .legend-item {
-  display: flex;
+  display: flex !important;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  visibility: visible;
+  opacity: 1;
+}
+
+.legend-item span {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
 }
 
 .legend-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .legend-dot.record {
   background-color: #007bff;
 }
+
 .legend-dot.reaction {
   background-color: #ff6b6b;
 }
+
 .legend-dot.today {
+  width: 8px;
+  height: 8px;
   border: 2px solid #007bff;
+  background-color: transparent;
   box-sizing: border-box;
 }
 
