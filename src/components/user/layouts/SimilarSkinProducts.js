@@ -4,6 +4,7 @@ import './SimilarSkinProducts.css';
 import { Heart } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from 'app/api';
 
 const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
@@ -11,6 +12,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   const isLoggedIn = !!localStorage.getItem('token');
 
+  // API 응답 → 카드용 데이터 변환
   const convertToCard = (list) =>
     list.map((p, index) => ({
       id: p.prdNo,
@@ -22,6 +24,26 @@ const SimilarSkinProducts = ({ userSkin }) => {
         ? `/images/${p.prdImg}`
         : `/images/product${index + 1}.jpg`,
     }));
+
+  // 장바구니 추가
+  const handleAddToCart = async (prdNo) => {
+    if (!isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await api.post('/api/cart/items', {
+        productId: prdNo,
+        quantity: 1,
+      });
+      alert('장바구니에 추가되었습니다.');
+    } catch (error) {
+      console.error('장바구니 추가 실패:', error);
+      alert('장바구니 추가에 실패했습니다.');
+    }
+  };
 
   useEffect(() => {
     const loadFallback = async () => {
@@ -49,12 +71,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
       }
     };
 
-    if (!isLoggedIn) {
-      loadFallback();
-      return;
-    }
-
-    if (!userSkin) {
+    if (!isLoggedIn || !userSkin) {
       loadFallback();
       return;
     }
@@ -80,19 +97,32 @@ const SimilarSkinProducts = ({ userSkin }) => {
                   size={22}
                   className="position-absolute top-0 end-0 m-3 heart-icon"
                 />
-                <img src={p.img} className="card-img-top product-img" alt={p.name} />
+                <img
+                  src={p.img}
+                  className="card-img-top product-img"
+                  alt={p.name}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/products/${p.id}`)}
+                />
               </div>
 
               <div className="card-body text-start pb-0">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
                 <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
-                <h6 className="fw-bold text-dark mb-3">{p.price.toLocaleString()}원</h6>
+                <h6 className="fw-bold text-dark mb-3">
+                  {p.price.toLocaleString()}원
+                </h6>
               </div>
 
               {/* 장바구니 버튼 */}
               <div className="p-3">
-                <button className="btn cart-btn w-100">장바구니</button>
+                <button
+                  className="btn cart-btn w-100"
+                  onClick={() => handleAddToCart(p.id)}
+                >
+                  장바구니
+                </button>
               </div>
             </div>
           </div>
@@ -109,7 +139,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
         </button>
       </div>
 
-      {/* 로그인 유도 버튼 */}
+      {/* 로그인 유도 */}
       {!isLoggedIn && (
         <div className="mt-3">
           <button
