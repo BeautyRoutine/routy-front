@@ -479,7 +479,10 @@ export function Header({
         setCategoryTree(tree);
       })
       .catch(error => {
-        if (error.name === 'CanceledError') return;
+        // 요청 취소된 경우는 무시 (컴포넌트 언마운트 또는 재렌더링 시)
+        if (error.name === 'CanceledError' || error.message === 'canceled' || error.code === 'ERR_CANCELED') {
+          return;
+        }
         console.error('카테고리 불러오기 실패:', error);
         setCategoryError(error);
         // 에러 시에도 topCategories는 유지
