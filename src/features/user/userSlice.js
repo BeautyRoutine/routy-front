@@ -25,7 +25,7 @@ const getEndpoints = userId => ({
   profile: `/api/users/${userId}/profile`,
   orders: `/api/users/${userId}/orders/status-summary`, // 미구현
   ingredients: `/api/users/${userId}/ingredients`,
-  likes: `/api/users/${userId}/likes`,
+  likes: `/api/likes`,
   reviews: `/api/users/${userId}/reviews`,
   recentProducts: `/api/users/${userId}/recent-products`,
   claims: `/api/users/${userId}/claims`,
@@ -396,7 +396,7 @@ export const addLike = createAsyncThunk(
   'user/addLike',
   async ({ userId, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
     try {
-      await api.post(`${getEndpoints(userId).likes}/${productId}`, null, { params: { type } });
+      await api.post(`/api/likes/${productId}`, null, { params: { type } });
       return { productId, type };
     } catch (error) {
       return rejectWithValue(error.response?.data || '좋아요 추가에 실패했습니다.');
@@ -411,7 +411,7 @@ export const removeLike = createAsyncThunk(
   'user/removeLike',
   async ({ userId, productId, type = 'PRODUCT' }, { rejectWithValue }) => {
     try {
-      await api.delete(`${getEndpoints(userId).likes}/${productId}`, { params: { type } });
+      await api.delete(`/api/likes/${productId}`, { params: { type } });
       return { productId, type };
     } catch (error) {
       return rejectWithValue(error.response?.data || '좋아요 삭제에 실패했습니다.');
@@ -561,6 +561,24 @@ const userSlice = createSlice({
         state.currentUser = null;
         state.isAuthenticated = false;
         localStorage.removeItem('token');
+      })
+      // addLike
+      .addCase(addLike.fulfilled, (state, action) => {
+        const { productId, type } = action.payload;
+        if (type === 'PRODUCT') {
+          const exists = state.likes.products.some(item => item.productId === productId);
+          if (!exists) {
+            state.likes.products.push({
+              id: Date.now(),
+              productId: productId,
+              name: '로딩중...',
+              brand: '',
+              price: 0,
+              image: null,
+              date: new Date().toISOString(),
+            });
+          }
+        }
       })
       // removeLike
       .addCase(removeLike.fulfilled, (state, action) => {
