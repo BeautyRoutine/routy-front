@@ -41,7 +41,7 @@ function transformCategoryData(data) {
 const RankingPage = ({ user_skin }) => {
   const navigate = useNavigate();
 
-  const skinTypes = useMemo(() => ['전체', '건성', '지성', '민감성'], []);
+  const skinTypes = useMemo(() => ['전체', '지성', '건성', '민감성'], []);
 
   // 카테고리 및 랭킹 데이터 상태
   const [categories, setCategories] = useState([{ id: null, name: '전체' }]);
