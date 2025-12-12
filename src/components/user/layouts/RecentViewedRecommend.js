@@ -27,7 +27,7 @@ const RecentViewedRecommend = () => {
     }
 
     axios
-      .get("http://localhost:8080/api/products/list/recent", {
+      .get(`${process.env.REACT_APP_API_URL}/api/products/list/recent`, {
         params: { userId }
       })
       .then(res => {

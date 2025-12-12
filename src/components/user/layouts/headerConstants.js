@@ -11,7 +11,7 @@ export {
 } from '../data/headerMocks';
 
 // 공통 API 루트: .env 없이 개발 시에도 동작하도록 기본값을 둔다.
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 // 헤더에서 참조하는 예시 엔드포인트 묶음.
 // 실제 백엔드와 연결할 때는 문자열만 교체하면 된다.
