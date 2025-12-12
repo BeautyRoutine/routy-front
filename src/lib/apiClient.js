@@ -4,7 +4,7 @@ import axios from "axios";
 // Axios 인스턴스 생성
 // ================================
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: process.env.REACT_APP_API_URL,
   withCredentials: true,
   timeout: 10000,
 });
@@ -21,7 +21,7 @@ async function requestTokenRefresh() {
       throw new Error("No refresh token");
     }
 
-    const res = await axios.post("http://localhost:8080/api/auth/refresh", {
+    const res = await api.post("/api/auth/refresh", {
       refreshToken,
       userId,
     });

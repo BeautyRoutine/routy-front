@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const admConfigSlice = createSlice({
   name: 'admConfig',
   initialState: {
-    apiBaseUrl: 'http://localhost:8085/api/admin',
+    apiBaseUrl: `${process.env.REACT_APP_ADMIN_API_URL}/api/admin`,
   },
   reducers: {},
 });

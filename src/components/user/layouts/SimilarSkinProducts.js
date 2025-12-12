@@ -49,7 +49,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
     const loadFallback = async () => {
       try {
         const res = await axios.get(
-          'http://localhost:8080/api/products/list/fallback',
+          `${process.env.REACT_APP_API_URL}/api/products/list/fallback`,
           { params: { limit: 4 } }
         );
         setProducts(convertToCard(res.data.data || []));
@@ -61,7 +61,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
     const loadSkinRecommend = async () => {
       try {
         const res = await axios.get(
-          'http://localhost:8080/api/products/list/skin_type',
+          `${process.env.REACT_APP_API_URL}/api/products/list/skin_type`,
           { params: { limit: 4, skin: Number(userSkin) } }
         );
         setProducts(convertToCard(res.data.data || []));

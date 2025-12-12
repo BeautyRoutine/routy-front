@@ -31,7 +31,7 @@ const SkinProfileSetupPage = () => {
       }
 
       const response = await axios.post(
-        'http://localhost:8080/api/user/skin-profile',
+        `${process.env.REACT_APP_API_URL}/api/user/skin-profile`,
         { skinType: profile.skinType },
         {
           headers: {

@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const userConfigSlice = createSlice({
   name: 'userConfig',
   initialState: {
-    apiBaseUrl: 'http://localhost:8080/api',
+    apiBaseUrl: `${process.env.REACT_APP_API_URL}/api`,
   },
   reducers: {},
 });

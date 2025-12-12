@@ -92,7 +92,7 @@ const LoginPage = () => {
   };
 
   const handleKakaoLogin = () => {
-    window.location.href = "http://localhost:8080/auth/kakao/login";
+    window.location.href = `${process.env.REACT_APP_API_URL}/auth/kakao/login`;
   };
 
   return (

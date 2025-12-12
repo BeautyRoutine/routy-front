@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // 1. Axios 인스턴스 생성 및 기본 URL 설정
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: process.env.REACT_APP_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
