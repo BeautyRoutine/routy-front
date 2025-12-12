@@ -7,12 +7,24 @@ import {
 } from '../../components/user/data/mypageConstants';
 
 // 피부 타입 매핑 (DB Code <-> UI Label)
-// 1:건성 / 2:지성 / 3:민감성 / 6:선택안함
+// 1:지성 / 2:건성 / 3:민감성 / 6:선택안함
 const SKIN_TYPE_MAP = {
   1: '지성',
   2: '건성',
   3: '민감성',
   6: '선택안함',
+};
+
+// 배달상태 타입 매핑
+export const ORDER_STATUS_MAP = {
+  1: '주문서',
+  2: '결제완료',
+  3: '준비중',
+  4: '배송중',
+  5: '완료',
+  6: '취소',
+  7: '환불',
+  8: '교환',
 };
 
 const getSkinTypeCode = label => {
@@ -23,7 +35,8 @@ const getSkinTypeCode = label => {
 // API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
 const getEndpoints = userId => ({
   profile: `/api/users/${userId}/profile`,
-  orders: `/api/users/${userId}/orders/status-summary`, // 미구현
+  orders_summary: `/api/orders/${userId}/status-summary`,
+  orders: `/api/orders/${userId}`,
   ingredients: `/api/users/${userId}/ingredients`,
   likes: `/api/likes`,
   reviews: `/api/users/${userId}/reviews`,
@@ -62,14 +75,18 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
   const endpoints = getEndpoints(userId);
   try {
     // API 호출 시도
-    const [profileRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] = await Promise.all([
+    const [profileRes, ordersSumRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] = await Promise.all([
       api.get(endpoints.profile).catch(err => {
         console.error('Profile API Load Failed:', err);
         return { data: FALLBACK_USER_PROFILE };
       }),
+      api.get(endpoints.orders_summary).catch(err => {
+        console.error('OrdersSummary API Load Failed:', err);
+        return { data: FALLBACK_ORDER_STEPS };
+      }),
       api.get(endpoints.orders).catch(err => {
         console.error('Orders API Load Failed:', err);
-        return { data: FALLBACK_ORDER_STEPS };
+        return { data: [] };
       }),
       api.get(endpoints.ingredients).catch(err => {
         console.error('Ingredients API Load Failed:', err);
@@ -208,13 +225,31 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
     const claimList = rawClaims.data || rawClaims || [];
     const mappedClaims = Array.isArray(claimList) ? claimList : [];
 
+    // 주문 요약 데이터 매핑
+    const rawSumOrders = ordersSumRes.data || {};
+    const orderSteps = rawSumOrders.data || rawSumOrders;
+    const mappedOrderSteps = {
+      주문접수: 0,
+      결제완료: orderSteps.paymentComplete || 0,
+      배송준비중: orderSteps.preparing || 0,
+      배송중: orderSteps.shipping || 0,
+      배송완료: orderSteps.delivered || 0,
+    };
+
     // 주문 데이터 매핑
-    const rawOrders = ordersRes.data || {};
-    const orderSteps = rawOrders.data || rawOrders;
+    const rawOrders = ordersRes?.data || {};
+    const orderList = rawOrders?.data || [];
+    const mappedOrders = Array.isArray(orderList)
+      ? orderList.map(order => ({
+          ...order,
+          orderStatusStr: ORDER_STATUS_MAP[order.orderStatus] || String(order.orderStatus),
+        }))
+      : [];
 
     return {
       profile: mappedProfile,
-      orderSteps: orderSteps || FALLBACK_ORDER_STEPS,
+      orderSteps: mappedOrderSteps,
+      orderList: mappedOrders,
       ingredients: mappedIngredients || FALLBACK_INGREDIENT_GROUPS,
       likes: mappedLikes,
       myReviews: mappedReviews,
@@ -522,6 +557,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = action.payload.profile;
         state.orderSteps = action.payload.orderSteps;
+        state.orderList = action.payload.orderList;
         state.ingredients = action.payload.ingredients;
         state.likes = action.payload.likes;
         state.myReviews = action.payload.myReviews;

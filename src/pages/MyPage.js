@@ -50,7 +50,14 @@ const buildNavSections = user => [
 const MyPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const { profile: userProfile, ingredients, likes, orderSteps, currentUser } = useSelector(state => state.user);
+  const {
+    profile: userProfile,
+    ingredients,
+    likes,
+    orderSteps,
+    orderList,
+    currentUser,
+  } = useSelector(state => state.user);
 
   // UI State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
@@ -128,7 +135,7 @@ const MyPage = () => {
       case 'withdrawal':
         return <MemberWithdrawal onCancel={handleShowDashboard} />;
       case 'order-history':
-        return <OrderHistory userId={currentUser?.userId} />;
+        return <OrderHistory orderList={orderList} />;
       case 'claim-history':
         return <ClaimHistory claims={[]} />; // 클레임 내역 API 미구현으로 빈 배열 전달
       case 'recent-views':
@@ -207,7 +214,6 @@ const MyPage = () => {
               </header>
               <div className="status-steps">
                 {[
-                  { label: '주문접수', value: orderSteps['주문접수'] || 0 },
                   { label: '결제완료', value: orderSteps['결제완료'] || 0 },
                   { label: '배송준비중', value: orderSteps['배송준비중'] || 0 },
                   { label: '배송중', value: orderSteps['배송중'] || 0 },
