@@ -75,40 +75,41 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
   const endpoints = getEndpoints(userId);
   try {
     // API 호출 시도
-    const [profileRes, ordersSumRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] = await Promise.all([
-      api.get(endpoints.profile).catch(err => {
-        console.error('Profile API Load Failed:', err);
-        return { data: FALLBACK_USER_PROFILE };
-      }),
-      api.get(endpoints.orders_summary).catch(err => {
-        console.error('OrdersSummary API Load Failed:', err);
-        return { data: FALLBACK_ORDER_STEPS };
-      }),
-      api.get(endpoints.orders).catch(err => {
-        console.error('Orders API Load Failed:', err);
-        return { data: [] };
-      }),
-      api.get(endpoints.ingredients).catch(err => {
-        console.error('Ingredients API Load Failed:', err);
-        return { data: FALLBACK_INGREDIENT_GROUPS };
-      }),
-      api.get(endpoints.likes, { params: { type: 'PRODUCT' } }).catch(err => {
-        console.error('Likes API Load Failed:', err);
-        return { data: [] };
-      }),
-      api.get(endpoints.reviews).catch(err => {
-        console.error('Reviews API Load Failed:', err);
-        return { data: [] };
-      }),
-      api.get(endpoints.recentProducts).catch(err => {
-        console.error('Recent Products API Load Failed:', err);
-        return { data: [] };
-      }),
-      api.get(endpoints.claims).catch(err => {
-        console.error('Claims API Load Failed:', err);
-        return { data: [] };
-      }),
-    ]);
+    const [profileRes, ordersSumRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] =
+      await Promise.all([
+        api.get(endpoints.profile).catch(err => {
+          console.error('Profile API Load Failed:', err);
+          return { data: FALLBACK_USER_PROFILE };
+        }),
+        api.get(endpoints.orders_summary).catch(err => {
+          console.error('OrdersSummary API Load Failed:', err);
+          return { data: FALLBACK_ORDER_STEPS };
+        }),
+        api.get(endpoints.orders).catch(err => {
+          console.error('Orders API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.ingredients).catch(err => {
+          console.error('Ingredients API Load Failed:', err);
+          return { data: FALLBACK_INGREDIENT_GROUPS };
+        }),
+        api.get(endpoints.likes, { params: { type: 'PRODUCT' } }).catch(err => {
+          console.error('Likes API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.reviews).catch(err => {
+          console.error('Reviews API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.recentProducts).catch(err => {
+          console.error('Recent Products API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.claims).catch(err => {
+          console.error('Claims API Load Failed:', err);
+          return { data: [] };
+        }),
+      ]);
 
     // [DEBUG] 실제 받아온 데이터 구조 확인
     console.log('API Response - Profile:', profileRes.data);
@@ -269,6 +270,29 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
     };
   }
 });
+
+/**
+ * Async Thunk: 주문정보 날짜 범위 적용한 데이터 로드
+ *
+ * 주문정보를 조회할 때 날짜 범위를 적용해서 데이터를 조회할 수 있습니다.
+ * fetchMyPageData에선 날짜 필터링을 지원하지 않아 부득이하게 새로 하나 추가하였습니다.
+ */
+export const fetchOrdersByDate = createAsyncThunk(
+  'user/fetchOrdersByDate',
+  async ({ userId, startDate, endDate }, { rejectWithValue }) => {
+    const endpoints = getEndpoints(userId);
+    try {
+      const res = await api.get(endpoints.orders, {
+        params: { startDate, endDate },
+      });
+
+      return res.data.data; // orderList만 반환
+    } catch (err) {
+      console.error('날짜별 주문 조회 실패:', err);
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  },
+);
 
 /**
  * Async Thunk: 프로필 업데이트
@@ -675,6 +699,9 @@ const userSlice = createSlice({
       // removeIngredient
       .addCase(removeIngredient.fulfilled, (state, action) => {
         state.ingredients = action.payload;
+      })
+      .addCase(fetchOrdersByDate.fulfilled, (state, action) => {
+        state.orderList = action.payload;
       });
   },
 });

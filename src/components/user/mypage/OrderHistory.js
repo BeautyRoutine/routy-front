@@ -1,17 +1,89 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+
+import { fetchMyPageData, fetchOrdersByDate } from 'features/user/userSlice';
 
 import { Table } from 'react-bootstrap';
 import './OrderHistory.css';
+import { API_BASE_URL } from '../layouts/headerConstants';
 
 const OrderHistory = ({ orderList }) => {
+  const dispatch = useDispatch();
+  const userId = useSelector(state => state.user.currentUser?.userId);
+  const userNo = useSelector(state => state.user.currentUser?.userNo);
+
+  // 페이지 상태
   const PAGE_GAP = 5;
   const [page, setPage] = useState(1);
+  // 페이지 변경 시 상세보기 초기화
+  const handlePageChange = newPage => {
+    setPage(newPage);
+  };
+  // 전체 데이터를 PAGE_GAP 단위로 분할
+  const { pageGroups, totalPages } = useMemo(() => {
+    const groups = [];
+    for (let i = 0; i < orderList.length; i += PAGE_GAP) {
+      groups.push(orderList.slice(i, i + PAGE_GAP));
+    }
+    return {
+      pageGroups: groups,
+      totalPages: groups.length,
+    };
+  }, [orderList]);
+  // 페이지 초기화
+  useEffect(() => {
+    setPage(1);
+  }, [orderList]);
+  // ==============================================
+  // 모달 상태
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState(null); // 'return' | 'exchange'
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [reason, setReason] = useState('');
+  //모달 열기/닫기
+  const openModal = (order, mode) => {
+    setSelectedOrder({
+      orderNo: order.orderNo,
+      qnaType: mode === 'return' ? 5 : 6, // 5=반품, 6=교환
+    });
+    setModalMode(mode);
+    setModalOpen(true);
+  };
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalMode(null);
+    setSelectedOrder(null);
+  };
+  // 교환&환불 api post
+  const submitClaim = async () => {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/orders/${selectedOrder.orderNo}/claims`,
+        {
+          qnaType: selectedOrder.qnaType,
+          userNo: userNo,
+          qnaQ: reason,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
 
+      alert('요청이 접수되었습니다.');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      alert('요청 중 오류가 발생했습니다.');
+    } finally {
+      dispatch(fetchMyPageData(userId));
+    }
+  };
+  // ==============================================
+  // 날짜 상태
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [openRows, setOpenRows] = useState({});
   const [period, setPeriod] = useState(1); // 기본 1개월 선택
-
   // 오늘 날짜 초기화
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -21,7 +93,6 @@ const OrderHistory = ({ orderList }) => {
     past.setMonth(past.getMonth() - 1);
     setStartDate(past.toISOString().split('T')[0]);
   }, []);
-
   // 기간 버튼 클릭 시 시작 날짜 변경 (endDate 기준)
   const handlePeriodClick = months => {
     setPeriod(months);
@@ -33,7 +104,6 @@ const OrderHistory = ({ orderList }) => {
     past.setMonth(end.getMonth() - months);
     setStartDate(past.toISOString().split('T')[0]);
   };
-
   // endDate를 사용자가 바꿀 때, 선택된 period가 있으면 startDate도 다시 계산
   const handleEndDateChange = e => {
     const value = e.target.value;
@@ -46,21 +116,16 @@ const OrderHistory = ({ orderList }) => {
     past.setMonth(end.getMonth() - period);
     setStartDate(past.toISOString().split('T')[0]);
   };
-
-  // 페이지 변경 시 상세보기 초기화
-  const handlePageChange = newPage => {
-    setPage(newPage);
-    setOpenRows({});
+  // 날짜 조회 핸들러
+  const handleSearch = () => {
+    dispatch(
+      fetchOrdersByDate({
+        userId,
+        startDate,
+        endDate,
+      }),
+    );
   };
-
-  // 전체 데이터를 PAGE_GAP 단위로 분할
-  const pageGroups = [];
-  for (let i = 0; i < orderList.length; i += PAGE_GAP) {
-    pageGroups.push(orderList.slice(i, i + PAGE_GAP));
-  }
-
-  const totalPages = pageGroups.length;
-  const currentPageOrders = pageGroups[page - 1] || [];
 
   return (
     <div className="order-history-container">
@@ -88,7 +153,7 @@ const OrderHistory = ({ orderList }) => {
             <span className="tilde">~</span>
             <input type="date" className="date-input" value={endDate} onChange={handleEndDateChange} />
           </div>
-          <button style={{ marginLeft: '37px' }} className="search-btn">
+          <button style={{ marginLeft: '37px' }} className="search-btn" onClick={handleSearch}>
             조회
           </button>
         </div>
@@ -117,7 +182,10 @@ const OrderHistory = ({ orderList }) => {
 
         {/* 각 페이지별 tbody를 미리 생성 */}
         {pageGroups.map((pageOrders, pageIndex) => (
-          <tbody key={pageIndex} style={{ display: page === pageIndex + 1 ? 'table-row-group' : 'none' }}>
+          <tbody
+            key={`page-${pageIndex}-${orderList.length}`}
+            style={{ display: page === pageIndex + 1 ? 'table-row-group' : 'none' }}
+          >
             {pageOrders.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-5 text-muted">
@@ -133,14 +201,6 @@ const OrderHistory = ({ orderList }) => {
                       <img
                         src={`${process.env.PUBLIC_URL}/images/product/${order.productImage}`}
                         alt={order.productName}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          objectFit: 'cover',
-                          margin: '2px 8px 2px 5px',
-                          border: '1px solid #ccc', // 테두리 추가
-                          borderRadius: '4px', // 모서리 둥글게 (선택사항)
-                        }}
                       />
                       <p>{order.productName}</p>
                     </div>
@@ -150,11 +210,15 @@ const OrderHistory = ({ orderList }) => {
                       )}
 
                       {order.orderStatus >= 5 && order.returnCnt === 0 && order.swapCnt === 0 && (
-                        <button className="action-button return">반품요청</button>
+                        <button className="action-button return" onClick={() => openModal(order, 'return')}>
+                          반품요청
+                        </button>
                       )}
 
                       {order.orderStatus >= 5 && order.returnCnt === 0 && order.swapCnt === 0 && (
-                        <button className="action-button exchange">교환요청</button>
+                        <button className="action-button exchange" onClick={() => openModal(order, 'exchange')}>
+                          교환요청
+                        </button>
                       )}
                     </div>
                   </td>
@@ -193,6 +257,32 @@ const OrderHistory = ({ orderList }) => {
               {num}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* 모달 컴포넌트 */}
+      {modalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <h5 className="mb-3">{modalMode === 'return' ? '반품 요청' : '교환 요청'}</h5>
+            <p className="text-muted mb-2">주문번호: {selectedOrder?.orderNo}</p>
+            <textarea
+              className="form-control mb-3"
+              rows={4}
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              placeholder={modalMode === 'return' ? '반품 사유를 입력해주세요...' : '교환 사유를 입력해주세요...'}
+            />
+
+            <div className="d-flex justify-content-end gap-2 mt-4">
+              <button className="btn btn-secondary" onClick={closeModal}>
+                취소
+              </button>
+              <button className="btn btn-primary" onClick={submitClaim}>
+                제출하기
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
