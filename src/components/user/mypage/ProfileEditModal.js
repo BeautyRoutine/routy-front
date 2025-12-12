@@ -1,28 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // React hooks 복구
+import { useDispatch } from 'react-redux';
+import { checkNickname } from '../../../features/user/userSlice';
 import { X, Camera, Edit2, Check } from 'lucide-react';
 import './ProfileEditModal.css';
 
 const SOCIAL_PROVIDERS = [{ id: 'kakao', name: '카카오', icon: 'K', connected: true }];
 
-const SKIN_TYPES = ['건성', '민감성', '지성', '복합성'];
-const SKIN_CONCERNS = ['수분 부족', '모공 케어', '탄력 개선', '미백', '트러블', '주름'];
+const SKIN_TYPES = ['지성', '건성', '민감성', '선택안함'];
+// const SKIN_CONCERNS = ['수분 부족', '모공 케어', '탄력 개선', '미백', '트러블', '주름']; // 삭제
 
 const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
+  const dispatch = useDispatch(); // dispatch 훅 사용
   const [formData, setFormData] = useState({
     name: '',
     nickname: '',
     email: '',
     phone: '010-1234-5678', // Dummy default
     address: '서울시 강남구 테헤란로 123', // Dummy default
-    skinType: [],
-    skinConcerns: [],
+    skinType: '', // 단일 문자열로 변경
+    // skinConcerns: [], // 삭제
     serviceNotification: true,
     marketingConsent: false,
     routineNotification: true,
   });
 
   useEffect(() => {
-    if (userProfile) {
+    if (isOpen && userProfile) {
+      // [DEBUG] 모달이 열릴 때 전달받은 프로필 데이터 확인
+      console.log('ProfileEditModal received:', userProfile);
+
       setFormData({
         name: userProfile.name || '',
         nickname: userProfile.nickname || '',
@@ -32,14 +38,14 @@ const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
         address: userProfile.address || '',
         detailAddress: userProfile.detailAddress || '',
         extraAddress: userProfile.extraAddress || '',
-        skinType: userProfile.tags ? userProfile.tags.filter(t => SKIN_TYPES.includes(t)) : [],
-        skinConcerns: userProfile.skinConcerns || [],
+        skinType: userProfile.tags ? userProfile.tags.find(t => SKIN_TYPES.includes(t)) || '' : '', // 첫 번째 매칭되는 값만 사용
+        // skinConcerns: userProfile.skinConcerns || [], // 삭제
         serviceNotification: userProfile.serviceNotification ?? true,
         marketingConsent: userProfile.marketingConsent ?? false,
         routineNotification: userProfile.routineNotification ?? true,
       });
     }
-  }, [userProfile]);
+  }, [userProfile, isOpen]);
 
   if (!isOpen) return null;
 
@@ -48,17 +54,11 @@ const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const toggleSkinType = type => {
-    setFormData(prev => {
-      const current = prev.skinType;
-      if (current.includes(type)) {
-        return { ...prev, skinType: current.filter(t => t !== type) };
-      } else {
-        return { ...prev, skinType: [...current, type] };
-      }
-    });
+  const handleSkinTypeChange = type => {
+    setFormData(prev => ({ ...prev, skinType: type }));
   };
 
+  /*
   const toggleSkinConcern = concern => {
     setFormData(prev => {
       const current = prev.skinConcerns;
@@ -69,18 +69,35 @@ const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
       }
     });
   };
+  */
 
   const toggleNotification = key => {
     setFormData(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleCheckNickname = () => {
+  const handleCheckNickname = async () => {
     if (!formData.nickname) {
       alert('닉네임을 입력해주세요.');
       return;
     }
-    // TODO: API call to check nickname availability
-    alert('사용 가능한 닉네임입니다.');
+
+    try {
+      const resultAction = await dispatch(checkNickname(formData.nickname));
+      if (checkNickname.fulfilled.match(resultAction)) {
+        const isAvailable = resultAction.payload; // true or false
+        if (isAvailable) {
+          alert('사용 가능한 닉네임입니다.');
+        } else {
+          alert('이미 사용 중인 닉네임입니다.');
+        }
+      } else {
+        // 에러 발생 시
+        alert(resultAction.payload || '닉네임 확인 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('Nickname check failed:', error);
+      alert('오류가 발생했습니다. 다시 시도해주세요.');
+    }
   };
 
   const handleSubmit = () => {
@@ -211,13 +228,15 @@ const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
 
           {/* Skin Type */}
           <div className="form-group">
-            <label>피부 타입</label>
+            <label>
+              피부 타입 <span style={{ fontSize: '12px', color: '#888', fontWeight: 'normal' }}>(1개 선택)</span>
+            </label>
             <div className="chip-group">
               {SKIN_TYPES.map(type => (
                 <button
                   key={type}
-                  className={`chip-btn skin-type ${formData.skinType.includes(type) ? 'active' : ''}`}
-                  onClick={() => toggleSkinType(type)}
+                  className={`chip-btn skin-type ${formData.skinType === type ? 'active' : ''}`}
+                  onClick={() => handleSkinTypeChange(type)}
                 >
                   {type}
                 </button>
@@ -225,21 +244,7 @@ const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
             </div>
           </div>
 
-          {/* Skin Concerns */}
-          <div className="form-group">
-            <label>피부 고민</label>
-            <div className="chip-group">
-              {SKIN_CONCERNS.map(concern => (
-                <button
-                  key={concern}
-                  className={`chip-btn skin-concern ${formData.skinConcerns.includes(concern) ? 'active' : ''}`}
-                  onClick={() => toggleSkinConcern(concern)}
-                >
-                  {concern}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Skin Concerns Removed */}
 
           <div className="divider" />
 

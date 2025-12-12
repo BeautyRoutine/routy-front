@@ -1,108 +1,138 @@
 import axios from "axios";
 
-// API 기본 설정
-const apiBaseURL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
-
+// ================================
+// Axios 인스턴스 생성
+// ================================
 const api = axios.create({
-  baseURL: apiBaseURL,
+  baseURL: "http://localhost:8080",
+  withCredentials: true,
   timeout: 10000,
 });
 
-// --------------------------
-// 토큰 꺼내오기
-// --------------------------
-function getToken() {
+// ================================
+// Refresh Token 재발급 요청 함수
+// ================================
+async function requestTokenRefresh() {
   try {
-    const auth =
-      localStorage.getItem("auth") || sessionStorage.getItem("auth");
+    const refreshToken = localStorage.getItem("refreshToken");
+    const userId = localStorage.getItem("userId");
 
-    if (auth) {
-      const parsed = JSON.parse(auth);
-      if (parsed?.token) return parsed.token;
+    if (!refreshToken || !userId) {
+      throw new Error("No refresh token");
     }
 
-    return (
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("token") ||
-      null
-    );
-  } catch {
-    return null;
+    const res = await axios.post("http://localhost:8080/api/auth/refresh", {
+      refreshToken,
+      userId,
+    });
+
+    return res.data; // { accessToken, refreshToken }
+  } catch (e) {
+    throw e;
   }
 }
 
-// --------------------------
-// 요청 인터셉터
-// --------------------------
-api.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) {
-    config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ================================
+// 요청 인터셉터 (accessToken 자동 포함)
+// ================================
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// --------------------------
-// 응답 인터셉터
-// --------------------------
+// ================================
+// 응답 인터셉터 (401 → refresh 또는 로그아웃)
+// ================================
 api.interceptors.response.use(
-  (res) => {
-    const body = res.data;
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-    // 백엔드에서 { resultCode, resultMsg, data } 형태로 줄 때 처리
-    if (body && typeof body === "object" && "resultCode" in body) {
-      if (body.resultCode === 200) return body;
+    // access token 만료 → refresh 시도
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-      const err = new Error(body.resultMsg || "요청 오류");
-      err.body = body;
-      throw err;
+      try {
+        const { accessToken, refreshToken } = await requestTokenRefresh();
+
+        // 저장
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        // Authorization 업데이트 후 재요청
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        return api(originalRequest);
+      } catch (e) {
+        // 재발급 실패 → 강제 로그아웃
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("userId");
+
+        window.location.href = "/login";
+        return Promise.reject(e);
+      }
     }
 
-    return res;
-  },
-  (err) => {
-    const msg =
-      err?.response?.data?.resultMsg ||
-      err?.response?.data?.message ||
-      err.message ||
-      "네트워크 오류";
+    // 기타 에러
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.resultMsg ||
+      error.message ||
+      "알 수 없는 오류가 발생했습니다.";
 
-    const wrapped = new Error(msg);
-    wrapped.original = err;
-    return Promise.reject(wrapped);
+    return Promise.reject(new Error(message));
   }
 );
 
-// -------------------------
-// 인증 관련 API
-// -------------------------
+// ================================
+// AUTH 관련 API
+// ================================
 
 // 로그인
-// payload: { userEmail, userPw, asAdmin(false 기본) }
 export const login = (payload) =>
-  api.post("/api/auth/login", payload);
+  api.post("/api/auth/login", payload).then((res) => res.data);
 
 // 회원가입
 export const signUp = (payload) =>
-  api.post("/api/auth/signup", payload);
+  api.post("/api/auth/signup", payload).then((res) => res.data);
 
-// 휴대폰 인증번호 요청
+// ================================
+// 휴대폰 인증
+// ================================
 export const requestPhoneVerify = (payload) =>
-  api.post("/api/auth/phone/request", payload);
+  api.post("/api/auth/phone/request", payload).then((res) => res.data);
 
-// 휴대폰 인증번호 확인
 export const confirmPhoneVerify = (payload) =>
-  api.post("/api/auth/phone/verify", payload);
+  api.post("/api/auth/phone/confirm", payload).then((res) => res.data);
 
-// -------------------------
-// 카카오 로그인 URL (단순 문자열)
-// -------------------------
-export function getKakaoUrl() {
-  const base = apiBaseURL.replace(/\/+$/, ""); // 끝 / 제거
-  // 백엔드의 /auth/kakao/login 으로 보내면, 거기서 카카오로 redirect 해줌
-  return `${base}/auth/kakao/login`;
-}
+// ================================
+// 성분 검색 (IngredientAddModal.js 용)
+// ================================
+export const searchIngredients = (params) => {
+  const { page = 1, size = 10, keyword = "" } = params || {};
 
+  return api.get("/api/admin/ingredients", {
+    params: {
+      page,
+      page_gap: size,
+      ing_name: keyword,
+    },
+  });
+};
+
+// ================================
+// 상품 검색
+// ================================
+export const searchProducts = (keyword) =>
+  api.get("/api/search", { params: { keyword } });
+
+// ================================
 export default api;

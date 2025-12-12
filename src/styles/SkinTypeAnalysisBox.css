@@ -1,0 +1,30 @@
+.bar-graph {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 10px 0;
+}
+
+.bar-fill {
+  height: 20px;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.bar-count {
+  margin-left: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.bar-overlay {
+  position: absolute;
+  top: 120%; /* 그래프 바로 아래 */
+  left: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 10px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setItems, setItemsCount } from 'features/orders/admDeliveriesSlice';
 
-import LoadingSpinner from 'components/common/LoadingSpinner';
+import { RenderingStateHandler } from 'components/common/commonUtils';
+
 import ListItem from './OrderDeliveryListItem';
 
 const paramKeys = {
@@ -18,6 +19,7 @@ const paramKeys = {
 
 const OrderDeliveryList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,17 +80,13 @@ const OrderDeliveryList = () => {
         delv_e_end_day: endEndDate,
       };
 
-      // console.log(`${apiBaseUrl}/order_delivery/list`);
-      // console.log(params);
       setLoading(true);
       setError('');
       try {
-        const result = await axios.get(`${apiBaseUrl}/order_delivery/list`, { params });
-        // console.log(result);
+        const result = await axios.get(`${apiBaseUrl}/orders/delivery/list`, { params });
         dispatch(setItems(result.data.data.list));
         dispatch(setItemsCount(result.data.data.total));
       } catch (err) {
-        console.error('택배목록 불러오기 실패: ', err);
         setError('❌ 목록 불러오기 실패');
         dispatch(setItems([]));
         dispatch(setItemsCount(0));
@@ -184,7 +182,10 @@ const OrderDeliveryList = () => {
 
       {/* 테이블 */}
       <div className="table-responsive">
-        <div className="d-flex justify-content-end mb-2">
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <button className="btn btn-success" onClick={() => navigate('/admin/order/delivery/add')}>
+            <i class="bi bi-plus-square" /> 택배 추가
+          </button>
           <span className="text-muted">총 {rowTotal}건</span>
         </div>
         <table className="table table-bordered table-hover align-middle text-center shadow-sm rounded">
@@ -211,7 +212,7 @@ const OrderDeliveryList = () => {
             {loading ? (
               <tr>
                 <td colSpan="7" className="text-center py-5">
-                  <LoadingSpinner />
+                  <RenderingStateHandler loading={loading} error={error} data={items.length > 0 ? items : null} />
                 </td>
               </tr>
             ) : error ? (

@@ -1,0 +1,222 @@
+import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'react-bootstrap';
+import ReviewDetailModal from './ReviewDetailModal';
+import './ReviewSummary.css';
+
+const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
+  // 베스트 리뷰 선정 기준
+  const MIN_TOTAL_REVIEWS = 5; // 리뷰가 최소 5개 수정가능
+  const MIN_LIKES = 5; // 좋아요가 최소 5개 수정 가능
+
+  // 베스트 리뷰 선정 로직
+  const getBestReviews = (reviews, totalCount) => {
+    // 데이터 없거나, 전체 리뷰 수가 기준 미만이면 []
+    if (!reviews || reviews.length === 0 || totalCount < MIN_TOTAL_REVIEWS) {
+      return [];
+    }
+
+    return (
+      reviews
+        // 좋아요가 기준
+        .filter(review => review.likeCount >= MIN_LIKES)
+        // 좋아요 수 정렬
+        .sort((a, b) => b.likeCount - a.likeCount)
+        // 상위 2개
+        .slice(0, 2)
+    );
+  };
+
+  const { summary } = reviewInfo || {};
+
+  //reveiwInfo가 있으면 reviews랑 리뷰수 받기
+  const [bestReviews, setBestReviews] = useState(
+    reviewInfo ? getBestReviews(reviewInfo.reviews, reviewInfo.summary.totalCount) : [],
+  );
+
+  //  모달 상태 on off, 모달 담을 state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
+
+  //초기값때 못받아오는 경우 여기서 리뷰 2개 받아옴
+  //좋아요 바뀔때마다 다시 계산해야할듯
+  useEffect(() => {
+    if (reviewInfo && reviewInfo.reviews) {
+      // 여기서도 totalCount 같이 넘겨줌
+      const best = getBestReviews(reviewInfo.reviews, reviewInfo.summary.totalCount);
+      setBestReviews(best);
+    }
+  }, [reviewInfo]);
+
+  //베스트 리뷰 갱신되었을때 리뷰 데이터 최신화하기
+  useEffect(() => {
+    //모달 열려있음 & 베스트 리뷰 있음
+    if (selectedReview && bestReviews.length > 0) {
+      //베스트 리뷰에서 현재 리뷰랑 동일한 리뷰 탐색
+      const updatedReview = bestReviews.find(r => r.revNo === selectedReview.revNo);
+
+      // 찾았으면 교체
+      if (updatedReview) {
+        setSelectedReview(updatedReview);
+      }
+    }
+  }, [bestReviews, selectedReview]); //bestReviews 바꿀때 실행
+
+  //만약 reviewinfo가 없으면 null 반환
+  if (!reviewInfo) return null;
+
+  // 리뷰 카드 클릭하면 실행되는 함수
+  const handleReviewClick = review => {
+    setSelectedReview(review); // 선택된 리뷰 저장
+    setShowModal(true); // 모달 열기
+  };
+
+  // --- 좋아요 기능---
+  const toggleLike = (e, revNo) => {
+    e.stopPropagation();
+    if (onLikeToggle) {
+      onLikeToggle(revNo); // 부모에게 보내기
+    } else {
+      console.error('onLikeToggle 함수가 전달되지 않음');
+    }
+  };
+
+  // 별점, 평균낼때도 사용
+  const renderStars = rating => {
+    const fullStars = Math.round(rating);
+    return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
+  };
+
+  return (
+    <div className="snapshot-container my-5">
+      <Row>
+        {/* 별점 통계 왼쪽*/}
+        <Col md={4} className="rating-left-col">
+          <div className="text-center mb-4">
+            <div className="big-score">{summary.averageRating}</div>
+            <div className="total-stars">{renderStars(summary.averageRating)}</div>
+            <div className="total-count-text">{summary.totalCount}개 리뷰</div>
+          </div>
+
+          {/* 점수별 그래프 */}
+          <div className="rating-bars">
+            {[5, 4, 3, 2, 1].map(score => {
+              // 만약 없으면 {} 가져오기
+              const dist = summary.distribution || {};
+              //특정 점수 데이터가 없으면 0이라고 치기
+              const count = dist[score] || 0;
+              const percent = summary.totalCount > 0 ? (count / summary.totalCount) * 100 : 0;
+
+              return (
+                <div key={score} className="rating-bar-row">
+                  <div className="rating-label">
+                    <span className="text-warning">★</span> {score}
+                  </div>
+                  <div className="bar-bg">
+                    {/*퍼센트만큼 길이를 줌 */}
+                    <div className="bar-fill" style={{ width: `${percent}%` }}></div>
+                  </div>
+                  <div className="rating-count-num">{count}</div>
+                </div>
+              );
+            })}
+          </div>
+        </Col>
+
+        {/* 베스트 리뷰 */}
+        <Col md={8}>
+          <div className="best-review-title">
+            <span>베스트 리뷰</span>
+          </div>
+
+          {/*베스트 리뷰 없을 때 안내 문구 */}
+          {bestReviews.length === 0 ? (
+            <div className="text-center py-5 text-muted" style={{ backgroundColor: '#f8f9fa', borderRadius: '12px' }}>
+              아직 베스트 리뷰가 선정되지 않았습니다.
+            </div>
+          ) : (
+            <Row className="g-3">
+              {bestReviews.map(review => (
+                <Col md={6} key={review.revNo}>
+                  <div
+                    className="review-card-compact"
+                    onClick={() => handleReviewClick(review)} // 클릭하면 모달창 추가
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="reviewer-info">
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#ddd' }}></div>
+                      <span className="reviewer-name ms-2">{review.userName}</span>
+                      <span className="review-date">{review.revDate}</span>
+                    </div>
+
+                    {/*내용, 썸네일 가로 배치*/}
+                    <div className="d-flex justify-content-between" style={{ height: '80px', marginBottom: '10px' }}>
+                      {/* 왼쪽: 별점 + 텍스트 */}
+                      <div style={{ flex: 1, overflow: 'hidden', paddingRight: '10px' }}>
+                        <div style={{ color: '#ffc107', fontSize: '13px', marginBottom: '4px' }}>
+                          {'★'.repeat(review.revStar)}
+                          {'☆'.repeat(5 - review.revStar)}
+                        </div>
+                        <div className="review-content-compact" style={{ fontSize: '13px' }}>
+                          {review.revGood || review.revContent}
+                        </div>
+                      </div>
+
+                      {/* 오른쪽: 썸네일 */}
+                      {review.revImg && (
+                        <div style={{ width: '80px', height: '80px', flexShrink: 0 }}>
+                          <img
+                            src={review.revImg}
+                            alt="리뷰"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              borderRadius: '8px',
+                              border: '1px solid #eee',
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    {/* 하단: 태그*/}
+                    <div>
+                      <div className="review-tags mb-2" style={{ height: '24px', overflow: 'hidden' }}>
+                        {review.feedback &&
+                          review.feedback.map((tag, idx) => (
+                            <span key={idx} className="review-tag">
+                              #{tag}
+                            </span>
+                          ))}
+                      </div>
+                      {/* 하단: 좋아요*/}
+                      <div className="like-btn-area">
+                        <button
+                          className={`like-toggle-btn ${review.liked || review.isLiked ? 'liked' : ''}`}
+                          // e 받아서 모달도 켜지는거 방지
+                          onClick={e => toggleLike(e, review.revNo)}
+                        >
+                          <span>👍</span>
+                          <span>{review.likeCount}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
+          )}
+        </Col>
+      </Row>
+
+      {/* 모달 컴포넌트, showModal로 상태 받아옴,onHide는 닫기 전달, 리뷰 내용*/}
+      <ReviewDetailModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        review={selectedReview}
+        onLikeToggle={onLikeToggle}
+      />
+    </div>
+  );
+};
+
+export default ReviewSummary;

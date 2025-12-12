@@ -46,7 +46,9 @@
   font-size: 13px;
   color: #666;
   margin-bottom: 15px;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .list-info .count {
@@ -199,26 +201,39 @@
 }
 
 /* Buttons */
-.btn-cart,
-.btn-delete {
+.btn-cart {
   padding: 6px 12px;
-  font-size: 12px;
-  border: 1px solid #ddd;
-  background-color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background-color: #6cc5ff; /* Primary sky blue */
+  color: #fff;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 4px;
   width: 80px;
   transition: all 0.2s;
 }
 
 .btn-cart:hover {
-  border-color: #333;
-  color: #333;
+  background-color: #5ab3ed;
+}
+
+.btn-delete {
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #666;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 80px;
+  transition: all 0.2s;
 }
 
 .btn-delete:hover {
   border-color: #999;
-  color: #666;
+  color: #333;
+  background-color: #f9f9f9;
 }
 
 /* Empty State */

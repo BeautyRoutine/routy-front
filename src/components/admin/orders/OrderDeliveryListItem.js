@@ -3,49 +3,49 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { selectItem } from 'features/orders/admDeliveriesSlice';
 
+import { formatDateParts } from 'components/common/orderUtils';
+
 const OrderDeliveryListItem = ({ item }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleClick = () => {
     dispatch(selectItem(item));
-    navigate(`/admin/order/delivery/${item.DELVNO}`);
+    navigate(`/admin/order/delivery/${item.delvNo}`);
   };
 
   return (
     <tr onClick={handleClick} style={{ cursor: 'pointer' }}>
-      <td>{item.DELVNO}</td>
+      <td>{item.delvNo}</td>
       <td>
-        {item.USERNAME}({item.USERNICK})
+        {item.userName}({item.userNick})
         <br />
-        <small className="text-muted">{item.USERID}</small>
+        <small className="text-muted">{item.userId}</small>
       </td>
       <td>
-        {item.DELVGETNAME}
+        {item.delvGetName}
         <br />
-        <small className="text-muted">{item.DELVGETHP}</small>
-      </td>
-      <td>{item.DELVGETJIBUNADDR ? `(${item.DELVGETZIP}) ${item.DELVGETJIBUNADDR}` : `(${item.DELVGETZIP}) -`}</td>
-      <td>
-        {item.DELVCOMPANY}
-        <br />
-        <small className="text-muted">{item.DELVCOMNUM}</small>
+        <small className="text-muted">{item.delvGetHp}</small>
       </td>
       <td>
-        {item.DELVENDDATE ? (
-          <>
-            {item.DELVENDDATE.split(' ')[0]}
-            <br />
-            {item.DELVENDDATE.split(' ')[1]}
-          </>
-        ) : (
-          '-'
-        )}
+        {item.delvGetJibunAddr
+          ? `(${item.delvGetZip}) ${item.delvGetJibunAddr}`
+          : `(${item.delvGetZip}) ${item.delvGetRoadAddr}`}
       </td>
       <td>
-        {item.DELVREGDATE.split(' ')[0]}
+        {item.delvCompany}
         <br />
-        {item.DELVREGDATE.split(' ')[1]}
+        <small className="text-muted">{item.delvComNum}</small>
+      </td>
+      <td>
+        {formatDateParts(item.delvEnddate).date}
+        <br />
+        {formatDateParts(item.delvEnddate).time}
+      </td>
+      <td>
+        {formatDateParts(item.delvRegdate).date}
+        <br />
+        {formatDateParts(item.delvRegdate).time}
       </td>
     </tr>
   );

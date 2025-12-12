@@ -1,19 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
+import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
 
-const ReviewList = ({ reviewInfo }) => {
+const ReviewList = ({ reviewInfo, onLikeToggle }) => {
   // 정렬 상태 (latest: 최신순, rating: 평점순, like: 좋아요순)
   const [sortOption, setSortOption] = useState('latest');
 
-  // 현재 페이지 번호 -작동 안됨 현재
-  //const [activePage, setActivePage] = useState(1);
+  //  모달 상태 on off, 모달 담을 state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
+
+  const [activePage, setActivePage] = useState(1);
+
+  //구조분해할당
+  const { reviews, summary } = reviewInfo || {};
+
+  useEffect(() => {
+    // 모달이 열려있고(selectedReview), 목록 데이터(reviews)가 있을 때
+    if (selectedReview && reviews) {
+      // 리스트에서 현재 모달에 뜬 것과 똑같은 화면을 찾음
+      const updatedReview = reviews.find(r => r.revNo === selectedReview.revNo);
+
+      // 찾았으면 모달 데이터를 최신으로 교체
+      if (updatedReview) {
+        setSelectedReview(updatedReview);
+      }
+    }
+  }, [reviewInfo, reviews, selectedReview]);
 
   // 데이터가 없으면 아무것도 안 그림
   if (!reviewInfo || !reviewInfo.reviews) return null;
 
-  //구조분해할당
-  const { reviews, summary } = reviewInfo;
+  //페이지 변경
+  const handlePageChange = pageNumber => {
+    setActivePage(pageNumber);
+    console.log(`페이지 변경 요청: ${pageNumber}, 정렬: ${sortOption}`);
+    // api 받아와야함
+  };
+
+  //페이지수
+  const totalPages = summary.totalCount ? Math.ceil(summary.totalCount / 10) : 0;
 
   // 별점 그리기 헬퍼
   const renderStars = rating => {
@@ -21,11 +48,34 @@ const ReviewList = ({ reviewInfo }) => {
     return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
   };
 
-  // 좋아요 클릭 핸들러 (여기서는 UI만 변경하는 척)
-  const handleLikeClick = revNo => {
-    console.log(`리뷰 ${revNo}번 좋아요 클릭됨 (API 호출 필요)`);
-    // 실제로는 여기서 API 호출 후 데이터를 다시 받아오거나 state를 업데이트해야 함
+  // 좋아요 클릭 핸들러
+  const handleLikeClick = (e, revNo) => {
+    e.stopPropagation(); // 모달 방지
+    if (onLikeToggle) {
+      //함수 체크
+      onLikeToggle(revNo);
+    } else {
+      console.error('onLikeToggle 함수가 전달되지 않았습니다!');
+    }
   };
+
+  // 리뷰 카드 클릭하면 실행되는 함수
+  const handleReviewClick = review => {
+    setSelectedReview(review); // 선택된 리뷰 저장
+    setShowModal(true); // 모달 열기
+  };
+
+  //만약 리뷰가 0개면 보여줄 return
+  if (summary.totalCount === 0) {
+    return (
+      <div className="text-center py-5" style={{ color: '#999' }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
+        <h4>아직 등록된 리뷰가 없습니다.</h4>
+        <p>첫 번째 리뷰를 작성하고 포인트를 받아보세요!</p>
+        <button className="btn btn-primary mt-3">리뷰 작성하기</button>
+      </div>
+    );
+  }
 
   return (
     <div className="review-list-container">
@@ -77,7 +127,12 @@ const ReviewList = ({ reviewInfo }) => {
       {/*리뷰 리스트 */}
       <div className="review-items-wrapper">
         {reviews.map(review => (
-          <div key={review.revNo} className="review-item">
+          <div
+            key={review.revNo}
+            className="review-item"
+            onClick={() => handleReviewClick(review)}
+            style={{ cursor: 'pointer' }}
+          >
             {/* 헤더: 유저 정보 & 신고 */}
             <div className="review-header">
               <div className="user-profile-area">
@@ -110,7 +165,7 @@ const ReviewList = ({ reviewInfo }) => {
               {/* 사진이 있을 때만 표시 */}
               {review.revImg && <img src={review.revImg} alt="리뷰 사진" className="review-attached-img" />}
 
-              <p className="review-text-content">{review.revContent || review.revGood}</p>
+              <p className="review-text-content">{review.content}</p>
             </div>
 
             {/* 태그*/}
@@ -129,8 +184,8 @@ const ReviewList = ({ reviewInfo }) => {
               {/* 좋아요 */}
               <div className="like-button-area">
                 <button
-                  className={`like-btn-simple ${review.isLiked ? 'active' : ''}`}
-                  onClick={() => handleLikeClick(review.revNo)}
+                  className={`like-btn-simple ${review.liked || review.isLiked ? 'active' : ''}`}
+                  onClick={e => handleLikeClick(e, review.revNo)}
                 >
                   <span style={{ fontSize: '16px' }}>👍</span>
                   도움이 되었어요
@@ -144,15 +199,41 @@ const ReviewList = ({ reviewInfo }) => {
 
       {/* 페이지네이션 */}
       <div className="d-flex justify-content-center mt-5">
-        <Pagination>
-          <Pagination.First />
-          <Pagination.Prev />
-          <Pagination.Item active>{1}</Pagination.Item>
-          <Pagination.Item>{2}</Pagination.Item>
-          <Pagination.Next />
-          <Pagination.Last />
-        </Pagination>
+        {totalPages > 0 && (
+          <Pagination>
+            {/* << 맨 처음으로 */}
+            <Pagination.First onClick={() => handlePageChange(1)} disabled={activePage === 1} />
+            {/* < 이전 */}
+            <Pagination.Prev onClick={() => handlePageChange(activePage - 1)} disabled={activePage === 1} />
+
+            {/* 숫자 버튼 자동 생성 */}
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const pageNum = idx + 1;
+              return (
+                <Pagination.Item
+                  key={pageNum}
+                  active={pageNum === activePage}
+                  onClick={() => handlePageChange(pageNum)}
+                >
+                  {pageNum}
+                </Pagination.Item>
+              );
+            })}
+
+            {/* > 다음 */}
+            <Pagination.Next onClick={() => handlePageChange(activePage + 1)} disabled={activePage === totalPages} />
+            {/* >> 맨 끝으로 */}
+            <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={activePage === totalPages} />
+          </Pagination>
+        )}
       </div>
+
+      <ReviewDetailModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        review={selectedReview}
+        onLikeToggle={onLikeToggle}
+      />
     </div>
   );
 };

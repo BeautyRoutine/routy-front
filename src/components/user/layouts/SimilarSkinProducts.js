@@ -3,79 +3,159 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './SimilarSkinProducts.css';
 import { Heart } from 'lucide-react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import api from 'app/api';
 
-const SimilarSkinProducts = () => {
+const SimilarSkinProducts = ({ userSkin }) => {
   const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
+
+  const isLoggedIn = !!localStorage.getItem('token');
+
+  // API 응답 → 카드용 데이터 변환
+  const convertToCard = (list) =>
+    list.map((p, index) => ({
+      id: p.prdNo,
+      name: p.prdName,
+      brand: p.prdCompany,
+      rating: p.avgRating ? Number(p.avgRating) : 4.0,
+      price: p.prdPrice,
+      img: p.prdImg
+        ? `/images/${p.prdImg}`
+        : `/images/product${index + 1}.jpg`,
+    }));
+
+  // 장바구니 추가
+  const handleAddToCart = async (prdNo) => {
+    if (!isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await api.post('/api/cart/items', {
+        productId: prdNo,
+        quantity: 1,
+      });
+      alert('장바구니에 추가되었습니다.');
+    } catch (error) {
+      console.error('장바구니 추가 실패:', error);
+      alert('장바구니 추가에 실패했습니다.');
+    }
+  };
 
   useEffect(() => {
-    const prdNos = [101, 102, 103, 104];
+    const loadFallback = async () => {
+      try {
+        const res = await axios.get(
+          'http://localhost:8080/api/products/list/fallback',
+          { params: { limit: 4 } }
+        );
+        setProducts(convertToCard(res.data.data || []));
+      } catch (err) {
+        console.error('Fallback error:', err);
+      }
+    };
 
-    Promise.all(prdNos.map(no => axios.get(`http://localhost:8080/api/products/${no}`)))
-      .then(responses => {
-        const converted = responses.map((res, index) => {
-          const p = res.data;
+    const loadSkinRecommend = async () => {
+      try {
+        const res = await axios.get(
+          'http://localhost:8080/api/products/list/skin_type',
+          { params: { limit: 4, skin: Number(userSkin) } }
+        );
+        setProducts(convertToCard(res.data.data || []));
+      } catch (err) {
+        console.error('Skin recommend error:', err);
+        loadFallback();
+      }
+    };
 
-          return {
-            id: p.prdNo,
-            name: p.prdName,
-            brand: p.prdCompany,
-            rating: 4.7,
-            tags: ['추천', '피부'],
-            discount: null,
-            price: p.prdPrice,
-            original: null,
-            img: `/images/product${index + 1}.jpg`, // 이미지 그대로 유지
-          };
-        });
+    if (!isLoggedIn || !userSkin) {
+      loadFallback();
+      return;
+    }
 
-        setProducts(converted);
-      })
-      .catch(err => console.error(err));
-  }, []);
+    loadSkinRecommend();
+  }, [isLoggedIn, userSkin]);
 
   return (
     <div className="container my-5 text-center similar-skin-section">
-      <h5 className="fw-bold text-primary mb-1">비슷한 피부 타입 사용자들은 이걸 많이 선택했어요!</h5>
-      <p className="text-muted small mb-4">건성·민감성 피부 사용자 12,440명이 선택</p>
+      <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
 
-      <div className="row row-cols-1 row-cols-md-4 g-4">
-        {products.map(p => (
+      <p className="text-muted small mb-4">
+        로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
+      </p>
+
+      {/* 카드 목록 */}
+      <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
+        {products.map((p) => (
           <div key={p.id} className="col">
             <div className="card h-100 border-0 shadow-sm product-card position-relative">
-              {p.discount && (
-                <span className="badge bg-danger position-absolute top-0 start-0 m-2">{p.discount} OFF</span>
-              )}
+              <div className="position-relative">
+                <Heart
+                  size={22}
+                  className="position-absolute top-0 end-0 m-3 heart-icon"
+                />
+                <img
+                  src={p.img}
+                  className="card-img-top product-img"
+                  alt={p.name}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/products/${p.id}`)}
+                />
+              </div>
 
-              <Heart size={20} className="position-absolute top-0 end-0 m-3 heart-icon" />
-
-              <img src={p.img} className="card-img-top" alt={p.name} style={{ borderRadius: '10px' }} />
-
-              <div className="card-body text-start">
+              <div className="card-body text-start pb-0">
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
+                <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
+                <h6 className="fw-bold text-dark mb-3">
+                  {p.price.toLocaleString()}원
+                </h6>
+              </div>
 
-                <div className="mb-2">
-                  {p.tags.map((tag, i) => (
-                    <span key={i} className="badge bg-light text-primary me-1">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <p className="small mb-2">⭐ {p.rating}</p>
-
-                <h6 className="fw-bold text-dark">{p.price.toLocaleString()}원</h6>
-
-                <button className="btn cart-btn w-100 mt-2">장바구니</button>
+              {/* 장바구니 버튼 */}
+              <div className="p-3">
+                <button
+                  className="btn cart-btn w-100"
+                  onClick={() => handleAddToCart(p.id)}
+                >
+                  장바구니
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-4">
-        <button className="btn btn-outline-primary rounded-pill px-4">더 많은 추천 상품 보기</button>
+      {/* 더 많은 추천 보기 */}
+      <div className="mt-3">
+        <button
+          className="btn btn-outline-primary rounded-pill px-4 more-btn"
+          onClick={() => navigate('/recommend/more')}
+        >
+          더 많은 추천 상품 보기
+        </button>
       </div>
+
+      {/* 로그인 유도 */}
+      {!isLoggedIn && (
+        <div className="mt-3">
+          <button
+            className="btn btn-primary rounded-pill px-4 me-2"
+            onClick={() => navigate('/login')}
+          >
+            로그인
+          </button>
+          <button
+            className="btn btn-outline-primary rounded-pill px-4"
+            onClick={() => navigate('/signup')}
+          >
+            회원가입
+          </button>
+        </div>
+      )}
     </div>
   );
 };

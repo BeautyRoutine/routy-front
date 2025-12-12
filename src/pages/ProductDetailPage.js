@@ -1,20 +1,163 @@
-import React from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
-
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import api from 'lib/apiClient';
+import { saveRecentProduct } from 'features/user/userSlice';
 import ProductImageGallery from 'components/user/details/ProductImageGallery';
 import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
-import ReviewSnapshot from 'components/user/details/ReviewSnapshot';
-import IngredientAnalysis from 'components/user/details/IngredientAnalysis';
-
-// 더미데이터 받아오기
-import { dummyProductData } from './demoProductData';
+import ReviewSummary from 'components/user/details/ReviewSummary';
+import ProductIngredientAnalysis from 'components/user/details/ProductIngredientAnalysis';
 
 const ProductDetailPage = () => {
-  // TODO: API 연동 시, useEffect와 useState를 사용해 이 데이터를 채웁니다.
-  const productData = dummyProductData;
+  const { prdNo } = useParams(); // URL의 :prdNo 값을 가져옴 (예: 101)
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector(state => state.user);
 
-  //구조 분해 할당
+  const [productData, setProductData] = useState(null); //  데이터를 담을 state
+  const [loading, setLoading] = useState(true); // 로딩 중인지 체크
+
+  // 탭 이동용 ref
+  const [activeTab, setActiveTab] = useState('desc'); // 기본값 상품설명
+  const tabsRef = useRef(null); // 탭 위치로 스크롤 이동하기 위해 사용
+
+  //탭 이동용 핸들러
+  const handleMoveToReview = () => {
+    setActiveTab('review'); // 탭을 리뷰로 변경
+    tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // 좋아요 핸들러
+  const handleLikeToggle = async revNo => {
+    // 로그인 체크
+    if (!currentUser) return alert('로그인이 필요합니다.');
+    try {
+      // API 호출
+      await api.post(`/api/reviews/${revNo}/like`, null, {
+        params: { userNo: currentUser?.userNo || 0 },
+      });
+
+      // 화면 즉시 갱신, 백엔드에 보내고, 새로받아오지 말고 프론트에서 증감하기
+      setProductData(prev => {
+        //기존값 prev
+        if (!prev) return null;
+
+        //새 배열 만들기(불변성 이슈)
+        const updatedReviews = prev.reviewInfo.reviews.map(review => {
+          if (review.revNo === revNo) {
+            //리뷰번호 체크
+            //리뷰 좋아요 isliked liked 둘다 확인하기 둘중 하나라도 참이면 참
+            const currentStatus = review.liked || review.isLiked;
+
+            const newStatus = !currentStatus; //토글기능이니 반대값으로 변해야함
+            return {
+              ...review, //...으로 리뷰 복사해오기
+              liked: newStatus,
+              isLiked: newStatus, //상태변경
+              likeCount: newStatus ? review.likeCount + 1 : review.likeCount - 1,
+            };
+          }
+          return review; //클릭 안했으면 그대로
+        });
+
+        return {
+          ...prev, //전체 데이터
+          reviewInfo: {
+            ...prev.reviewInfo,
+            reviews: updatedReviews,
+          },
+        };
+      });
+    } catch (error) {
+      console.error('좋아요 오류:', error);
+      alert('처리에 실패했습니다.');
+    }
+  };
+
+  // 연결작업
+  useEffect(() => {
+    const fetchData = async () => {
+      //비동기
+      try {
+        setLoading(true); //로딩 시작
+        // 로그인 안한 상태면 null 상태니 ?.으로 있는지 체크, 없으면 undefined->null
+        const analysisParams = {
+          userId: currentUser?.userId || null,
+          userSkin: currentUser?.userSkin || null, // 유저 피부타입 (예: 'OILY', 'DRY')
+        };
+
+        //get 요청 주소 : /api/products/101
+        const productRes = await api.get(`/api/products/${prdNo}`);
+        const reviewRes = await api.get(`/api/products/${prdNo}/reviews`, {
+          params: { userNo: currentUser?.userNo || 0 }, //유저 아이디 체크해서 같이 보내기
+        });
+        //유저 검색 조건 추가해야되서 params으로
+        const ingredientRes = await api.get(`/api/products/${prdNo}/analysis`, { params: analysisParams });
+        const productObj = productRes.data.data;
+
+        // 최근 본 상품 저장 로직 추가
+        if (currentUser?.userId && prdNo && productObj?.prdSubCate) {
+          // UI 즉시 업데이트를 위한 상세 정보 구성
+          const productDetails = {
+            id: productObj.prdNo,
+            prdNo: productObj.prdNo,
+            name: productObj.prdName,
+            brand: productObj.prdCompany,
+            price: productObj.prdPrice,
+            salePrice: productObj.salePrice,
+            discount: productObj.discountRate || productObj.discount,
+            image: productObj.prdImg ? `${api.defaults.baseURL}/images/product/${productObj.prdImg}` : null,
+            viewedDate: new Date().toISOString(),
+          };
+
+          dispatch(
+            saveRecentProduct({
+              userId: currentUser.userId,
+              prdNo,
+              prdSubCate: productObj.prdSubCate,
+              productDetails, // 추가된 파라미터
+            }),
+          );
+        }
+
+        // 데이터 구조 만들기
+        const combinedData = {
+          productInfo: productObj, // 백엔드 DTO가 여기, apiResponse로 포장했으니  data.data
+          reviewInfo: reviewRes.data.data || { summary: { totalCount: 0, averageRating: 0 }, reviews: [] }, // 리뷰 데이터
+          ingredientInfo: ingredientRes.data.data,
+          purchaseInfo: {},
+        };
+
+        setProductData(combinedData); // state에 저장, 화면 갱신
+      } catch (error) {
+        //에러나면
+        console.error('데이터 로딩 실패:', error);
+        alert('상품 정보를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false); // 로딩 끝 (돌아가는거 멈춤)
+      }
+    };
+
+    if (prdNo) {
+      //상품번호가 있을때만 서버요청
+      fetchData();
+    }
+  }, [prdNo, currentUser, dispatch]);
+
+  // 로딩 중일 때 화면 돌아가기
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
+        <Spinner animation="border" variant="primary" /> {/*돌아가는 애니메이션 */}
+      </div>
+    );
+  }
+
+  // 데이터가 없으면 에러
+  if (!productData) return <div className="text-center py-5">상품 정보를 찾을 수 없습니다.</div>;
+
+  // 데이터 꺼내기
   const { productInfo, reviewInfo, ingredientInfo, purchaseInfo } = productData;
 
   return (
@@ -22,39 +165,44 @@ const ProductDetailPage = () => {
       <Row>
         <Col md={6}>
           {/* 좌측 6칸 차지, productInfo 안에 이미지 */}
-          <ProductImageGallery images={productInfo.images} />
+          <ProductImageGallery images={productInfo.images ? productInfo.images : { gallery: [] }} />
         </Col>
 
         <Col md={6}>
           {/*우측 6칸 차지,  상품 정보 리뷰, 버튼 등 전달 */}
-          <ProductInfo product={productInfo} reviewSummary={reviewInfo.summary} />
+          <ProductInfo product={productInfo} reviewSummary={reviewInfo.summary} onMoveToReview={handleMoveToReview} />
         </Col>
       </Row>
+
       {/*별점, 우수리뷰 */}
       <Row className="mt-5">
         <Col>
-          <ReviewSnapshot reviewInfo={reviewInfo} />
+          <ReviewSummary reviewInfo={reviewInfo} onLikeToggle={handleLikeToggle} />
         </Col>
       </Row>
+      <hr className="my-5" />
 
       {/*성분 분석 */}
       <Row className="mt-5">
         <Col>
-          <IngredientAnalysis ingredientInfo={ingredientInfo} />
+          <ProductIngredientAnalysis ingredientInfo={ingredientInfo} productInfo={productInfo} />
         </Col>
       </Row>
 
-      <hr className="my-5" />
-
       <Row>
         <Col>
-          {/* 분해한 데이터 전달 */}
-          <ProductDetailTabs
-            productInfo={productInfo}
-            purchaseInfo={purchaseInfo}
-            reviewInfo={reviewInfo}
-            ingredientInfo={ingredientInfo}
-          />
+          <div ref={tabsRef} style={{ paddingTop: '20px' }}>
+            {/* 분해한 데이터 전달 */}
+            <ProductDetailTabs
+              activeTab={activeTab} // 현재 탭 상태
+              onTabSelect={setActiveTab} //탭 변경
+              productInfo={productInfo}
+              purchaseInfo={purchaseInfo}
+              reviewInfo={reviewInfo}
+              ingredientInfo={ingredientInfo}
+              onLikeToggle={handleLikeToggle}
+            />
+          </div>
         </Col>
       </Row>
     </Container>

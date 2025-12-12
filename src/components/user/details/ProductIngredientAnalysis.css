@@ -1,0 +1,133 @@
+.ingredient-section {
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* --- 분석 박스 공통 --- */
+.analysis-box {
+  padding: 24px;
+  border-radius: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 위에서부터 정렬 */
+}
+
+/* 박스 배경색 */
+.bg-blue-soft {
+  background-color: #e7f5ff;
+}
+.bg-pink-soft {
+  background-color: #fff0f6;
+}
+
+/* 하단 요약 박스 (상태별 스타일) */
+.box-status {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 12px;
+  height: 100%;
+}
+
+/* 안전 (Green) */
+.status-safe {
+  background-color: #f8fff9;
+  border: 1px solid #40c057;
+}
+
+/* 주의 (Yellow) */
+.status-warning {
+  background-color: #fff9db;
+  border: 1px solid #fab005;
+}
+
+/* 정보 (Blue) */
+.status-info {
+  background-color: #e7f5ff;
+  border: 1px solid #339af0;
+}
+
+/* --- 텍스트 및 배지 --- */
+.box-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 내부 소제목 (좋은 성분, 주의 성분) */
+.sub-label {
+  font-size: 13px;
+  color: #868e96;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+/* 첫번째 소제목은 위쪽 여백 제거 */
+.sub-label:first-of-type {
+  margin-top: 0;
+}
+
+.badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.custom-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 배지 색상 */
+.badge-green {
+  background-color: #d3f9d8;
+  color: #2b8a3e;
+}
+.badge-purple {
+  background-color: #f3d9fa;
+  color: #845ef7;
+}
+.badge-orange {
+  background-color: #ffe8cc;
+  color: #e8590c;
+}
+
+/* --- 전체 성분 펼치기 --- */
+.full-ingredient-toggle {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.toggle-btn {
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: bold;
+  color: #495057;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.toggle-btn:hover {
+  background-color: #f8f9fa;
+}
+
+.full-list-container {
+  margin-top: 20px;
+  padding: 24px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #555;
+  border: 1px solid #eee;
+}

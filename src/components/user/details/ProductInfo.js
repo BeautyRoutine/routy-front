@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import api from 'app/api';
 import './ProductInfo.css';
 
 // product, reviewSummary props로 받기
-function ProductInfo({ product, reviewSummary }) {
+function ProductInfo({ product, reviewSummary, onMoveToReview }) {
+  const navigate = useNavigate();
+
   //제품 구매 수량 기억용 state, 기본값1
   const [quantity, setQuantity] = useState(1);
 
@@ -15,6 +18,53 @@ function ProductInfo({ product, reviewSummary }) {
     // 새 수량이 1일때만 업데이트, 0이나 음수 방지
     if (newQuantity >= 1) {
       setQuantity(newQuantity);
+    }
+  };
+
+  // 장바구니 추가
+  const handleAddtoCart = async () => {
+    try {
+      await api.post('/api/cart/items', {
+        productId: product.prdNo,
+        quantity: quantity,
+      });
+      alert('장바구니에 추가되었습니다.');
+    } catch (error) {
+      console.error('장바구니 추가 실패:', error);
+      alert('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  // 바로 구매
+  const handleBuyNow = () => {
+    try {
+      const itemPrice = product.salePrice || product.prdPrice;
+      const totalAmount = itemPrice * quantity;
+      const deliveryFee = totalAmount >= 30000 ? 0 : 3000;
+
+      navigate('/checkout', {
+        state: {
+          selectedItems: [
+            {
+              productId: product.prdNo,
+              prdNo: product.prdNo,
+              name: product.prdName,
+              brand: product.prdCompany,
+              price: itemPrice,
+              quantity: quantity,
+              imageUrl: product.prdImg,
+            },
+          ],
+          summary: {
+            totalAmount: totalAmount,
+            deliveryFee: deliveryFee,
+            finalPaymentAmount: totalAmount + deliveryFee,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('바로 구매 실패:', error);
+      alert('바로 구매에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -33,15 +83,9 @@ function ProductInfo({ product, reviewSummary }) {
       <p className="product-company">{product.prdCompany}</p>
       <h1 className="product-name">{product.prdName}</h1>
       <p className="text-muted" style={{ fontSize: '14px', margin: '4px 0 8px 0' }}>
-        5가지 분자 크기의 히알루론산으로 깊은 보습을 선사하는 프리미엄 세럼
+        {product.prdDesc || '상품 설명 참조'}
       </p>
-      {/* 별점, 리뷰 */}
-      <div className="review-summary">
-        <span className="stars">{renderStars(reviewSummary.averageRating)}</span>
-        <span className="rating-number">{reviewSummary.averageRating}</span>
-        <span className="review-count">{reviewSummary.totalCount}개 리뷰</span>
-      </div>
-      <hr />
+
       {/* 가격 */}
       <div className="product-price">
         {/* toLocaleString() 사용해서 3자리마다 , 넣기*/}
@@ -49,14 +93,21 @@ function ProductInfo({ product, reviewSummary }) {
         <span className="won">원</span>
       </div>
 
-      {/* 옵션 ui만 <-----------수정/삭제 가능 */}
-      <Form.Group>
-        <Form.Label>용량 선택</Form.Label>
-        <Form.Select>
-          <option>{product.prdVolume}ml</option>
-          {/* 일단 임시용 하나, 아예 이부분 뺄수도 있음 */}
-        </Form.Select>
-      </Form.Group>
+      {/* 별점, 리뷰 */}
+      <div
+        className="review-summary"
+        onClick={() => {
+          onMoveToReview();
+        }}
+        style={{ cursor: 'pointer' }}
+        title="리뷰 보러가기"
+      >
+        <span className="stars">{renderStars(reviewSummary.averageRating)}</span>
+        <span className="rating-number">{reviewSummary.averageRating}</span>
+        <span className="review-count">{reviewSummary.totalCount}개 리뷰</span>
+      </div>
+      <hr />
+
       {/*수량 선택 */}
       <div className="quantity-selector">
         <button className="quantity-btn" onClick={() => handleQuantityChange(-1)}>
@@ -72,7 +123,7 @@ function ProductInfo({ product, reviewSummary }) {
       <div className="shipping-info">
         <div className="shipping-row">
           <span>🚚</span>
-          <span>배송비: 3,000원 (50,000원 이상 무료)</span>
+          <span>배송비: 3,000원 (30,000원 이상 무료)</span>
         </div>
         <div className="shipping-row">
           <span>📦</span>
@@ -89,11 +140,15 @@ function ProductInfo({ product, reviewSummary }) {
       {/* 버튼들*/}
       <div className="action-buttons-group">
         {/* 찜하기 버튼 */}
-        <button className="wishlist-btn">♡ 찜하기</button>
+        <button className="wishlist-btn">♡ 좋아요</button>
         {/* 장바구니, 바로구매 버튼 */}
         <div className="buy-buttons">
-          <button className="btn-custom btn-cart">장바구니</button>
-          <button className="btn-custom btn-buy">바로구매</button>
+          <button className="btn-custom btn-cart" onClick={handleAddtoCart}>
+            장바구니
+          </button>
+          <button className="btn-custom btn-buy" onClick={handleBuyNow}>
+            바로구매
+          </button>
         </div>
       </div>
     </div>

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Header } from './Header';
 import SideSticky from './SideSticky';
-import { DEMO_RECENT_ITEMS, DEMO_CART_COUNT } from '../data/headerMocks';
+import api from '../../../lib/apiClient';
+import { DEMO_RECENT_ITEMS } from './headerConstants';
 
 /**
  * 사용자용 전역 레이아웃. Header와 사이드 스티키를 묶어 렌더링하며,
@@ -19,17 +21,74 @@ const UserGlobalLayout = ({
   onRequireLogin,
   onCartClick,
 }) => {
+  const [recentItems, setRecentItems] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const { currentUser } = useSelector(state => state.user);
+  const userId = currentUser?.userId;
+
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 로그인한 경우에만 더미 최근 목록을 넘겨 UI를 시연한다.
-  const recentItems = isLoggedIn ? DEMO_RECENT_ITEMS : [];
+  // 로그인 상태 변경 시 최근 본 상품 API 호출
+  useEffect(() => {
+    if (!isLoggedIn || !userId) {
+      setRecentItems([]);
+      setCartCount(0);
+      return;
+    }
+
+    // 1. 최근 본 상품 조회
+    api
+      .get(`/api/users/${userId}/recent-products`)
+      .then(response => {
+        const rawData = response.data;
+        const list = Array.isArray(rawData) ? rawData : rawData?.data || [];
+
+        if (Array.isArray(list)) {
+          // SideSticky가 기대하는 포맷(id, title, image)으로 매핑
+          const mappedItems = list.map(item => {
+            return {
+              id: item.prdNo,
+              title: item.prdName,
+              image: item.prdImg ? `${process.env.PUBLIC_URL}/images/product/${item.prdImg}` : null,
+            };
+          });
+          // 최신순 정렬 (API가 최신순으로 준다고 가정하고 reverse 제거)
+          setRecentItems(mappedItems);
+        } else {
+          setRecentItems([]);
+        }
+      })
+      .catch(error => {
+        console.error('최근 본 상품 로드 실패:', error);
+        // API 실패 시 데모 데이터 폴백 (개발 편의용)
+        setRecentItems(DEMO_RECENT_ITEMS);
+      });
+
+    // 2. 장바구니 개수 조회
+    api
+      .get(`/api/users/${userId}/cart/count`)
+      .then(response => {
+        // 응답 구조: { resultCode: 200, resultMsg: "SUCCESS", data: { count: 3 } }
+        const result = response.data;
+        if (result && result.data && typeof result.data.count === 'number') {
+          setCartCount(result.data.count);
+        } else {
+          setCartCount(0);
+        }
+      })
+      .catch(error => {
+        console.error('장바구니 개수 로드 실패:', error);
+        setCartCount(0);
+      });
+  }, [isLoggedIn, userId]);
 
   return (
     <>
       <Header
         isLoggedIn={isLoggedIn}
+        userId={userId}
         onLoginChange={onLoginChange}
         onLoginClick={onLoginClick}
         onSignupClick={onSignupClick}
@@ -37,14 +96,14 @@ const UserGlobalLayout = ({
         onNavigate={onNavigate}
         userRole={userRole}
         onRoleChange={onRoleChange}
+        cartCount={cartCount}
       />
       <SideSticky
         isLoggedIn={isLoggedIn}
         recentItems={recentItems}
-        cartCount={DEMO_CART_COUNT}
         onRequireLogin={onRequireLogin}
-        onCartClick={onCartClick}
         onScrollTop={handleScrollTop}
+        onNavigate={onNavigate}
       />
     </>
   );

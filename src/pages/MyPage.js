@@ -1,20 +1,21 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Settings } from 'lucide-react';
 import ProfileEditModal from '../components/user/mypage/ProfileEditModal';
-import ProfileDetail from '../components/user/mypage/ProfileDetail';
 import DeliveryAddress from '../components/user/mypage/DeliveryAddress';
 import MemberWithdrawal from '../components/user/mypage/MemberWithdrawal';
 import PasswordChange from '../components/user/mypage/PasswordChange';
 import OrderHistory from '../components/user/mypage/OrderHistory';
 import ClaimHistory from '../components/user/mypage/ClaimHistory';
 import LikeList from '../components/user/mypage/LikeList';
-import IngredientModal from '../components/user/mypage/IngredientModal';
-import { fetchMyPageData, updateUserProfile } from '../features/user/userSlice';
+import RecentViewedProducts from '../components/user/mypage/RecentViewedProducts';
+import IngredientManagement from '../components/user/mypage/IngredientManagement';
+import IngredientAddModal from '../components/user/mypage/IngredientAddModal';
+import MyReviewList from '../components/user/mypage/MyReviewList';
+import { fetchMyPageData, updateUserProfile, addIngredient, removeIngredient } from '../features/user/userSlice';
 import '../styles/MyPage.css';
 import { FALLBACK_INGREDIENT_BLOCK_META } from 'components/user/data/mypageConstants';
-import { DEMO_ORDERS, DEMO_LIKES, DEMO_CLAIMS } from '../components/user/data/mypageMocks';
 
 /**
  * buildNavSections Helper
@@ -26,15 +27,15 @@ import { DEMO_ORDERS, DEMO_LIKES, DEMO_CLAIMS } from '../components/user/data/my
 const buildNavSections = user => [
   {
     title: '마이 쇼핑',
-    items: ['주문/배송 조회', '취소·반품/교환 내역', '좋아요'],
+    items: ['주문/배송 조회', '취소·반품/교환 내역', '최근 본 상품', '좋아요'],
   },
   {
     title: '마이 활동',
-    items: ['1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황'],
+    items: ['성분 관리', '1:1 문의 내역', `리뷰 (${user.reviews})`, '상품 Q&A 내역', '이벤트 참여 현황'],
   },
   {
     title: '마이 정보',
-    items: ['회원정보 수정', '배송지/환불계좌', '비밀번호 수정', '회원탈퇴'],
+    items: ['배송지/환불계좌', '비밀번호 수정', '회원탈퇴'],
   },
 ];
 
@@ -48,85 +49,96 @@ const buildNavSections = user => [
  */
 const MyPage = () => {
   const dispatch = useDispatch();
-  // const navigate = useNavigate();
-  const { profile: userProfile, ingredients } = useSelector(state => state.user);
+  const location = useLocation();
+  const { profile: userProfile, ingredients, likes, orderSteps, currentUser } = useSelector(state => state.user);
 
   // UI State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 프로필 수정 모달 상태
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 변경 모달 상태
-  const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false); // 성분 관리 모달 상태
-  const [viewMode, setViewMode] = useState('dashboard'); // 현재 보여줄 뷰 모드 ('dashboard' | 'profile' | 'delivery' | 'withdrawal')
+  const [isIngredientAddModalOpen, setIsIngredientAddModalOpen] = useState(false); // 성분 추가 모달 상태
+  const [viewMode, setViewMode] = useState('dashboard'); // 현재 보여줄 뷰 모드
   const [likeTab, setLikeTab] = useState('products'); // 'products' | 'brands'
+
+  // location state에 따른 viewMode 설정
+  useEffect(() => {
+    if (location.state?.view) {
+      setViewMode(location.state.view);
+    }
+  }, [location.state]);
 
   // Derived State: 사용자 정보가 변경될 때마다 네비게이션 메뉴 재생성
   const navSections = useMemo(() => buildNavSections(userProfile), [userProfile]);
 
-  // Calculate Order Counts from DEMO_ORDERS
-  const orderCounts = useMemo(() => {
-    const counts = {
-      주문접수: 0,
-      결제완료: 0,
-      배송준비중: 0,
-      배송중: 0,
-      배송완료: 0,
-    };
-    DEMO_ORDERS.forEach(order => {
-      if (counts[order.status] !== undefined) {
-        counts[order.status]++;
-      }
-    });
-    return counts;
-  }, []);
-
   useEffect(() => {
-    dispatch(fetchMyPageData());
-  }, [dispatch]);
+    // 로그인된 사용자 ID로 데이터 조회
+    if (currentUser && currentUser.userId) {
+      dispatch(fetchMyPageData(currentUser.userId));
+    }
+  }, [dispatch, currentUser]);
 
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
   const handleCloseEditModal = () => setIsEditModalOpen(false);
 
-  const handleShowProfileDetail = () => setViewMode('profile');
   const handleShowDashboard = () => setViewMode('dashboard');
 
   // Handler: 사이드바 메뉴 클릭 처리
   const handleNavClick = item => {
-    if (item === '회원정보 수정') setViewMode('profile');
-    else if (item === '배송지/환불계좌') setViewMode('delivery');
-    else if (item === '회원탈퇴') setViewMode('withdrawal');
-    else if (item === '비밀번호 수정') setIsPasswordModalOpen(true); // 비밀번호 수정은 모달 오픈
-    else if (item === '주문/배송 조회') setViewMode('order-history');
-    else if (item === '취소·반품/교환 내역') setViewMode('claim-history');
-    else if (item === '좋아요') setViewMode('like-list');
-    else {
+    if (item === '배송지/환불계좌') {
+      setViewMode('delivery');
+    } else if (item === '회원탈퇴') {
+      setViewMode('withdrawal');
+    } else if (item === '비밀번호 수정') {
+      setIsPasswordModalOpen(true);
+    } // 비밀번호 수정은 모달 오픈
+    else if (item === '주문/배송 조회') {
+      setViewMode('order-history');
+    } else if (item === '취소·반품/교환 내역') {
+      setViewMode('claim-history');
+    } else if (item === '최근 본 상품') {
+      setViewMode('recent-views');
+    } else if (item === '좋아요') {
+      setViewMode('like-list');
+    } else if (item === '성분 관리') {
+      setViewMode('ingredient-management');
+    } else if (item.startsWith('리뷰')) {
+      // "리뷰 (N)" 형태 대응
+      setViewMode('reviews');
+    } else {
       // For other items, maybe navigate or show placeholder
       console.log('Clicked:', item);
     }
   };
 
-  const handleSaveProfile = updatedData => {
+  const handleSaveProfile = async updatedData => {
     // Redux Thunk를 통해 프로필 업데이트 요청
-    dispatch(updateUserProfile(updatedData));
+    // currentUser.userId는 백엔드의 userId와 매핑되어 있음
+    const result = await dispatch(updateUserProfile({ userId: currentUser.userId, data: updatedData }));
+    if (updateUserProfile.fulfilled.match(result)) {
+      window.location.reload();
+    }
   };
 
   // 뷰 모드에 따른 메인 컨텐츠 렌더링
   const renderContent = () => {
     switch (viewMode) {
-      case 'profile':
-        return (
-          <ProfileDetail userProfile={userProfile} onEditProfile={handleOpenEditModal} onBack={handleShowDashboard} />
-        );
       case 'delivery':
         return <DeliveryAddress />;
       case 'withdrawal':
         return <MemberWithdrawal onCancel={handleShowDashboard} />;
       case 'order-history':
-        return <OrderHistory orders={DEMO_ORDERS} />;
+        return <OrderHistory userId={currentUser?.userId} />;
       case 'claim-history':
-        return <ClaimHistory claims={DEMO_CLAIMS} />;
+        return <ClaimHistory claims={[]} />; // 클레임 내역 API 미구현으로 빈 배열 전달
+      case 'recent-views':
+        return <RecentViewedProducts />;
       case 'like-list':
-        return <LikeList likes={DEMO_LIKES} />;
+        return <LikeList likes={likes} />;
+      case 'ingredient-management':
+        return <IngredientManagement ingredients={ingredients} onAddClick={() => setIsIngredientAddModalOpen(true)} />;
+      case 'reviews':
+        return <MyReviewList />;
       case 'dashboard':
       default:
         return (
@@ -138,7 +150,15 @@ const MyPage = () => {
                   <div className="user-avatar-placeholder"></div>
                   <div className="hero-text-group">
                     <p className="hero-greeting">
-                      <strong>{userProfile.name}</strong>님 반갑습니다.
+                      <strong>
+                        {userProfile.name}
+                        {userProfile.nickname && (
+                          <span style={{ fontWeight: 'normal', fontSize: '0.9em', marginLeft: '4px' }}>
+                            ({userProfile.nickname})
+                          </span>
+                        )}
+                      </strong>
+                      님 반갑습니다.
                     </p>
                     <div className="hero-tags-row">
                       {userProfile.tags &&
@@ -148,15 +168,6 @@ const MyPage = () => {
                           </span>
                         ))}
                     </div>
-                    {userProfile.skinConcerns && userProfile.skinConcerns.length > 0 && (
-                      <div className="hero-tags-row">
-                        {userProfile.skinConcerns.map(concern => (
-                          <span key={concern} className="skin-tag">
-                            {concern}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </div>
                 <div className="hero-links">
@@ -169,7 +180,6 @@ const MyPage = () => {
                     <span>회원정보 수정</span>
                     <Settings size={14} color="#fff" />
                   </button>
-                  <button onClick={handleShowProfileDetail}>나의프로필 &gt;</button>
                 </div>
               </div>
               <div className="hero-stats">
@@ -197,11 +207,11 @@ const MyPage = () => {
               </header>
               <div className="status-steps">
                 {[
-                  { label: '주문접수', value: orderCounts['주문접수'] },
-                  { label: '결제완료', value: orderCounts['결제완료'] },
-                  { label: '배송준비중', value: orderCounts['배송준비중'] },
-                  { label: '배송중', value: orderCounts['배송중'] },
-                  { label: '배송완료', value: orderCounts['배송완료'] },
+                  { label: '주문접수', value: orderSteps['주문접수'] || 0 },
+                  { label: '결제완료', value: orderSteps['결제완료'] || 0 },
+                  { label: '배송준비중', value: orderSteps['배송준비중'] || 0 },
+                  { label: '배송중', value: orderSteps['배송중'] || 0 },
+                  { label: '배송완료', value: orderSteps['배송완료'] || 0 },
                 ].map((step, index, arr) => (
                   <React.Fragment key={step.label}>
                     <div className="status-step">
@@ -217,7 +227,13 @@ const MyPage = () => {
             {/* 찜한 상품/브랜드 탭 뷰 */}
             <section className="mypage-favorite">
               <header>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '12px',
+                  }}
+                >
                   <h3>좋아요</h3>
                   <div style={{ display: 'flex', gap: '8px', fontSize: '14px' }}>
                     <span
@@ -249,7 +265,7 @@ const MyPage = () => {
               </header>
 
               {likeTab === 'products' ? (
-                DEMO_LIKES.products.length === 0 ? (
+                likes.products.length === 0 ? (
                   <div className="empty-state">
                     <div className="empty-icon">!</div>
                     <p>좋아요 상품이 없습니다.</p>
@@ -257,9 +273,14 @@ const MyPage = () => {
                 ) : (
                   <div
                     className="favorite-preview-list"
-                    style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}
+                    style={{
+                      display: 'flex',
+                      gap: '15px',
+                      overflowX: 'auto',
+                      paddingBottom: '10px',
+                    }}
                   >
-                    {DEMO_LIKES.products.slice(0, 5).map(item => (
+                    {likes.products.slice(0, 5).map(item => (
                       <div
                         key={item.id}
                         className="favorite-item"
@@ -324,7 +345,7 @@ const MyPage = () => {
                   </div>
                 )
               ) : /* 브랜드 탭 컨텐츠 */
-              DEMO_LIKES.brands.length === 0 ? (
+              likes.brands.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon">!</div>
                   <p>좋아요 브랜드가 없습니다.</p>
@@ -332,13 +353,22 @@ const MyPage = () => {
               ) : (
                 <div
                   className="favorite-preview-list"
-                  style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}
+                  style={{
+                    display: 'flex',
+                    gap: '15px',
+                    overflowX: 'auto',
+                    paddingBottom: '10px',
+                  }}
                 >
-                  {DEMO_LIKES.brands.slice(0, 5).map(brand => (
+                  {likes.brands.slice(0, 5).map(brand => (
                     <div
                       key={brand.id}
                       className="favorite-item"
-                      style={{ width: '120px', flexShrink: 0, textAlign: 'center' }}
+                      style={{
+                        width: '120px',
+                        flexShrink: 0,
+                        textAlign: 'center',
+                      }}
                     >
                       <div
                         style={{
@@ -394,8 +424,8 @@ const MyPage = () => {
             <section className="mypage-ingredients">
               <div className="ingredients-header">
                 <h3>즐겨 찾는 성분</h3>
-                <button type="button" onClick={() => setIsIngredientModalOpen(true)}>
-                  전체 보기 &gt;
+                <button type="button" onClick={() => setIsIngredientAddModalOpen(true)}>
+                  + 추가
                 </button>
               </div>
               <div className="ingredient-groups">
@@ -403,7 +433,12 @@ const MyPage = () => {
                   <article key={block.key} className={`ingredient-block ${block.key}`}>
                     <div className="ingredient-block-header">
                       <h4>{block.label}</h4>
-                      <button type="button" onClick={() => setIsIngredientModalOpen(true)}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setViewMode('ingredient-management');
+                        }}
+                      >
                         더보기
                       </button>
                     </div>
@@ -479,11 +514,30 @@ const MyPage = () => {
       {/* 비밀번호 변경 모달 컴포넌트 */}
       <PasswordChange isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} />
 
-      {/* 성분 관리 모달 */}
-      <IngredientModal
-        isOpen={isIngredientModalOpen}
-        onClose={() => setIsIngredientModalOpen(false)}
-        ingredients={ingredients}
+      {/* 성분 추가 모달 */}
+      <IngredientAddModal
+        isOpen={isIngredientAddModalOpen}
+        onClose={() => setIsIngredientAddModalOpen(false)}
+        currentIngredients={ingredients}
+        onAdd={(ingredient, listType) => {
+          // 성분 추가 API 호출
+          dispatch(
+            addIngredient({
+              userId: currentUser.userId,
+              ingredientId: ingredient.id,
+              type: listType, // 'FOCUS' | 'AVOID'
+            }),
+          );
+        }}
+        onRemove={(ingredient, listType) => {
+          dispatch(
+            removeIngredient({
+              userId: currentUser.userId,
+              ingredientId: ingredient.id,
+              type: listType, // 'FOCUS' | 'AVOID'
+            }),
+          );
+        }}
       />
     </div>
   );

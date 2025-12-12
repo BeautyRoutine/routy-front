@@ -98,10 +98,19 @@
   line-height: 1.8;
 }
 
-.info-text {
+.info-text-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
   color: #64748b;
   margin-bottom: 16px;
+}
+
+.info-text-row .highlight {
+  color: #5ab3ed;
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .address-table-header {

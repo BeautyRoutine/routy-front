@@ -1,0 +1,150 @@
+.checkout-page {
+  padding: 40px 0;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.checkout-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.checkout-layout {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.checkout-main {
+  flex: 2; /* 왼쪽 영역을 더 넓게 */
+}
+
+.checkout-sidebar {
+  flex: 1; /* 오른쪽 영역 */
+}
+
+.section-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.section-card h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+/* 입력 폼 스타일 */
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+/* 상품 목록 스타일 */
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-item-row:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 500;
+  color: #333;
+  margin-right: 10px;
+}
+
+.item-qty {
+  color: #888;
+  font-size: 14px;
+}
+
+.item-price {
+  font-weight: bold;
+}
+
+/* 오른쪽 결제창 스타일 */
+.summary-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: sticky; /* 스크롤 내려도 따라오게 */
+  top: 20px;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.price-row.total {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  color: #333;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.total-price {
+  color: #e11d48;
+  font-size: 24px;
+}
+
+.btn-pay {
+  width: 100%;
+  padding: 16px;
+  margin-top: 20px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-pay:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.btn-pay:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
