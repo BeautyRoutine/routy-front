@@ -38,7 +38,7 @@ const RecentViewedRecommend = () => {
           brand: p.prdCompany,
           rating: p.avgRating || 0,
           reviewText: `${p.reviewCount || 0}개의 리뷰`,
-          img: `/images/${p.prdImg}`,
+          img: `${process.env.PUBLIC_URL}/images/product/${p.prdImg}`,
         }));
 
         setProducts(converted);
@@ -71,9 +71,7 @@ const RecentViewedRecommend = () => {
     <div className="container my-5">
       <div className="mb-3" style={{ textAlign: 'left' }}>
         <h4 className="fw-bold mb-1">최근 본 카테고리 기반 추천</h4>
-        <p className="text-muted small mb-0">
-          최근에 본 상품을 기반으로 추천드려요
-        </p>
+        <p className="text-muted small mb-0">최근에 본 상품을 기반으로 추천드려요</p>
       </div>
 
       <div className="row row-cols-1 row-cols-md-4 g-4">
