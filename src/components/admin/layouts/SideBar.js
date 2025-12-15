@@ -84,8 +84,8 @@ function Sidebar() {
               배송 목록
             </Link>
             <Link
-              to="/admin/order/request"
-              className={`submenu-link ${path.includes('/admin/order/request') ? 'active' : ''}`}
+              to="/admin/order/claim"
+              className={`submenu-link ${path.includes('/admin/order/claim') ? 'active' : ''}`}
             >
               교환&환불 요청 조회
             </Link>
