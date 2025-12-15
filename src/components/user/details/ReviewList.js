@@ -5,9 +5,9 @@ import './ReviewList.css';
 import { formatUserInfo } from '../../common/reviewUtils';
 import ReviewTagList from 'components/user/review/ReviewTagList';
 
-const ReviewList = ({ reviewInfo, onLikeToggle }) => {
-  // 정렬 상태 (latest: 최신순, rating: 평점순, like: 좋아요순)
-  const [sortOption, setSortOption] = useState('latest');
+const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
+  // 정렬 상태 (추천순, new: 최신순, rating: 평점순, like: 좋아요순)
+  const [sortOption, setSortOption] = useState('recommended');
 
   //  모달 상태 on off, 모달 담을 state
   const [showModal, setShowModal] = useState(false);
@@ -37,8 +37,20 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
   //페이지 변경
   const handlePageChange = pageNumber => {
     setActivePage(pageNumber);
-    console.log(`페이지 변경 요청: ${pageNumber}, 정렬: ${sortOption}`);
-    // api 받아와야함
+    if (onFilterChange) {
+      onFilterChange(pageNumber, sortOption);
+    }
+  };
+
+  //정렬 변경용 핸들러
+  const handleSortClick = newSort => {
+    setSortOption(newSort);
+    setActivePage(1); // 정렬 바꾸면 1페이지로 초기화
+
+    // 부모에게 데이터 다시 달라고 요청
+    if (onFilterChange) {
+      onFilterChange(1, newSort);
+    }
   };
 
   //페이지수
@@ -112,15 +124,25 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
 
       {/* 정렬 옵션 */}
       <div className="sort-tab-area">
-        <span className={`sort-btn ${sortOption === 'latest' ? 'active' : ''}`} onClick={() => setSortOption('latest')}>
+        <span
+          className={`sort-btn ${sortOption === 'recommended' ? 'active' : ''}`}
+          onClick={() => handleSortClick('recommended')}
+        >
+          추천순
+        </span>
+        <span>|</span>
+        <span className={`sort-btn ${sortOption === 'new' ? 'active' : ''}`} onClick={() => handleSortClick('new')}>
           최신순
         </span>
         <span>|</span>
-        <span className={`sort-btn ${sortOption === 'rating' ? 'active' : ''}`} onClick={() => setSortOption('rating')}>
+        <span
+          className={`sort-btn ${sortOption === 'rating' ? 'active' : ''}`}
+          onClick={() => handleSortClick('rating')}
+        >
           평점순
         </span>
         <span>|</span>
-        <span className={`sort-btn ${sortOption === 'like' ? 'active' : ''}`} onClick={() => setSortOption('like')}>
+        <span className={`sort-btn ${sortOption === 'like' ? 'active' : ''}`} onClick={() => handleSortClick('like')}>
           좋아요순
         </span>
       </div>

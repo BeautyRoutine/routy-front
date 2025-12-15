@@ -3,7 +3,7 @@ import { Tabs, Tab, Button, Accordion } from 'react-bootstrap';
 import './ProductDetailTabs.css';
 import ReviewList from './ReviewList';
 import ReviewWriteModal from 'components/user/review/ReviewWriteModal';
-
+import api from 'lib/apiClient';
 // 데이터 념겨받기
 function ProductDetailTabs({
   productInfo,
@@ -13,6 +13,7 @@ function ProductDetailTabs({
   activeTab,
   onTabSelect,
   onLikeToggle,
+  onReviewUpdate,
   userInfo,
 }) {
   // 기본값은 상품설명창, 현재 탭 기억용 state->상위페이지에서 관리
@@ -34,6 +35,27 @@ function ProductDetailTabs({
       return;
     }
     setShowWriteModal(true);
+  };
+
+  //리뷰 정렬
+  const handleReviewFilterChange = async (page, sort) => {
+    try {
+      const userNoParam = userInfo ? `&userNo=${userInfo.userNo}` : '';
+
+      // sort 값이 이미 'new', 'recommended', 'rating', 'like' 중 하나이므로 그대로 전송
+      const response = await api.get(
+        `/api/products/${productInfo.prdNo}/reviews?page=${page}&limit=10&sort=${sort}${userNoParam}`,
+      );
+
+      if (response.data && response.data.resultMsg === 'SUCCESS') {
+        // 부모 컴포넌트(ProductDetail)의 상태 업데이트 함수 호출
+        if (onReviewUpdate) {
+          onReviewUpdate(response.data.data);
+        }
+      }
+    } catch (error) {
+      console.error('리뷰 정렬/페이징 실패', error);
+    }
   };
 
   return (
@@ -176,7 +198,7 @@ function ProductDetailTabs({
                 리뷰 작성하기
               </Button>
             </div>
-            <ReviewList reviewInfo={reviewInfo} onLikeToggle={onLikeToggle} />
+            <ReviewList reviewInfo={reviewInfo} onLikeToggle={onLikeToggle} onFilterChange={handleReviewFilterChange} />
           </div>
         </Tab>
 
