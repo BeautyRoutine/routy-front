@@ -45,7 +45,7 @@ const OrderHistory = ({ orderList }) => {
   const openModal = (order, mode) => {
     setSelectedOrder({
       orderNo: order.orderNo,
-      qnaType: mode === 'return' ? 5 : 6, // 5=반품, 6=교환
+      qnaType: mode === 'return' ? 7 : 8, // 7=환불, 8=교환
     });
     setModalMode(mode);
     setModalOpen(true);
