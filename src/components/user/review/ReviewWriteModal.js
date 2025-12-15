@@ -102,9 +102,19 @@ const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitt
         onHide();
         if (onReviewSubmitted) onReviewSubmitted();
       } else {
-        // HTTP 200이지만 논리적 에러인 경우 (예: DB 에러 등)
+        //에러메세지 담기
+        let errorMsg = response.data.resultMsg || '알 수 없는 오류';
+
+        // "BAD_REQUEST: " 문자열 제거
+        if (errorMsg.includes(': ')) {
+          errorMsg = errorMsg.split(': ')[1];
+        }
+
         console.error('서버 에러 응답:', response.data);
-        alert('리뷰 등록 실패: ' + (response.data.message || '알 수 없는 오류'));
+        alert(errorMsg); // errorMsg로 받기
+        if (errorMsg.includes('이미') || errorMsg.includes('작성하셨습니다')) {
+          onHide();
+        }
       }
     } catch (error) {
       console.error('리뷰 등록 실패', error);

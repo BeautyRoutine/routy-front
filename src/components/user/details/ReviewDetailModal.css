@@ -100,3 +100,24 @@
 .modal-image-section .carousel-control-next {
   right: 0; /* 완전 오른쪽으로 밀기 */
 }
+
+.modal-image-section {
+  position: relative !important;
+}
+
+.modal-image-section .carousel,
+.modal-image-section .carousel-inner,
+.modal-image-section .carousel-item {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.modal-image-section .carousel-control-prev,
+.modal-image-section .carousel-control-next {
+  width: 10% !important; /* 클릭하기 편하게 5% -> 10% 추천 */
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  /* 배경색이 없으면 흰색 배경에서 안 보일 수 있으니 호버 시라도 보이게 */
+  opacity: 0.5;
+}
