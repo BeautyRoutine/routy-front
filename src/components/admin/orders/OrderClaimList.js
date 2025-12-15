@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -82,7 +82,7 @@ const OrderClaimList = () => {
   const items = useSelector(state => state.admDeliveries.list);
 
   // URL에서 파라미터 읽기
-  const getParamValue = field => searchParams.get(field.urlParam) || '';
+  const getParamValue = useCallback(field => searchParams.get(field.urlParam) || '', [searchParams]);
   const currentPage = Number(searchParams.get(PAGE_PARAM.urlParam)) || 1;
 
   // Form 상태
@@ -143,7 +143,6 @@ const OrderClaimList = () => {
       setLoading(true);
       setError('');
       try {
-        console.log(apiParams);
         const result = await axios.get(`${apiBaseUrl}/orders/claim/list`, { params: apiParams });
         dispatch(setItems(result.data.data.list));
         dispatch(setItemsCount(result.data.data.total));
@@ -156,7 +155,7 @@ const OrderClaimList = () => {
       }
     };
     loadData();
-  }, [searchParams, pageGap, apiBaseUrl, dispatch]);
+  }, [searchParams, currentPage, pageGap, getParamValue, apiBaseUrl, dispatch]);
 
   return (
     <div className="container-fluid">

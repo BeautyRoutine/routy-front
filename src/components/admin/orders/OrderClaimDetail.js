@@ -20,20 +20,20 @@ const OrderDeliveryDetail = () => {
   const itemList = useSelector(state => state.admDeliveries.list);
   const selectedItem = useSelector(state => state.admDeliveries.selectedItem);
 
-  // 삭제
-  const handleDelete = async () => {
-    const confirmDelete = window.confirm('정말로 이 택배 정보를 삭제하시겠습니까?');
-    if (!confirmDelete) return;
+  // // 삭제
+  // const handleDelete = async () => {
+  //   const confirmDelete = window.confirm('정말로 이 택배 정보를 삭제하시겠습니까?');
+  //   if (!confirmDelete) return;
 
-    try {
-      await axios.delete(`${apiBaseUrl}/orders/delivery/${qnaNo}`);
-      alert('데이터 삭제되었습니다.');
-      navigate('/admin/order/delivery');
-    } catch (err) {
-      console.error(err);
-      alert('데이터 삭제 중 오류가 발생했습니다.');
-    }
-  };
+  //   try {
+  //     await axios.delete(`${apiBaseUrl}/orders/delivery/${qnaNo}`);
+  //     alert('데이터 삭제되었습니다.');
+  //     navigate('/admin/order/delivery');
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert('데이터 삭제 중 오류가 발생했습니다.');
+  //   }
+  // };
 
   useEffect(() => {
     const loadDelivery = async () => {
