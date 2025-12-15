@@ -13,7 +13,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
   const isLoggedIn = !!localStorage.getItem('token');
 
   // API 응답 → 카드용 데이터 변환
-  const convertToCard = (list) =>
+  const convertToCard = list =>
     list.map((p, index) => ({
       id: p.prdNo,
       name: p.prdName,
@@ -21,12 +21,12 @@ const SimilarSkinProducts = ({ userSkin }) => {
       rating: p.avgRating ? Number(p.avgRating) : 4.0,
       price: p.prdPrice,
       img: p.prdImg
-        ? `/images/${p.prdImg}`
-        : `/images/product${index + 1}.jpg`,
+        ? `${process.env.PUBLIC_URL}/images/product/${p.prdImg}`
+        : `${process.env.PUBLIC_URL}/images/product/product${index + 1}.jpg`,
     }));
 
   // 장바구니 추가
-  const handleAddToCart = async (prdNo) => {
+  const handleAddToCart = async prdNo => {
     if (!isLoggedIn) {
       alert('로그인이 필요합니다.');
       navigate('/login');
@@ -48,10 +48,9 @@ const SimilarSkinProducts = ({ userSkin }) => {
   useEffect(() => {
     const loadFallback = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/products/list/fallback`,
-          { params: { limit: 4 } }
-        );
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/products/list/fallback`, {
+          params: { limit: 4 },
+        });
         setProducts(convertToCard(res.data.data || []));
       } catch (err) {
         console.error('Fallback error:', err);
@@ -60,10 +59,9 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
     const loadSkinRecommend = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/products/list/skin_type`,
-          { params: { limit: 4, skin: Number(userSkin) } }
-        );
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/products/list/skin_type`, {
+          params: { limit: 4, skin: Number(userSkin) },
+        });
         setProducts(convertToCard(res.data.data || []));
       } catch (err) {
         console.error('Skin recommend error:', err);
@@ -83,20 +81,15 @@ const SimilarSkinProducts = ({ userSkin }) => {
     <div className="container my-5 text-center similar-skin-section">
       <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
 
-      <p className="text-muted small mb-4">
-        로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!
-      </p>
+      <p className="text-muted small mb-4">로그인하면 당신의 피부 타입에 맞는 맞춤형 추천을 받을 수 있어요!</p>
 
       {/* 카드 목록 */}
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
-        {products.map((p) => (
+        {products.map(p => (
           <div key={p.id} className="col">
             <div className="card h-100 border-0 shadow-sm product-card position-relative">
               <div className="position-relative">
-                <Heart
-                  size={22}
-                  className="position-absolute top-0 end-0 m-3 heart-icon"
-                />
+                <Heart size={22} className="position-absolute top-0 end-0 m-3 heart-icon" />
                 <img
                   src={p.img}
                   className="card-img-top product-img"
@@ -110,17 +103,12 @@ const SimilarSkinProducts = ({ userSkin }) => {
                 <h6 className="fw-bold mb-1">{p.name}</h6>
                 <p className="text-muted small mb-1">{p.brand}</p>
                 <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
-                <h6 className="fw-bold text-dark mb-3">
-                  {p.price.toLocaleString()}원
-                </h6>
+                <h6 className="fw-bold text-dark mb-3">{p.price.toLocaleString()}원</h6>
               </div>
 
               {/* 장바구니 버튼 */}
               <div className="p-3">
-                <button
-                  className="btn cart-btn w-100"
-                  onClick={() => handleAddToCart(p.id)}
-                >
+                <button className="btn cart-btn w-100" onClick={() => handleAddToCart(p.id)}>
                   장바구니
                 </button>
               </div>
@@ -142,16 +130,10 @@ const SimilarSkinProducts = ({ userSkin }) => {
       {/* 로그인 유도 */}
       {!isLoggedIn && (
         <div className="mt-3">
-          <button
-            className="btn btn-primary rounded-pill px-4 me-2"
-            onClick={() => navigate('/login')}
-          >
+          <button className="btn btn-primary rounded-pill px-4 me-2" onClick={() => navigate('/login')}>
             로그인
           </button>
-          <button
-            className="btn btn-outline-primary rounded-pill px-4"
-            onClick={() => navigate('/signup')}
-          >
+          <button className="btn btn-outline-primary rounded-pill px-4" onClick={() => navigate('/signup')}>
             회원가입
           </button>
         </div>
