@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'react-bootstrap';
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewSummary.css';
-import { formatUserInfo, classifyFeedback } from '../../common/reviewUtils';
+import { formatUserInfo } from '../../common/reviewUtils';
+import ReviewTagList from 'components/user/review/ReviewTagList';
 
 const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
   // 베스트 리뷰 선정 기준
@@ -185,33 +186,8 @@ const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
                     </div>
                     {/* 하단: 태그*/}
                     <div>
-                      <div className="mt-2">
-                        {review.feedback &&
-                          (() => {
-                            const { positive, negative } = classifyFeedback(review.feedback);
-                            return (
-                              <div style={{ fontSize: '11px' }}>
-                                {/* 긍정 */}
-                                {positive.length > 0 && (
-                                  <div className="d-flex mb-1 overflow-hidden text-nowrap">
-                                    <span className="me-1 fw-bold text-primary">Good</span>
-                                    <span className="text-muted text-truncate">
-                                      {positive.map(t => `#${t}`).join(' ')}
-                                    </span>
-                                  </div>
-                                )}
-                                {/* 부정 */}
-                                {negative.length > 0 && (
-                                  <div className="d-flex overflow-hidden text-nowrap">
-                                    <span className="me-1 fw-bold text-danger">Bad</span>
-                                    <span className="text-muted text-truncate">
-                                      {negative.map(t => `#${t}`).join(' ')}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })()}
+                      <div className="review-tags mt-2">
+                        <ReviewTagList feedback={review.feedback} />
                       </div>
                       {/* 하단: 좋아요*/}
                       <div className="like-btn-area">

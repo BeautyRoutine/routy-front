@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
-import { formatUserInfo, classifyFeedback } from '../../common/reviewUtils';
+import { formatUserInfo } from '../../common/reviewUtils';
+import ReviewTagList from 'components/user/review/ReviewTagList';
 
 const ReviewList = ({ reviewInfo, onLikeToggle }) => {
   // 정렬 상태 (latest: 최신순, rating: 평점순, like: 좋아요순)
@@ -175,49 +176,7 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
 
             {/* 태그*/}
             <div className="review-footer">
-              {/* 태그 리스트가 있을 때만 실행 */}
-              {review.feedback &&
-                review.feedback.length > 0 &&
-                (() => {
-                  // 1. 분류하기
-                  const { positive, negative } = classifyFeedback(review.feedback);
-
-                  return (
-                    <div className="tag-list-container d-flex flex-column gap-1 mb-2">
-                      {/* 2. 윗줄: 긍정 (데이터 없으면 안 보임) */}
-                      {positive.length > 0 && (
-                        <div className="d-flex flex-wrap gap-1">
-                          <span style={{ fontSize: '12px', fontWeight: 'bold', marginRight: '4px' }}>👍</span>
-                          {positive.map((tag, idx) => (
-                            <span
-                              key={`p-${idx}`}
-                              className="tag-badge"
-                              style={{ background: '#f0f8ff', color: '#333', border: '1px solid #cce5ff' }}
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* 3. 아랫줄: 부정 (데이터 없으면 안 보임) */}
-                      {negative.length > 0 && (
-                        <div className="d-flex flex-wrap gap-1">
-                          <span style={{ fontSize: '12px', fontWeight: 'bold', marginRight: '4px' }}>👎</span>
-                          {negative.map((tag, idx) => (
-                            <span
-                              key={`n-${idx}`}
-                              className="tag-badge"
-                              style={{ background: '#fff5f5', color: '#333', border: '1px solid #ffc9c9' }}
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
+              <ReviewTagList feedback={review.feedback} />
 
               {/* 좋아요 */}
               <div className="like-button-area">

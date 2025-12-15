@@ -1,7 +1,8 @@
 import React from 'react';
 import { Modal, Carousel } from 'react-bootstrap';
 import './ReviewDetailModal.css';
-import { formatUserInfo, classifyFeedback } from '../../common/reviewUtils';
+import { formatUserInfo } from '../../common/reviewUtils';
+import ReviewTagList from 'components/user/review/ReviewTagList';
 
 //show, onHide, review  onlike 받아오기
 const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
@@ -75,50 +76,13 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
               <span className="ms-2 fw-bold">{review.revStar}</span>
             </div>
 
-            {/* 옵션 정보 */}
-            <p className="text-muted small mb-4">옵션: 더미데이터입니다. 이게 문제인지 테스트중입니다.</p>
-
             {/* 스크롤 가능한 본문 내용 */}
             <div className="modal-scroll-content">
               <p className="review-text-full">{review.content}</p>
 
               {/*반응*/}
-              <div className="modal-scroll-content">
-                <p className="review-text-full">{review.content}</p>
-
-                {/* 태그 영역 */}
-                <div className="review-tags mt-3">
-                  {review.feedback &&
-                    (() => {
-                      const { positive, negative } = classifyFeedback(review.feedback);
-                      return (
-                        <div className="d-flex flex-column gap-2">
-                          {/* 긍정 */}
-                          {positive.length > 0 && (
-                            <div className="d-flex align-items-center flex-wrap gap-1">
-                              <strong style={{ fontSize: '13px', minWidth: '40px' }}>장점</strong>
-                              {positive.map((t, i) => (
-                                <span key={i} className="review-tag" style={{ background: '#e3f2fd' }}>
-                                  #{t}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          {/* 부정 */}
-                          {negative.length > 0 && (
-                            <div className="d-flex align-items-center flex-wrap gap-1">
-                              <strong style={{ fontSize: '13px', minWidth: '40px' }}>단점</strong>
-                              {negative.map((t, i) => (
-                                <span key={i} className="review-tag" style={{ background: '#ffebee' }}>
-                                  #{t}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                </div>
+              <div className="review-tags mt-3">
+                <ReviewTagList feedback={review.feedback} />
               </div>
             </div>
 
