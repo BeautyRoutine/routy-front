@@ -2,6 +2,19 @@
  * ORDERS 테이블 관련 특정 필드값의 텍스트 변환값을 반환하는 용도.
  */
 
+// 주문 상태 텍스트 변환
+export const getODStatusText = value => {
+  if (value === 1) return '주문서';
+  if (value === 2) return '결제완료';
+  if (value === 3) return '준비중';
+  if (value === 4) return '배송중';
+  if (value === 5) return '완료';
+  if (value === 6) return '취소';
+  if (value === 7) return '환불';
+  if (value === 8) return '교환';
+  return '';
+};
+
 // 배송 출입방법 텍스트 변환
 export const getDeliveryKeyText = (type, key) => {
   if (type === 2) return '자유출입가능';
@@ -9,7 +22,7 @@ export const getDeliveryKeyText = (type, key) => {
   return `공동현관번호: ${key ?? '-'}`;
 };
 
-// 접수 종류 텍스트 변환
+// 택배 접수 종류 텍스트 변환
 export const getTypeText = value => {
   if (value === 11) return '배송';
   if (value === 12) return '재배송';
@@ -22,13 +35,30 @@ export const getTypeText = value => {
 
 // 배송 상태 텍스트 변환
 export const getStatusText = value => {
-  if (value === 1) return '주문완료';
-  if (value === 2) return '준비중';
+  if (value === 1) return '배송준비중';
+  if (value === 2) return '집화완료';
   if (value === 3) return '배송중';
-  if (value === 4) return '배송완료';
-  if (value === 5) return '취소';
-  if (value === 6) return '반품';
-  if (value === 7) return '교환';
+  if (value === 4) return '지점 도착';
+  if (value === 5) return '배송출발';
+  if (value === 6) return '배송 완료';
+  return '';
+};
+
+// QA 요청 타입 텍스트 변환
+export const getQATypeText = value => {
+  if (value === 1) return '제품 문의';
+  if (value === 2) return '주문 문의';
+  if (value === 3) return '리뷰 신고';
+  if (value === 7) return '환불 요청';
+  if (value === 8) return '교환 요청';
+  return '';
+};
+
+// QA 요청 상태 텍스트 변환
+export const getQAStatusText = value => {
+  if (value === 1) return '등록';
+  if (value === 2) return '진행중';
+  if (value === 3) return '완료';
   return '';
 };
 

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectItem, clearSelectedItem } from 'features/orders/admOrdersSlice';
 
-import { getDeliveryKeyText } from 'components/common/orderUtils';
+import { getODStatusText, getDeliveryKeyText } from 'components/common/orderUtils';
 import { useHandleBack, RenderingStateHandler } from 'components/common/commonUtils';
 
 import OrderPrdTable from './OrderPrdTable';
@@ -65,7 +65,11 @@ const OrderDetail = () => {
               <tbody>
                 <tr>
                   <th className="bg-light">주문번호</th>
-                  <td>{selectedItem.odNo}</td>
+                  <td colSpan={3}>{selectedItem.odNo}</td>
+                </tr>
+                <tr>
+                  <th className="bg-light">주문 상태</th>
+                  <td>{getODStatusText(selectedItem.odStatus)}</td>
                   <th className="bg-light">결제일</th>
                   <td>{selectedItem.odRegdate}</td>
                 </tr>
