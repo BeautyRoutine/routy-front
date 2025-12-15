@@ -15,11 +15,11 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
           {/* 왼쪽 이미지*/}
           <div className="modal-image-section">
             {review.images && review.images.length > 0 ? (
-              <Carousel interval={null} indicators={review.images.length > 1}>
+              <Carousel interval={null} indicators={review.images.length > 1} variant="dark">
                 {review.images.map((imgUrl, idx) => (
                   <Carousel.Item key={idx}>
                     <img
-                      src={`${process.env.PUBLIC_URL}/${imgUrl}`}
+                      src={`${process.env.PUBLIC_URL}${imgUrl}`}
                       alt={`리뷰 ${idx}`}
                       className="d-block w-100 modal-img-full"
                       style={{ objectFit: 'contain', height: '100%' }}

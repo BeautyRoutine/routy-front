@@ -74,7 +74,6 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
         <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
         <h4>아직 등록된 리뷰가 없습니다.</h4>
         <p>첫 번째 리뷰를 작성하고 포인트를 받아보세요!</p>
-        <button className="btn btn-primary mt-3">리뷰 작성하기</button>
       </div>
     );
   }
@@ -167,11 +166,31 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
             </div>
 
             {/* 본문: 사진 먼저 나오고 텍스트 */}
-            <div className="review-body">
-              {/* 사진이 있을 때만 표시 */}
-              {review.revImg && <img src={review.revImg} alt="리뷰 사진" className="review-attached-img" />}
+            <div className="review-body d-flex justify-content-between" style={{ minHeight: '80px' }}>
+              {/* 텍스트*/}
+              <div className="review-text-wrapper" style={{ flex: 1, paddingRight: '15px' }}>
+                <p className="review-text-content" style={{ margin: 0, wordBreak: 'break-all' }}>
+                  {review.content}
+                </p>
+              </div>
 
-              <p className="review-text-content">{review.content}</p>
+              {/* 이미지 (오른쪽에 고정 크기로 배치) */}
+              {(review.revImg || (review.images && review.images.length > 0)) && (
+                <div className="review-image-wrapper" style={{ width: '80px', height: '80px', flexShrink: 0 }}>
+                  <img
+                    src={`${process.env.PUBLIC_URL}${review.revImg || review.images[0]}`}
+                    alt="리뷰 썸네일"
+                    className="review-attached-img"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                      border: '1px solid #eee',
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* 태그*/}
