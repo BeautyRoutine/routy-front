@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import { FEEDBACK_OPTIONS } from '../../common/reviewUtils';
-import api from 'lib/apiClient'; 
+import api from 'lib/apiClient';
 
 const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitted }) => {
   const [rating, setRating] = useState(5);
@@ -68,9 +68,10 @@ const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitt
         revStar: rating,
         content: content,
         odNo: odNo || 0, // 상품상세는 0, 마이페이지는 실제 주문번호
-        userSkin: userInfo?.userSkin, // 유저 정보 넣어서 보냄
-        userColor: userInfo?.userColor, // 유저 정보 넣어서 보냄
+        userSkin: userInfo?.userSkin || 0, // 유저 정보 넣어서 보냄
+        userColor: userInfo?.userColor || null, // 유저 정보 넣어서 보냄
         feedback: selectedFeedbacks, // [101, 501] 코드 리스트
+        revRank: userInfo?.revRank || 1,
       };
 
       // 2. JSON을 Blob으로 변환해서 'data' 키에 추가 (Spring @RequestPart("data")와 매칭)
@@ -83,15 +84,21 @@ const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitt
       });
 
       // 4. API 전송
-      await api.post(`/api/products/${prdNo}/reviews`, formData, {
+      const response = await api.post(`/api/products/${prdNo}/reviews`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      alert('리뷰가 등록되었습니다!');
-      onHide(); // 모달 닫기
-      if (onReviewSubmitted) onReviewSubmitted(); // 부모에게 알림(리스트 갱신용)
+      if (response.data && response.data.resultMsg === 'SUCCESS') {
+        alert('리뷰가 등록되었습니다!');
+        onHide();
+        if (onReviewSubmitted) onReviewSubmitted();
+      } else {
+        // HTTP 200이지만 논리적 에러인 경우 (예: DB 에러 등)
+        console.error('서버 에러 응답:', response.data);
+        alert('리뷰 등록 실패: ' + (response.data.message || '알 수 없는 오류'));
+      }
     } catch (error) {
       console.error('리뷰 등록 실패', error);
       alert('리뷰 등록 중 오류가 발생했습니다.');
