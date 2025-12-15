@@ -1,7 +1,7 @@
 import React from 'react';
-import { Modal } from 'react-bootstrap';
+import { Modal, Carousel } from 'react-bootstrap';
 import './ReviewDetailModal.css';
-import { formatUserInfo } from '../../common/reviewUtils';
+import { formatUserInfo, classifyFeedback } from '../../common/reviewUtils';
 
 //show, onHide, review  onlike 받아오기
 const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
@@ -13,10 +13,21 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
         <div className="modal-content-wrapper">
           {/* 왼쪽 이미지*/}
           <div className="modal-image-section">
-            {review.revImg ? (
-              <img src={review.revImg} alt="리뷰 상세" className="modal-img-full" />
+            {review.images && review.images.length > 0 ? (
+              <Carousel interval={null} indicators={review.images.length > 1}>
+                {review.images.map((imgUrl, idx) => (
+                  <Carousel.Item key={idx}>
+                    <img
+                      src={`${process.env.PUBLIC_URL}/${imgUrl}`}
+                      alt={`리뷰 ${idx}`}
+                      className="d-block w-100 modal-img-full"
+                      style={{ objectFit: 'contain', height: '100%' }}
+                    />
+                  </Carousel.Item>
+                ))}
+              </Carousel>
             ) : (
-              <div className="no-image-placeholder">이미지가 없는 리뷰입니다.</div>
+              <div className="no-image-placeholder">이미지 없음</div>
             )}
           </div>
 
@@ -71,14 +82,43 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
             <div className="modal-scroll-content">
               <p className="review-text-full">{review.content}</p>
 
-              {/* 태그 */}
-              <div className="review-tags mt-3">
-                {review.feedback &&
-                  review.feedback.map((tag, idx) => (
-                    <span key={idx} className="review-tag">
-                      #{tag}
-                    </span>
-                  ))}
+              {/*반응*/}
+              <div className="modal-scroll-content">
+                <p className="review-text-full">{review.content}</p>
+
+                {/* 태그 영역 */}
+                <div className="review-tags mt-3">
+                  {review.feedback &&
+                    (() => {
+                      const { positive, negative } = classifyFeedback(review.feedback);
+                      return (
+                        <div className="d-flex flex-column gap-2">
+                          {/* 긍정 */}
+                          {positive.length > 0 && (
+                            <div className="d-flex align-items-center flex-wrap gap-1">
+                              <strong style={{ fontSize: '13px', minWidth: '40px' }}>장점</strong>
+                              {positive.map((t, i) => (
+                                <span key={i} className="review-tag" style={{ background: '#e3f2fd' }}>
+                                  #{t}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {/* 부정 */}
+                          {negative.length > 0 && (
+                            <div className="d-flex align-items-center flex-wrap gap-1">
+                              <strong style={{ fontSize: '13px', minWidth: '40px' }}>단점</strong>
+                              {negative.map((t, i) => (
+                                <span key={i} className="review-tag" style={{ background: '#ffebee' }}>
+                                  #{t}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                </div>
               </div>
             </div>
 
