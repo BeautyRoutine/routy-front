@@ -87,7 +87,7 @@ function Sidebar() {
               to="/admin/order/claim"
               className={`submenu-link ${path.includes('/admin/order/claim') ? 'active' : ''}`}
             >
-              교환&환불 요청 조회
+              환불&교환 요청 조회
             </Link>
             <Link
               to="/admin/order/payout"

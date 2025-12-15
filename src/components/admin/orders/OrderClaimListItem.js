@@ -11,7 +11,7 @@ const OrderClaimListItem = ({ item }) => {
 
   const handleClick = () => {
     dispatch(selectItem(item));
-    navigate(`/admin/order/delivery/${item.delvNo}`);
+    navigate(`/admin/order/claim/${item.qnaNo}`);
   };
 
   return (

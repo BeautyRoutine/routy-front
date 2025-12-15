@@ -35,7 +35,16 @@ const OrderDeliveryEdit = () => {
   // 저장
   const handleSave = async () => {
     try {
-      await axios.put(`${apiBaseUrl}/orders/delivery/${delvNo}`, changedFields);
+      setChangedFields(prev => ({
+        ...prev,
+        qnaNo: formData.qnaNo,
+        odNo: formData.odNo,
+      }));
+      await axios.put(`${apiBaseUrl}/orders/delivery/${delvNo}`, {
+        ...changedFields,
+        qnaNo: formData.qnaNo,
+        odNo: formData.odNo,
+      });
       alert('✅ 수정되었습니다!');
       dispatch(clearSelectedItem());
       navigate(`/admin/order/delivery/${delvNo}`);

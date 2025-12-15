@@ -13,6 +13,7 @@ const OrderDeliveryAdd = () => {
 
   const [item, setItem] = useState({
     odNo: '',
+    qnaNo: '',
     delvCompany: '',
     delvComNum: '',
     delvType: 11,
@@ -28,8 +29,13 @@ const OrderDeliveryAdd = () => {
   // Get Param
   useEffect(() => {
     const odNoParam = searchParams.get('od_no');
+    const qnaNoParam = searchParams.get('qna_no');
     if (odNoParam) {
-      setItem(prev => ({ ...prev, odNo: odNoParam }));
+      setItem(prev => ({
+        ...prev,
+        odNo: odNoParam || prev.odNo,
+        qnaNo: qnaNoParam || prev.qnaNo,
+      }));
     }
   }, [searchParams]);
 

@@ -13,6 +13,7 @@ import OrderDeliveryAdd from 'components/admin/orders/OrderDeliveryAdd';
 import OrderDeliveryEdit from 'components/admin/orders/OrderDeliveryEdit';
 
 import OrderClaimList from 'components/admin/orders/OrderClaimList';
+import OrderClaimDetail from 'components/admin/orders/OrderClaimDetail';
 
 import ProductList from 'components/admin/products/ProductList';
 import ProductDetail from 'components/admin/products/ProductDetail';
@@ -45,6 +46,7 @@ const AdminHome = () => {
           <Route path="order/delivery/edit/:delvNo" Component={OrderDeliveryEdit} />
           {/* 환불&교환 목록 */}
           <Route path="order/claim" Component={OrderClaimList} />
+          <Route path="order/claim/:qnaNo" Component={OrderClaimDetail} />
           {/* 회원 관리 */}
           <Route path="member/list" element={<div>추가 예정</div>} />
           {/* 게시글 관리 */}
