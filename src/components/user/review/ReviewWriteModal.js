@@ -8,6 +8,10 @@ const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitt
   const [content, setContent] = useState('');
   const [selectedFeedbacks, setSelectedFeedbacks] = useState([]); // 선택된 코드들 [101, 501]
 
+  //피부 타입 톤 선택용 state
+  const [skinType, setSkinType] = useState(0);
+  const [skinTone, setSkinTone] = useState(0);
+
   // 이미지 관련
   const [previewImages, setPreviewImages] = useState([]); // 미리보기 URL
   const [uploadFiles, setUploadFiles] = useState([]); // 실제 보낼 File 객체
@@ -20,8 +24,11 @@ const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitt
       setSelectedFeedbacks([]);
       setPreviewImages([]);
       setUploadFiles([]);
+
+      setSkinType(userInfo?.userSkin || 0);
+      setSkinTone(userInfo?.userColor || 0);
     }
-  }, [show]);
+  }, [show, userInfo]);
 
   // 태그 선택 토글
   const toggleFeedback = code => {
@@ -68,8 +75,8 @@ const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitt
         revStar: rating,
         content: content,
         odNo: odNo || 0, // 상품상세는 0, 마이페이지는 실제 주문번호
-        userSkin: userInfo?.userSkin || 0, // 유저 정보 넣어서 보냄
-        userColor: userInfo?.userColor || null, // 유저 정보 넣어서 보냄
+        userSkin: Number(skinType), //state 값
+        userColor: Number(skinTone) === 0 ? null : Number(skinTone), // state 값
         feedback: selectedFeedbacks, // [101, 501] 코드 리스트
         revRank: userInfo?.revRank || 1,
       };
@@ -122,6 +129,34 @@ const ReviewWriteModal = ({ show, onHide, prdNo, odNo, userInfo, onReviewSubmitt
           </div>
           <div className="fw-bold">{rating}점</div>
         </div>
+
+        <Row className="mb-4">
+          <Col xs={6}>
+            <Form.Group>
+              <Form.Label className="fw-bold small">피부 타입</Form.Label>
+              <Form.Select value={skinType} onChange={e => setSkinType(e.target.value)} size="sm">
+                <option value="0">선택안함</option>
+                <option value="1">건성</option>
+                <option value="2">중성</option>
+                <option value="3">지성</option>
+                <option value="4">복합성</option>
+                <option value="5">수부지</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col xs={6}>
+            <Form.Group>
+              <Form.Label className="fw-bold small">퍼스널 컬러</Form.Label>
+              <Form.Select value={skinTone} onChange={e => setSkinTone(e.target.value)} size="sm">
+                <option value="0">선택안함</option>
+                <option value="1">봄웜톤</option>
+                <option value="2">여름쿨톤</option>
+                <option value="3">가을웜톤</option>
+                <option value="4">겨울쿨톤</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
 
         {/* 태그 선택 */}
         <div className="mb-3">
