@@ -33,10 +33,10 @@ const getSkinTypeCode = label => {
 };
 
 // API 엔드포인트 생성 함수 (RESTful Path Variable 지원)
-const getEndpoints = (userId, userNo) => ({
+const getEndpoints = userId => ({
   profile: `/api/users/${userId}/profile`,
-  orders_summary: `/api/orders/${userNo}/status-summary`,
-  orders: `/api/orders/${userNo}`,
+  orders_summary: `/api/orders/${userId}/status-summary`,
+  orders: `/api/orders/${userId}`,
   ingredients: `/api/users/${userId}/ingredients`,
   likes: `/api/likes`,
   reviews: `/api/users/${userId}/reviews`,
@@ -71,211 +71,204 @@ const transformIngredients = list => {
  * 사용자 프로필, 주문 진행 상황, 선호 성분 등 마이페이지에 필요한 모든 데이터를 가져옵니다.
  * @param {string} userId - 조회할 사용자 ID
  */
-export const fetchMyPageData = createAsyncThunk(
-  'user/fetchMyPageData',
-  async (argUserId, { getState, rejectWithValue }) => {
-    const { currentUser } = getState().user;
-    const userId = argUserId || currentUser?.userId;
-    const userNo = currentUser?.userNo;
-    const targetNo = userNo || 0;
+export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (userId, { rejectWithValue }) => {
+  const endpoints = getEndpoints(userId);
+  try {
+    // API 호출 시도
+    const [profileRes, ordersSumRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] =
+      await Promise.all([
+        api.get(endpoints.profile).catch(err => {
+          console.error('Profile API Load Failed:', err);
+          return { data: FALLBACK_USER_PROFILE };
+        }),
+        api.get(endpoints.orders_summary).catch(err => {
+          console.error('OrdersSummary API Load Failed:', err);
+          return { data: FALLBACK_ORDER_STEPS };
+        }),
+        api.get(endpoints.orders).catch(err => {
+          console.error('Orders API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.ingredients).catch(err => {
+          console.error('Ingredients API Load Failed:', err);
+          return { data: FALLBACK_INGREDIENT_GROUPS };
+        }),
+        api.get(endpoints.likes, { params: { type: 'PRODUCT' } }).catch(err => {
+          console.error('Likes API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.reviews).catch(err => {
+          console.error('Reviews API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.recentProducts).catch(err => {
+          console.error('Recent Products API Load Failed:', err);
+          return { data: [] };
+        }),
+        api.get(endpoints.claims).catch(err => {
+          console.error('Claims API Load Failed:', err);
+          return { data: [] };
+        }),
+      ]);
 
-    const endpoints = getEndpoints(userId, targetNo);
-    try {
-      // API 호출 시도
-      const [profileRes, ordersSumRes, ordersRes, ingredientsRes, likesRes, reviewsRes, recentRes, claimsRes] =
-        await Promise.all([
-          api.get(endpoints.profile).catch(err => {
-            console.error('Profile API Load Failed:', err);
-            return { data: FALLBACK_USER_PROFILE };
-          }),
-          api.get(endpoints.orders_summary).catch(err => {
-            console.error('OrdersSummary API Load Failed:', err);
-            return { data: FALLBACK_ORDER_STEPS };
-          }),
-          api.get(endpoints.orders).catch(err => {
-            console.error('Orders API Load Failed:', err);
-            return { data: [] };
-          }),
-          api.get(endpoints.ingredients).catch(err => {
-            console.error('Ingredients API Load Failed:', err);
-            return { data: FALLBACK_INGREDIENT_GROUPS };
-          }),
-          api.get(endpoints.likes, { params: { type: 'PRODUCT' } }).catch(err => {
-            console.error('Likes API Load Failed:', err);
-            return { data: [] };
-          }),
-          api.get(endpoints.reviews).catch(err => {
-            console.error('Reviews API Load Failed:', err);
-            return { data: [] };
-          }),
-          api.get(endpoints.recentProducts).catch(err => {
-            console.error('Recent Products API Load Failed:', err);
-            return { data: [] };
-          }),
-          api.get(endpoints.claims).catch(err => {
-            console.error('Claims API Load Failed:', err);
-            return { data: [] };
-          }),
-        ]);
+    // [DEBUG] 실제 받아온 데이터 구조 확인
+    console.log('API Response - Profile:', profileRes.data);
+    console.log('API Response - Ingredients:', ingredientsRes.data);
 
-      // [DEBUG] 실제 받아온 데이터 구조 확인
-      console.log('API Response - Profile:', profileRes.data);
-      console.log('API Response - Ingredients:', ingredientsRes.data);
+    // 백엔드 응답 데이터를 프론트엔드 포맷으로 매핑
+    // ApiResponse 구조(data 필드) 처리
+    const rawProfile = profileRes.data || {};
+    const backendProfile = rawProfile.data || rawProfile;
 
-      // 백엔드 응답 데이터를 프론트엔드 포맷으로 매핑
-      // ApiResponse 구조(data 필드) 처리
-      const rawProfile = profileRes.data || {};
-      const backendProfile = rawProfile.data || rawProfile;
-
-      const mappedProfile = {
-        ...FALLBACK_USER_PROFILE, // 기본값 유지
-        ...backendProfile, // 덮어쓰기
-        // 필드명 불일치 해결
-        name: backendProfile.userName || backendProfile.name || FALLBACK_USER_PROFILE.name,
-        nickname:
+    const mappedProfile = {
+      ...FALLBACK_USER_PROFILE, // 기본값 유지
+      ...backendProfile, // 덮어쓰기
+      // 필드명 불일치 해결
+      name: backendProfile.userName || backendProfile.name || FALLBACK_USER_PROFILE.name,
+      nickname:
         backendProfile.nickName || backendProfile.nickname || backendProfile.userName || FALLBACK_USER_PROFILE.nickname,
-        tier: backendProfile.userLevel || backendProfile.tier || FALLBACK_USER_PROFILE.tier,
-        // id 필드 매핑
-        // "me" 문자열이 들어오는 경우를 방지하기 위해 숫자 변환 가능 여부 체크
-        userNo:
-          backendProfile.userNo && !isNaN(Number(backendProfile.userNo))
-            ? backendProfile.userNo
-            : backendProfile.userId && !isNaN(Number(backendProfile.userId))
-            ? backendProfile.userId
-            : null,
-        // 리뷰 카운트 매핑 (백엔드: reviewCount -> 프론트: reviews)
-        reviews: backendProfile.reviewCount ?? FALLBACK_USER_PROFILE.reviews,
-        // skinType -> tags 변환 (UI가 tags 배열을 사용함)
-        tags: backendProfile.skinType ? [SKIN_TYPE_MAP[backendProfile.skinType] || backendProfile.skinType] : [],
-        skinConcerns: [],
-      };
+      tier: backendProfile.userLevel || backendProfile.tier || FALLBACK_USER_PROFILE.tier,
+      // id 필드 매핑
+      // "me" 문자열이 들어오는 경우를 방지하기 위해 숫자 변환 가능 여부 체크
+      userNo:
+        backendProfile.userNo && !isNaN(Number(backendProfile.userNo))
+          ? backendProfile.userNo
+          : backendProfile.userId && !isNaN(Number(backendProfile.userId))
+          ? backendProfile.userId
+          : null,
+      // 리뷰 카운트 매핑 (백엔드: reviewCount -> 프론트: reviews)
+      reviews: backendProfile.reviewCount ?? FALLBACK_USER_PROFILE.reviews,
+      // skinType -> tags 변환 (UI가 tags 배열을 사용함)
+      tags: backendProfile.skinType ? [SKIN_TYPE_MAP[backendProfile.skinType] || backendProfile.skinType] : [],
+      skinConcerns: [],
+    };
 
-      // 성분 데이터 매핑
-      const rawIngredients = ingredientsRes.data || {};
-      const ingredientsData = rawIngredients.data || rawIngredients;
+    // 성분 데이터 매핑
+    const rawIngredients = ingredientsRes.data || {};
+    const ingredientsData = rawIngredients.data || rawIngredients;
     const mappedIngredients = Array.isArray(ingredientsData) ? transformIngredients(ingredientsData) : ingredientsData;
 
-      // 좋아요 데이터 매핑
-      const rawLikes = likesRes.data || {};
-      const likeList = rawLikes.data || rawLikes || [];
-      const safeLikeList = Array.isArray(likeList) ? likeList : [];
+    // 좋아요 데이터 매핑
+    const rawLikes = likesRes.data || {};
+    const likeList = rawLikes.data || rawLikes || [];
+    const safeLikeList = Array.isArray(likeList) ? likeList : [];
 
-      const mappedLikes = {
-        products: safeLikeList.map(item => ({
-          id: item.likeId,
-          productId: item.productId,
-          name: item.productName,
-          brand: item.productCompany,
-          price: item.price,
-          image: item.imageUrl,
-          date: item.regDate,
-        })),
-        brands: [], // 브랜드 좋아요는 아직 API 명세에 없음
-      };
+    const mappedLikes = {
+      products: safeLikeList.map(item => ({
+        id: item.likeId,
+        productId: item.productId,
+        name: item.productName,
+        brand: item.productCompany,
+        price: item.price,
+        image: item.imageUrl,
+        date: item.regDate,
+      })),
+      brands: [], // 브랜드 좋아요는 아직 API 명세에 없음
+    };
 
-      // 리뷰 데이터 매핑
-      const rawReviews = reviewsRes.data || {};
-      const reviewList = rawReviews.data || rawReviews || [];
-      const mappedReviews = Array.isArray(reviewList) ? reviewList : [];
+    // 리뷰 데이터 매핑
+    const rawReviews = reviewsRes.data || {};
+    const reviewList = rawReviews.data || rawReviews || [];
+    const mappedReviews = Array.isArray(reviewList) ? reviewList : [];
 
-      // 최근 본 상품 매핑
-      const rawRecent = recentRes.data || {};
-      const recentList = rawRecent.data || rawRecent || [];
+    // 최근 본 상품 매핑
+    const rawRecent = recentRes.data || {};
+    const recentList = rawRecent.data || rawRecent || [];
 
-      let mappedRecent = [];
-      if (Array.isArray(recentList) && recentList.length > 0) {
-        const detailPromises = recentList.map(async item => {
-          const id = item.prdNo;
-          if (!id) return null;
+    let mappedRecent = [];
+    if (Array.isArray(recentList) && recentList.length > 0) {
+      const detailPromises = recentList.map(async item => {
+        const id = item.prdNo;
+        if (!id) return null;
 
-          const listTitle = item.prdName;
-          const listImage = item.prdImg;
+        const listTitle = item.prdName;
+        const listImage = item.prdImg;
 
-          try {
-            const detailRes = await api.get(`/api/products/${id}`);
-            const p = detailRes.data.data || detailRes.data;
+        try {
+          const detailRes = await api.get(`/api/products/${id}`);
+          const p = detailRes.data.data || detailRes.data;
 
-            const detailImage = p.prdImg || listImage;
+          const detailImage = p.prdImg || listImage;
 
-            return {
-              id: p.prdNo,
-              prdNo: p.prdNo,
-              name: p.prdName,
-              brand: p.prdCompany,
-              price: p.prdPrice,
-              salePrice: p.salePrice,
-              discount: p.discountRate || p.discount,
-              image: detailImage ? `${process.env.PUBLIC_URL}/images/product/${detailImage}` : null,
-              viewedDate: item.viewedAt || new Date().toISOString(),
-            };
-          } catch (err) {
-            console.warn(`Failed to fetch detail for product ${id}, using list data`, err);
-            return {
-              id: id,
-              prdNo: id,
-              name: listTitle,
-              brand: '',
-              price: 0,
-              salePrice: 0,
-              discount: 0,
-              image: listImage ? `${process.env.PUBLIC_URL}/images/product/${listImage}` : null,
-              viewedDate: item.viewedAt || new Date().toISOString(),
-            };
-          }
-        });
-        const details = await Promise.all(detailPromises);
-        // 최신순 정렬 (API가 최신순으로 준다고 가정하고 reverse 제거)
-        mappedRecent = details.filter(d => d !== null);
-      }
-
-      // 클레임 데이터 매핑
-      const rawClaims = claimsRes.data || {};
-      const claimList = rawClaims.data || rawClaims || [];
-      const mappedClaims = Array.isArray(claimList) ? claimList : [];
-
-      // 주문 요약 데이터 매핑
-      const rawSumOrders = ordersSumRes.data || {};
-      const orderSteps = rawSumOrders.data || rawSumOrders;
-      const mappedOrderSteps = {
-        주문접수: 0,
-        결제완료: orderSteps.paymentComplete || 0,
-        배송준비중: orderSteps.preparing || 0,
-        배송중: orderSteps.shipping || 0,
-        배송완료: orderSteps.delivered || 0,
-      };
-
-      // 주문 데이터 매핑
-      const rawOrders = ordersRes?.data || {};
-      const orderList = rawOrders?.data || [];
-      const mappedOrders = Array.isArray(orderList)
-        ? orderList.map(order => ({
-            ...order,
-            orderStatusStr: ORDER_STATUS_MAP[order.orderStatus] || String(order.orderStatus),
-          }))
-        : [];
-
-      return {
-        profile: mappedProfile,
-        orderSteps: mappedOrderSteps,
-        orderList: mappedOrders,
-        ingredients: mappedIngredients || FALLBACK_INGREDIENT_GROUPS,
-        likes: mappedLikes,
-        myReviews: mappedReviews,
-        recentProducts: mappedRecent,
-        claims: mappedClaims,
-      };
-    } catch (error) {
-      console.error('데이터 로드 실패, 폴백 데이터 사용', error);
-      return {
-        profile: FALLBACK_USER_PROFILE,
-        orderSteps: FALLBACK_ORDER_STEPS,
-        ingredients: FALLBACK_INGREDIENT_GROUPS,
-        likes: { products: [], brands: [] },
-        myReviews: [],
-        recentProducts: [],
-        claims: [],
-      };
+          return {
+            id: p.prdNo,
+            prdNo: p.prdNo,
+            name: p.prdName,
+            brand: p.prdCompany,
+            price: p.prdPrice,
+            salePrice: p.salePrice,
+            discount: p.discountRate || p.discount,
+            image: detailImage ? `${process.env.PUBLIC_URL}/images/product/${detailImage}` : null,
+            viewedDate: item.viewedAt || new Date().toISOString(),
+          };
+        } catch (err) {
+          console.warn(`Failed to fetch detail for product ${id}, using list data`, err);
+          return {
+            id: id,
+            prdNo: id,
+            name: listTitle,
+            brand: '',
+            price: 0,
+            salePrice: 0,
+            discount: 0,
+            image: listImage ? `${process.env.PUBLIC_URL}/images/product/${listImage}` : null,
+            viewedDate: item.viewedAt || new Date().toISOString(),
+          };
+        }
+      });
+      const details = await Promise.all(detailPromises);
+      // 최신순 정렬 (API가 최신순으로 준다고 가정하고 reverse 제거)
+      mappedRecent = details.filter(d => d !== null);
     }
+
+    // 클레임 데이터 매핑
+    const rawClaims = claimsRes.data || {};
+    const claimList = rawClaims.data || rawClaims || [];
+    const mappedClaims = Array.isArray(claimList) ? claimList : [];
+
+    // 주문 요약 데이터 매핑
+    const rawSumOrders = ordersSumRes.data || {};
+    const orderSteps = rawSumOrders.data || rawSumOrders;
+    const mappedOrderSteps = {
+      주문접수: 0,
+      결제완료: orderSteps.paymentComplete || 0,
+      배송준비중: orderSteps.preparing || 0,
+      배송중: orderSteps.shipping || 0,
+      배송완료: orderSteps.delivered || 0,
+    };
+
+    // 주문 데이터 매핑
+    const rawOrders = ordersRes?.data || {};
+    const orderList = rawOrders?.data || [];
+    const mappedOrders = Array.isArray(orderList)
+      ? orderList.map(order => ({
+          ...order,
+          orderStatusStr: ORDER_STATUS_MAP[order.orderStatus] || String(order.orderStatus),
+        }))
+      : [];
+
+    return {
+      profile: mappedProfile,
+      orderSteps: mappedOrderSteps,
+      orderList: mappedOrders,
+      ingredients: mappedIngredients || FALLBACK_INGREDIENT_GROUPS,
+      likes: mappedLikes,
+      myReviews: mappedReviews,
+      recentProducts: mappedRecent,
+      claims: mappedClaims,
+    };
+  } catch (error) {
+    console.error('데이터 로드 실패, 폴백 데이터 사용', error);
+    return {
+      profile: FALLBACK_USER_PROFILE,
+      orderSteps: FALLBACK_ORDER_STEPS,
+      ingredients: FALLBACK_INGREDIENT_GROUPS,
+      likes: { products: [], brands: [] },
+      myReviews: [],
+      recentProducts: [],
+      claims: [],
+    };
+  }
 });
 
 /**
