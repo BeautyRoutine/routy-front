@@ -9,7 +9,6 @@ import ProductInfo from 'components/user/details/ProductInfo';
 import ProductDetailTabs from 'components/user/details/ProductDetailTabs';
 import ReviewSummary from 'components/user/details/ReviewSummary';
 import ProductIngredientAnalysis from 'components/user/details/ProductIngredientAnalysis';
-import ReviewWriteModal from 'components/user/review/ReviewWriteModal';
 
 const ProductDetailPage = () => {
   const { prdNo } = useParams(); // URL의 :prdNo 값을 가져옴 (예: 101)
@@ -19,8 +18,6 @@ const ProductDetailPage = () => {
   const [productData, setProductData] = useState(null); //  데이터를 담을 state
   const [loading, setLoading] = useState(true); // 로딩 중인지 체크
 
-  const [showWriteModal, setShowWriteModal] = useState(false); // 작성 모달 상태
-
   // 탭 이동용 ref
   const [activeTab, setActiveTab] = useState('desc'); // 기본값 상품설명
   const tabsRef = useRef(null); // 탭 위치로 스크롤 이동하기 위해 사용
@@ -29,12 +26,6 @@ const ProductDetailPage = () => {
   const handleMoveToReview = () => {
     setActiveTab('review'); // 탭을 리뷰로 변경
     tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  // 리뷰 작성 완료 시 실행할 함수
-  const handleReviewSubmitted = () => {
-    //  페이지 새로고침
-    window.location.reload();
   };
 
   // 좋아요 핸들러
