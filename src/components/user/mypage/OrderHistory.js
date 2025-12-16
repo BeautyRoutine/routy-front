@@ -210,7 +210,7 @@ const OrderHistory = ({ orderList }) => {
               </tr>
             ) : (
               pageOrders.map(order => (
-                <tr key={order.orderNo}>
+                <tr key={order.ppMapNo}>
                   <td>{order.orderDate}</td>
                   <td style={{ borderLeft: '1px solid #C6C7C8' }} className="text-start d-flex flex-column">
                     <div className="d-flex flex-row align-items-center gap-1">
