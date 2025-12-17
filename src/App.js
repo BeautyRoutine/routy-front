@@ -40,7 +40,7 @@ function App() {
   const dispatch = useDispatch();
 
   const isAdmin = location.pathname.startsWith('/admin');
-  const noLayoutRoutes = ['kakao/callback'];
+  const noLayoutRoutes = ['/kakao/callback'];
   const isNoLayout = noLayoutRoutes.includes(location.pathname);
 
   // ---------------------------------------------------
@@ -173,7 +173,7 @@ function App() {
           <Route path="/" element={<Home />} />
 
           {/* KakaoCallback (레이아웃 없음) */}
-          <Route path="kakao/callback" element={<KakaoCallback />} />
+          <Route path="/kakao/callback" element={<KakaoCallback />} />
 
           {/* 장바구니 & 결제 */}
           <Route path="/cart" element={<CartPage />} />
