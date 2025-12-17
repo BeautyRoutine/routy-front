@@ -6,7 +6,7 @@ import './IngredientManagement.css';
 
 const IngredientManagement = ({ ingredients, onAddClick }) => {
   const dispatch = useDispatch();
-  const { profile } = useSelector(state => state.user);
+  const { currentUser } = useSelector(state => state.user);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [selectedIngredient, setSelectedIngredient] = useState(null);
@@ -22,8 +22,8 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
   };
 
   const handleDelete = async () => {
-    if (!profile?.userNo) {
-      console.error('UserNo is missing');
+    if (!currentUser?.userId) {
+      console.error('userId is missing');
       return;
     }
 
@@ -57,7 +57,7 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
     try {
       // 일괄 삭제 처리
       await Promise.all(
-        itemsToDelete.map(item => dispatch(removeIngredient({ userNo: profile.userNo, ...item })).unwrap()),
+        itemsToDelete.map(item => dispatch(removeIngredient({ userId: currentUser.userId, ...item })).unwrap()),
       );
 
       // 성공 시 편집 모드 종료
@@ -80,7 +80,7 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
     if (currentType === targetType) {
       await dispatch(
         removeIngredient({
-          userNo: profile.userNo,
+          userId: currentUser.userId,
           ingredientId: selectedIngredient.id,
           type: currentTypeUpper,
         }),
@@ -92,7 +92,7 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
       // 기존 상태 삭제
       await dispatch(
         removeIngredient({
-          userNo: profile.userNo,
+          userId: currentUser.userId,
           ingredientId: selectedIngredient.id,
           type: currentTypeUpper,
         }),
@@ -100,7 +100,7 @@ const IngredientManagement = ({ ingredients, onAddClick }) => {
       // 새로운 상태 추가
       await dispatch(
         addIngredient({
-          userNo: profile.userNo,
+          userId: currentUser.userId,
           ingredientId: selectedIngredient.id,
           type: targetTypeUpper,
         }),
