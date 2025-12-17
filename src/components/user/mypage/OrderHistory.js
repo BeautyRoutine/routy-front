@@ -8,10 +8,13 @@ import { Table } from 'react-bootstrap';
 import './OrderHistory.css';
 import { API_BASE_URL } from '../layouts/headerConstants';
 
+import ReviewWriteModal from 'components/user/review/ReviewWriteModal';
+
 const OrderHistory = ({ orderList }) => {
   const dispatch = useDispatch();
   const userId = useSelector(state => state.user.currentUser?.userId);
   const userNo = useSelector(state => state.user.currentUser?.userNo);
+  const userInfo = useSelector(state => state.user.currentUser);
 
   // 페이지 상태
   const PAGE_GAP = 5;
@@ -126,6 +129,19 @@ const OrderHistory = ({ orderList }) => {
       }),
     );
   };
+  // ==============================================
+  // 리뷰 쓰기 상태
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedReviewOrder, setSelectedReviewOrder] = useState(null);
+  // 리뷰 쓰기 버튼 핸들러
+  const openReviewModal = order => {
+    setSelectedReviewOrder(order);
+    setReviewModalOpen(true);
+  };
+  const closeReviewModal = () => {
+    setReviewModalOpen(false);
+    setSelectedReviewOrder(null);
+  };
 
   return (
     <div className="order-history-container">
@@ -194,7 +210,7 @@ const OrderHistory = ({ orderList }) => {
               </tr>
             ) : (
               pageOrders.map(order => (
-                <tr key={order.orderNo}>
+                <tr key={order.ppMapNo}>
                   <td>{order.orderDate}</td>
                   <td style={{ borderLeft: '1px solid #C6C7C8' }} className="text-start d-flex flex-column">
                     <div className="d-flex flex-row align-items-center gap-1">
@@ -206,7 +222,9 @@ const OrderHistory = ({ orderList }) => {
                     </div>
                     <div className="action-button-group p-1">
                       {order.orderStatus >= 5 && order.reviewCnt === 0 && (
-                        <button className="action-button confirm">리뷰쓰기</button>
+                        <button className="action-button confirm" onClick={() => openReviewModal(order)}>
+                          리뷰쓰기
+                        </button>
                       )}
 
                       {order.orderStatus >= 5 && order.returnCnt === 0 && order.swapCnt === 0 && (
@@ -260,7 +278,7 @@ const OrderHistory = ({ orderList }) => {
         </div>
       )}
 
-      {/* 모달 컴포넌트 */}
+      {/* 환불&교환 요청 모달 컴포넌트 */}
       {modalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
@@ -284,6 +302,18 @@ const OrderHistory = ({ orderList }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 리뷰 쓰기 모달 컴포넌트 */}
+      {reviewModalOpen && selectedReviewOrder && (
+        <ReviewWriteModal
+          show={reviewModalOpen}
+          onHide={closeReviewModal}
+          prdNo={selectedReviewOrder.productNo}
+          odNo={selectedReviewOrder.orderNo}
+          userInfo={userInfo}
+          onReviewSubmitted={() => dispatch(fetchMyPageData(userId))}
+        />
       )}
     </div>
   );
