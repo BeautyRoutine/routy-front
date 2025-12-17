@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../../lib/apiClient';
 import moment from 'moment';
 import 'moment/locale/ko';
@@ -115,6 +116,7 @@ export function Header({
   notificationCount,
   cartCount,
 }) {
+  const navigate = useNavigate();
   // ------------------------------
   // UI 상태(state) & DOM 참조(ref)
   // ------------------------------
@@ -979,7 +981,7 @@ export function Header({
                               onMyPageClick();
                               return;
                             }
-                            onNavigate?.('mypage');
+                            navigate('/mypage', { state: { view: 'defult' } });
                           }}
                         >
                           마이페이지
@@ -989,11 +991,7 @@ export function Header({
                           className="user-menu-item"
                           onClick={() => {
                             setUserMenuOpen(false);
-                            if (onOrdersClick) {
-                              onOrdersClick();
-                              return;
-                            }
-                            onNavigate?.('orders');
+                            navigate('/mypage', { state: { view: 'order-history' } });
                           }}
                         >
                           주문 및 배송 조회
@@ -1003,11 +1001,7 @@ export function Header({
                           className="user-menu-item"
                           onClick={() => {
                             setUserMenuOpen(false);
-                            if (onReviewManageClick) {
-                              onReviewManageClick();
-                              return;
-                            }
-                            onNavigate?.('reviews');
+                            navigate('/mypage', { state: { view: 'reviews' } });
                           }}
                         >
                           리뷰 관리
