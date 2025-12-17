@@ -96,13 +96,13 @@ export default function CheckoutPage() {
         })),
       };
 
-      // 1. 주문 생성 요청
+      // 주문 생성 요청
       const response = await api.post('/api/payments/order', orderData);
       const odNo = response.data;
 
       // 주문번호를 최소 8자리 문자열로 변환 (예: 1 -> "00000001")
       // 토스 요구사항(6자 이상) 충족 + 백엔드 호환(숫자로 파싱 가능)
-    const orderIdVal = `${String(odNo).padStart(8, '0')}_${Date.now()}`;
+      const orderIdVal = `${String(odNo).padStart(8, '0')}_${Date.now()}`;
 
       //  토스 결제창 띄우기 (orderId = odNo)
       await tossPayments.requestPayment('카드', {
@@ -162,6 +162,7 @@ export default function CheckoutPage() {
                     onChange={handleInputChange}
                     placeholder="우편번호"
                     style={{ width: '120px' }}
+                    maxLength={5}
                   />
                 </div>
                 <input

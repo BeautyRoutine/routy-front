@@ -30,16 +30,24 @@ api.interceptors.response.use(
     return response; // 성공 응답은 그대로 반환
   },
   error => {
+    const status = error.response?.status;
     // 401, 403 에러 토큰 만료 인증/권한 에러 처리
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem('token'); // 토큰 삭제
-      localStorage.removeItem('user'); // 사용자 정보 삭제
-      // 알림
+    if (status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-      // 로그인 페이지로 리다이렉트
       window.location.href = '/#/login';
-    }
+    } else if (status === 403) {
+      const message = error.response?.data?.message || '';
+      const isAuthError = message.includes('권한') || message.includes('접근') || !message;
 
+      if (isAuthError) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        alert('접근 권한이 없습니다. 다시 로그인해주세요.');
+        window.location.href = '/#/login';
+      }
+    }
     return Promise.reject(error); // 기타 에러는 그대로 반환
   },
 );

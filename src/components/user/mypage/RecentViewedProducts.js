@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import './RecentViewedProducts.css';
+import api from 'app/api';
 
 const RecentViewedProducts = () => {
   const navigate = useNavigate();
@@ -10,6 +11,20 @@ const RecentViewedProducts = () => {
 
   const handleProductClick = prdNo => {
     navigate(`/products/${prdNo}`);
+  };
+
+  const handleAddToCart = async (e, item) => {
+    e.stopPropagation();
+    try {
+      await api.post('/api/cart/items', {
+        productId: item.productId || item.prdNo,
+        quantity: 1,
+      });
+      alert('장바구니에 추가되었습니다.');
+    } catch (error) {
+      console.error('장바구니 추가 실패:', error);
+      alert('장바구니 추가에 실패했습니다.');
+    }
   };
 
   return (
@@ -59,7 +74,9 @@ const RecentViewedProducts = () => {
               </div>
               <div className="col-date">{item.viewedDate ? new Date(item.viewedDate).toLocaleDateString() : '-'}</div>
               <div className="col-manage">
-                <button className="btn-cart">장바구니</button>
+                <button className="btn-cart" onClick={e => handleAddToCart(e, item)}>
+                  장바구니
+                </button>
               </div>
             </div>
           ))}

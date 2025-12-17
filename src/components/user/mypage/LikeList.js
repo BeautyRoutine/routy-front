@@ -84,7 +84,11 @@ const LikeList = ({ likes = { products: [], brands: [] } }) => {
                 {activeTab === 'products' ? (
                   <>
                     <div className="col-product">
-                      <img src={item.image} alt={item.name} className="item-thumb" />
+                      <img
+                        src={`${process.env.PUBLIC_URL}/images/product/${item.image}`}
+                        alt={item.name}
+                        className="item-thumb"
+                      />
                       <div className="item-text">
                         <span className="item-brand">{item.brand}</span>
                         <span className="item-name">{item.name}</span>
@@ -121,7 +125,11 @@ const LikeList = ({ likes = { products: [], brands: [] } }) => {
                 ) : (
                   <>
                     <div className="col-brand">
-                      <img src={item.image} alt={item.name} className="brand-thumb" />
+                      <img
+                        src={`${process.env.PUBLIC_URL}/images/product/${item.image}`}
+                        alt={item.name}
+                        className="brand-thumb"
+                      />
                       <span className="brand-name">{item.name}</span>
                     </div>
                     <div className="col-desc">{item.desc}</div>
