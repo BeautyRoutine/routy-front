@@ -35,7 +35,7 @@
 /* 왼쪽 이미지 섹션 */
 .modal-image-section {
   flex: 1.5; /* 이미지 영역을 좀 더 넓게 */
-  background-color: #000;
+  background-color: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,4 +86,38 @@
   font-size: 15px;
   line-height: 1.6;
   white-space: pre-line;
+}
+
+.modal-image-section .carousel-control-prev,
+.modal-image-section .carousel-control-next {
+  width: 5%; /* 기본이 15%라 클릭 영역이 너무 안쪽까지 옴 */
+}
+
+.modal-image-section .carousel-control-prev {
+  left: 0; /* 완전 왼쪽으로 밀기 */
+}
+
+.modal-image-section .carousel-control-next {
+  right: 0; /* 완전 오른쪽으로 밀기 */
+}
+
+.modal-image-section {
+  position: relative !important;
+}
+
+.modal-image-section .carousel,
+.modal-image-section .carousel-inner,
+.modal-image-section .carousel-item {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.modal-image-section .carousel-control-prev,
+.modal-image-section .carousel-control-next {
+  width: 10% !important; /* 클릭하기 편하게 5% -> 10% 추천 */
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  /* 배경색이 없으면 흰색 배경에서 안 보일 수 있으니 호버 시라도 보이게 */
+  opacity: 0.5;
 }

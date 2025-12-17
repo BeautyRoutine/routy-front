@@ -16,10 +16,11 @@
 }
 
 .product-name {
-  font-size: 28px;
+  font-size: 24px !important;
   font-weight: bold;
   margin: 0;
   line-height: 1.3;
+  word-break: keep-all;
 }
 
 /* 리뷰 요약 */

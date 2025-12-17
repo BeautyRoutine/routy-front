@@ -1,6 +1,8 @@
 import React from 'react';
-import { Modal } from 'react-bootstrap';
+import { Modal, Carousel } from 'react-bootstrap';
 import './ReviewDetailModal.css';
+import { formatUserInfo } from '../../common/reviewUtils';
+import ReviewTagList from 'components/user/review/ReviewTagList';
 
 //show, onHide, review  onlike 받아오기
 const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
@@ -12,10 +14,21 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
         <div className="modal-content-wrapper">
           {/* 왼쪽 이미지*/}
           <div className="modal-image-section">
-            {review.revImg ? (
-              <img src={review.revImg} alt="리뷰 상세" className="modal-img-full" />
+            {review.images && review.images.length > 0 ? (
+              <Carousel interval={null} indicators={review.images.length > 1} variant="dark">
+                {review.images.map((imgUrl, idx) => (
+                  <Carousel.Item key={idx}>
+                    <img
+                      src={`${process.env.PUBLIC_URL}${imgUrl}`}
+                      alt={`리뷰 ${idx}`}
+                      className="d-block w-100 modal-img-full"
+                      style={{ objectFit: 'contain', height: '100%' }}
+                    />
+                  </Carousel.Item>
+                ))}
+              </Carousel>
             ) : (
-              <div className="no-image-placeholder">이미지가 없는 리뷰입니다.</div>
+              <div className="no-image-placeholder">이미지 없음</div>
             )}
           </div>
 
@@ -23,11 +36,33 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
           <div className="modal-text-section">
             {/* 헤더 (닫기)*/}
             <div className="modal-text-header">
-              <div className="user-info">
-                <span className="user-name">{review.userName}</span>
-                <span className="text-muted ms-2" style={{ fontSize: '12px' }}>
-                  {review.revDate}
-                </span>
+              <div className="user-info d-flex align-items-center">
+                {/*프로필 이미지 */}
+                <div className="me-2 flex-shrink-0">
+                  {/* flex-shrink-0: 이미지 찌그러짐 방지 */}
+                  {review.userImg ? (
+                    <img
+                      src={review.userImg}
+                      alt="프로필"
+                      className="profile-circle"
+                      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div
+                      className="profile-circle"
+                      style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ddd' }}
+                    ></div>
+                  )}
+                </div>
+                <div className="d-flex flex-column">
+                  <span className="user-name">{review.userName}</span>
+                  <span className="text-muted" style={{ fontSize: '12px', marginTop: '2px', display: 'block' }}>
+                    {formatUserInfo(review.userSkin, review.userColor)}
+                  </span>
+                  <span className="text-muted ms-2" style={{ fontSize: '12px' }}>
+                    {review.revDate}
+                  </span>
+                </div>
               </div>
               <button className="btn-close" onClick={onHide}></button>
             </div>
@@ -41,21 +76,13 @@ const ReviewDetailModal = ({ show, onHide, review, onLikeToggle }) => {
               <span className="ms-2 fw-bold">{review.revStar}</span>
             </div>
 
-            {/* 옵션 정보 */}
-            <p className="text-muted small mb-4">옵션: 더미데이터입니다. 이게 문제인지 테스트중입니다.</p>
-
             {/* 스크롤 가능한 본문 내용 */}
             <div className="modal-scroll-content">
               <p className="review-text-full">{review.content}</p>
 
-              {/* 태그 */}
+              {/*반응*/}
               <div className="review-tags mt-3">
-                {review.feedback &&
-                  review.feedback.map((tag, idx) => (
-                    <span key={idx} className="review-tag">
-                      #{tag}
-                    </span>
-                  ))}
+                <ReviewTagList feedback={review.feedback} />
               </div>
             </div>
 
