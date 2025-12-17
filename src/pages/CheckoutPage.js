@@ -110,8 +110,8 @@ export default function CheckoutPage() {
         orderId: orderIdVal, // 주문번호를 문자열로 변환
         orderName: orderName,
         customerName: shippingInfo.receiverName,
-        successUrl: `${window.location.origin}/routy-front#/payment/success`,
-        failUrl: `${window.location.origin}/routy-front#/payment/fail`,
+        successUrl: `${window.location.origin}#/payment/success`,
+        failUrl: `${window.location.origin}#/payment/fail`,
       });
     } catch (error) {
       console.error(error);
