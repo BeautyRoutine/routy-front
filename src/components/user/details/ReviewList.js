@@ -21,6 +21,10 @@ const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
   //구조분해할당
   const { reviews, summary } = reviewInfo || {};
 
+  //페이지네이션 용
+  const { pagination } = reviewInfo;
+  const filteredTotalCount = pagination ? pagination.totalCount : 0;
+
   useEffect(() => {
     // 모달이 열려있고(selectedReview), 목록 데이터(reviews)가 있을 때
     if (selectedReview && reviews) {
@@ -79,7 +83,7 @@ const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
   };
 
   //페이지수
-  const totalPages = summary.totalCount ? Math.ceil(summary.totalCount / 10) : 0;
+  const totalPages = filteredTotalCount ? Math.ceil(filteredTotalCount / 10) : 0;
 
   // 별점 그리기 헬퍼
   const renderStars = rating => {
@@ -105,7 +109,7 @@ const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
   };
 
   //만약 리뷰가 0개면 보여줄 return
-  if (summary.totalCount === 0) {
+  if (summary && summary.totalCount === 0) {
     return (
       <div className="text-center py-5" style={{ color: '#999' }}>
         <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
@@ -190,93 +194,101 @@ const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
         </span>
       </div>
 
-      {/*리뷰 리스트 */}
-      <div className="review-items-wrapper">
-        {reviews.map(review => (
-          <div
-            key={review.revNo}
-            className="review-item"
-            onClick={() => handleReviewClick(review)}
-            style={{ cursor: 'pointer' }}
-          >
-            {/* 헤더: 유저 정보 & 신고 */}
-            <div className="review-header">
-              <div className="user-profile-area">
-                {/* 프로필 이미지 */}
-                {review.userImg ? (
-                  <img src={review.userImg} alt="프로필" className="profile-circle" />
-                ) : (
-                  <div className="profile-circle"></div>
-                )}
-                {/*이름, 별점, 날짜 */}
-                <div className="d-flex flex-column">
-                  <div className="user-info-row">
-                    <span className="user-name">{review.userName}</span>
-                  </div>
-                  {/*피부 타입, 피부톤 추가 */}
-                  <span className="text-muted" style={{ fontSize: '12px', marginTop: '2px', display: 'block' }}>
-                    {formatUserInfo(review.userSkin, review.userColor)}
-                  </span>
-                  <div className="user-info-row">
-                    <span className="stars-small">{renderStars(review.revStar)}</span>
-                    <span className="review-date-text">{review.revDate}</span>
+      {/* 리뷰 리스트 조건부 */}
+      {filteredTotalCount === 0 ? (
+        <div className="text-center py-5" style={{ color: '#999', borderTop: '1px solid #eee' }}>
+          <div style={{ fontSize: '48px', marginBottom: '20px' }}>🔍</div>
+          <h4>조건에 맞는 리뷰가 없습니다.</h4>
+          <p>다른 옵션을 선택해 보세요.</p>
+        </div>
+      ) : (
+        <div className="review-items-wrapper">
+          {reviews.map(review => (
+            <div
+              key={review.revNo}
+              className="review-item"
+              onClick={() => handleReviewClick(review)}
+              style={{ cursor: 'pointer' }}
+            >
+              {/* 헤더: 유저 정보 & 신고 */}
+              <div className="review-header">
+                <div className="user-profile-area">
+                  {/* 프로필 이미지 */}
+                  {review.userImg ? (
+                    <img src={review.userImg} alt="프로필" className="profile-circle" />
+                  ) : (
+                    <div className="profile-circle"></div>
+                  )}
+                  {/*이름, 별점, 날짜 */}
+                  <div className="d-flex flex-column">
+                    <div className="user-info-row">
+                      <span className="user-name">{review.userName}</span>
+                    </div>
+                    {/*피부 타입, 피부톤 추가 */}
+                    <span className="text-muted" style={{ fontSize: '12px', marginTop: '2px', display: 'block' }}>
+                      {formatUserInfo(review.userSkin, review.userColor)}
+                    </span>
+                    <div className="user-info-row">
+                      <span className="stars-small">{renderStars(review.revStar)}</span>
+                      <span className="review-date-text">{review.revDate}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* 신고하기 버튼- 작동은 안함 */}
-              <button className="report-btn">
-                <span style={{ fontSize: '14px' }}>⚐</span> 신고하기
-              </button>
-            </div>
-
-            {/* 본문: 사진 먼저 나오고 텍스트 */}
-            <div className="review-body d-flex justify-content-between" style={{ minHeight: '80px' }}>
-              {/* 텍스트*/}
-              <div className="review-text-wrapper" style={{ flex: 1, paddingRight: '15px' }}>
-                <p className="review-text-content" style={{ margin: 0, wordBreak: 'break-all' }}>
-                  {review.content}
-                </p>
-              </div>
-
-              {/* 이미지 (오른쪽에 고정 크기로 배치) */}
-              {(review.revImg || (review.images && review.images.length > 0)) && (
-                <div className="review-image-wrapper" style={{ width: '80px', height: '80px', flexShrink: 0 }}>
-                  <img
-                    src={`${process.env.PUBLIC_URL}${review.revImg || review.images[0]}`}
-                    alt="리뷰 썸네일"
-                    className="review-attached-img"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: '8px',
-                      border: '1px solid #eee',
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* 태그*/}
-            <div className="review-footer">
-              <ReviewTagList feedback={review.feedback} />
-
-              {/* 좋아요 */}
-              <div className="like-button-area">
-                <button
-                  className={`like-btn-simple ${review.liked || review.isLiked ? 'active' : ''}`}
-                  onClick={e => handleLikeClick(e, review.revNo)}
-                >
-                  <span style={{ fontSize: '16px' }}>👍</span>
-                  도움이 되었어요
-                  <span style={{ fontWeight: 'bold', marginLeft: '2px' }}>{review.likeCount}</span>
+                {/* 신고하기 버튼- 작동은 안함 */}
+                <button className="report-btn">
+                  <span style={{ fontSize: '14px' }}>⚐</span> 신고하기
                 </button>
               </div>
+
+              {/* 본문: 사진 먼저 나오고 텍스트 */}
+              <div className="review-body d-flex justify-content-between" style={{ minHeight: '80px' }}>
+                {/* 텍스트*/}
+                <div className="review-text-wrapper" style={{ flex: 1, paddingRight: '15px' }}>
+                  <p className="review-text-content" style={{ margin: 0, wordBreak: 'break-all' }}>
+                    {review.content}
+                  </p>
+                </div>
+
+                {/* 이미지 (오른쪽에 고정 크기로 배치) */}
+                {(review.revImg || (review.images && review.images.length > 0)) && (
+                  <div className="review-image-wrapper" style={{ width: '80px', height: '80px', flexShrink: 0 }}>
+                    <img
+                      src={`${process.env.PUBLIC_URL}${review.revImg || review.images[0]}`}
+                      alt="리뷰 썸네일"
+                      className="review-attached-img"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
+                        border: '1px solid #eee',
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 태그*/}
+              <div className="review-footer">
+                <ReviewTagList feedback={review.feedback} />
+
+                {/* 좋아요 */}
+                <div className="like-button-area">
+                  <button
+                    className={`like-btn-simple ${review.liked || review.isLiked ? 'active' : ''}`}
+                    onClick={e => handleLikeClick(e, review.revNo)}
+                  >
+                    <span style={{ fontSize: '16px' }}>👍</span>
+                    도움이 되었어요
+                    <span style={{ fontWeight: 'bold', marginLeft: '2px' }}>{review.likeCount}</span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* 페이지네이션 */}
       <div className="d-flex justify-content-center mt-5">
