@@ -141,7 +141,7 @@ const MyRoutyPage = () => {
 
       if (res?.data && res.data.resultCode === 200) {
         const dashboardData = res.data.data || null;
-        console.log('Dashboard API Response:', dashboardData);
+        // console.log('Dashboard API Response:', dashboardData);
 
         // 응답 구조: data.weather 안에 날씨 정보가 있음
         if (dashboardData?.weather) {

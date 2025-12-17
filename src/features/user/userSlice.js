@@ -112,8 +112,8 @@ export const fetchMyPageData = createAsyncThunk('user/fetchMyPageData', async (u
       ]);
 
     // [DEBUG] 실제 받아온 데이터 구조 확인
-    console.log('API Response - Profile:', profileRes.data);
-    console.log('API Response - Ingredients:', ingredientsRes.data);
+    // console.log('API Response - Profile:', profileRes.data);
+    // console.log('API Response - Ingredients:', ingredientsRes.data);
 
     // 백엔드 응답 데이터를 프론트엔드 포맷으로 매핑
     // ApiResponse 구조(data 필드) 처리
