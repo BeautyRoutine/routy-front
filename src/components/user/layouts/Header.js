@@ -1012,7 +1012,7 @@ export function Header({
                         >
                           리뷰 관리
                         </button>
-                        <button
+                        {/* <button
                           type="button"
                           className="user-menu-item"
                           onClick={() => {
@@ -1025,7 +1025,7 @@ export function Header({
                           }}
                         >
                           고객센터
-                        </button>
+                        </button> */}
                         <div className="user-menu-divider" />
                         <button
                           type="button"

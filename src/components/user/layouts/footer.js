@@ -10,7 +10,7 @@ function Footer() {
         <nav className="footer-links" aria-label="footer nav">
           <a href="#terms">이용약관</a>
           <a href="#privacy">개인정보 처리방침</a>
-          <a href="#support">고객센터</a>
+          {/* <a href="#support">고객센터</a> */}
           <a href="#partnership">입점 문의</a>
         </nav>
 
