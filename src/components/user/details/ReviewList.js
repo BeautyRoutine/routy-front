@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
+import { formatUserInfo } from '../../common/reviewUtils';
+import ReviewTagList from 'components/user/review/ReviewTagList';
 
-const ReviewList = ({ reviewInfo, onLikeToggle }) => {
-  // 정렬 상태 (latest: 최신순, rating: 평점순, like: 좋아요순)
-  const [sortOption, setSortOption] = useState('latest');
+const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
+  // 정렬 상태 (추천순, new: 최신순, rating: 평점순, like: 좋아요순)
+  const [sortOption, setSortOption] = useState('recommended');
 
   //  모달 상태 on off, 모달 담을 state
   const [showModal, setShowModal] = useState(false);
@@ -35,8 +37,20 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
   //페이지 변경
   const handlePageChange = pageNumber => {
     setActivePage(pageNumber);
-    console.log(`페이지 변경 요청: ${pageNumber}, 정렬: ${sortOption}`);
-    // api 받아와야함
+    if (onFilterChange) {
+      onFilterChange(pageNumber, sortOption);
+    }
+  };
+
+  //정렬 변경용 핸들러
+  const handleSortClick = newSort => {
+    setSortOption(newSort);
+    setActivePage(1); // 정렬 바꾸면 1페이지로 초기화
+
+    // 부모에게 데이터 다시 달라고 요청
+    if (onFilterChange) {
+      onFilterChange(1, newSort);
+    }
   };
 
   //페이지수
@@ -72,7 +86,6 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
         <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
         <h4>아직 등록된 리뷰가 없습니다.</h4>
         <p>첫 번째 리뷰를 작성하고 포인트를 받아보세요!</p>
-        <button className="btn btn-primary mt-3">리뷰 작성하기</button>
       </div>
     );
   }
@@ -111,15 +124,25 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
 
       {/* 정렬 옵션 */}
       <div className="sort-tab-area">
-        <span className={`sort-btn ${sortOption === 'latest' ? 'active' : ''}`} onClick={() => setSortOption('latest')}>
+        <span
+          className={`sort-btn ${sortOption === 'recommended' ? 'active' : ''}`}
+          onClick={() => handleSortClick('recommended')}
+        >
+          추천순
+        </span>
+        <span>|</span>
+        <span className={`sort-btn ${sortOption === 'new' ? 'active' : ''}`} onClick={() => handleSortClick('new')}>
           최신순
         </span>
         <span>|</span>
-        <span className={`sort-btn ${sortOption === 'rating' ? 'active' : ''}`} onClick={() => setSortOption('rating')}>
+        <span
+          className={`sort-btn ${sortOption === 'rating' ? 'active' : ''}`}
+          onClick={() => handleSortClick('rating')}
+        >
           평점순
         </span>
         <span>|</span>
-        <span className={`sort-btn ${sortOption === 'like' ? 'active' : ''}`} onClick={() => setSortOption('like')}>
+        <span className={`sort-btn ${sortOption === 'like' ? 'active' : ''}`} onClick={() => handleSortClick('like')}>
           좋아요순
         </span>
       </div>
@@ -147,6 +170,10 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
                   <div className="user-info-row">
                     <span className="user-name">{review.userName}</span>
                   </div>
+                  {/*피부 타입, 피부톤 추가 */}
+                  <span className="text-muted" style={{ fontSize: '12px', marginTop: '2px', display: 'block' }}>
+                    {formatUserInfo(review.userSkin, review.userColor)}
+                  </span>
                   <div className="user-info-row">
                     <span className="stars-small">{renderStars(review.revStar)}</span>
                     <span className="review-date-text">{review.revDate}</span>
@@ -161,25 +188,36 @@ const ReviewList = ({ reviewInfo, onLikeToggle }) => {
             </div>
 
             {/* 본문: 사진 먼저 나오고 텍스트 */}
-            <div className="review-body">
-              {/* 사진이 있을 때만 표시 */}
-              {review.revImg && <img src={review.revImg} alt="리뷰 사진" className="review-attached-img" />}
+            <div className="review-body d-flex justify-content-between" style={{ minHeight: '80px' }}>
+              {/* 텍스트*/}
+              <div className="review-text-wrapper" style={{ flex: 1, paddingRight: '15px' }}>
+                <p className="review-text-content" style={{ margin: 0, wordBreak: 'break-all' }}>
+                  {review.content}
+                </p>
+              </div>
 
-              <p className="review-text-content">{review.content}</p>
+              {/* 이미지 (오른쪽에 고정 크기로 배치) */}
+              {(review.revImg || (review.images && review.images.length > 0)) && (
+                <div className="review-image-wrapper" style={{ width: '80px', height: '80px', flexShrink: 0 }}>
+                  <img
+                    src={`${process.env.PUBLIC_URL}${review.revImg || review.images[0]}`}
+                    alt="리뷰 썸네일"
+                    className="review-attached-img"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                      border: '1px solid #eee',
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* 태그*/}
             <div className="review-footer">
-              {/* 태그 리스트 */}
-              {review.feedback && review.feedback.length > 0 && (
-                <div className="tag-list">
-                  {review.feedback.map((tag, idx) => (
-                    <span key={idx} className="tag-badge">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <ReviewTagList feedback={review.feedback} />
 
               {/* 좋아요 */}
               <div className="like-button-area">

@@ -112,9 +112,11 @@ function ProductInfo({ product, reviewSummary, onMoveToReview }) {
       {/* 제조사, 상품명 */}
       <p className="product-company">{product.prdCompany}</p>
       <h1 className="product-name">{product.prdName}</h1>
-      <p className="text-muted" style={{ fontSize: '14px', margin: '4px 0 8px 0' }}>
-        {product.prdDesc || '상품 설명 참조'}
-      </p>
+      {product.prdDesc && (
+        <p className="text-muted" style={{ fontSize: '14px', margin: '4px 0 8px 0' }}>
+          {product.prdDesc}
+        </p>
+      )}
 
       {/* 가격 */}
       <div className="product-price">

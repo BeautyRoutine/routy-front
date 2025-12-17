@@ -75,6 +75,17 @@ const ProductDetailPage = () => {
     }
   };
 
+  //정렬시 갱신
+  const handleReviewUpdate = newReviewData => {
+    setProductData(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        reviewInfo: newReviewData, // 받아온 새 리뷰 데이터로 교체
+      };
+    });
+  };
+
   // 연결작업
   useEffect(() => {
     const fetchData = async () => {
@@ -208,6 +219,8 @@ const ProductDetailPage = () => {
               reviewInfo={reviewInfo}
               ingredientInfo={ingredientInfo}
               onLikeToggle={handleLikeToggle}
+              userInfo={currentUser}
+              onReviewUpdate={handleReviewUpdate}
             />
           </div>
         </Col>

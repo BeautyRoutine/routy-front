@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'react-bootstrap';
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewSummary.css';
+import { formatUserInfo } from '../../common/reviewUtils';
+import ReviewTagList from 'components/user/review/ReviewTagList';
 
 const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
   // 베스트 리뷰 선정 기준
@@ -145,6 +147,10 @@ const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
                     <div className="reviewer-info">
                       <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#ddd' }}></div>
                       <span className="reviewer-name ms-2">{review.userName}</span>
+                      <span className="text-muted" style={{ fontSize: '11px' }}>
+                        {formatUserInfo(review.userSkin, review.userColor)}
+                      </span>
+
                       <span className="review-date">{review.revDate}</span>
                     </div>
 
@@ -180,13 +186,8 @@ const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
                     </div>
                     {/* 하단: 태그*/}
                     <div>
-                      <div className="review-tags mb-2" style={{ height: '24px', overflow: 'hidden' }}>
-                        {review.feedback &&
-                          review.feedback.map((tag, idx) => (
-                            <span key={idx} className="review-tag">
-                              #{tag}
-                            </span>
-                          ))}
+                      <div className="review-tags mt-2">
+                        <ReviewTagList feedback={review.feedback} />
                       </div>
                       {/* 하단: 좋아요*/}
                       <div className="like-btn-area">

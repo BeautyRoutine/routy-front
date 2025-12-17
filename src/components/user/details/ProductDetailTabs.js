@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Tabs, Tab, Button, Accordion } from 'react-bootstrap';
 import './ProductDetailTabs.css';
 import ReviewList from './ReviewList';
-
+import ReviewWriteModal from 'components/user/review/ReviewWriteModal';
+import api from 'lib/apiClient';
 // 데이터 념겨받기
 function ProductDetailTabs({
   productInfo,
@@ -12,11 +13,50 @@ function ProductDetailTabs({
   activeTab,
   onTabSelect,
   onLikeToggle,
+  onReviewUpdate,
+  userInfo,
 }) {
   // 기본값은 상품설명창, 현재 탭 기억용 state->상위페이지에서 관리
   //const [key, setKey] = useState('desc');
   //이미지 더보기
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const [showWriteModal, setShowWriteModal] = useState(false); //리뷰 모달 상태 관리
+
+  //리뷰 새로고침
+  const handleReviewSubmitted = () => {
+    window.location.reload();
+  };
+
+  //리뷰 핸들러
+  const handleWriteClick = () => {
+    if (!userInfo) {
+      alert('로그인이 필요한 서비스입니다.');
+      return;
+    }
+    setShowWriteModal(true);
+  };
+
+  //리뷰 정렬
+  const handleReviewFilterChange = async (page, sort) => {
+    try {
+      const userNoParam = userInfo ? `&userNo=${userInfo.userNo}` : '';
+
+      // sort 값이 이미 'new', 'recommended', 'rating', 'like' 중 하나이므로 그대로 전송
+      const response = await api.get(
+        `/api/products/${productInfo.prdNo}/reviews?page=${page}&limit=10&sort=${sort}${userNoParam}`,
+      );
+
+      if (response.data && response.data.resultMsg === 'SUCCESS') {
+        // 부모 컴포넌트(ProductDetail)의 상태 업데이트 함수 호출
+        if (onReviewUpdate) {
+          onReviewUpdate(response.data.data);
+        }
+      }
+    } catch (error) {
+      console.error('리뷰 정렬/페이징 실패', error);
+    }
+  };
 
   return (
     <div className="detail-tabs-container">
@@ -154,9 +194,11 @@ function ProductDetailTabs({
           <div className="tab-content-area">
             <div className="d-flex justify-content-end mb-3">
               {/* (임시) 버튼 UI */}
-              <Button variant="primary">리뷰 작성하기</Button>
+              <Button variant="dark" onClick={handleWriteClick}>
+                리뷰 작성하기
+              </Button>
             </div>
-            <ReviewList reviewInfo={reviewInfo} onLikeToggle={onLikeToggle} />
+            <ReviewList reviewInfo={reviewInfo} onLikeToggle={onLikeToggle} onFilterChange={handleReviewFilterChange} />
           </div>
         </Tab>
 
@@ -171,6 +213,16 @@ function ProductDetailTabs({
           </div>
         </Tab>
       </Tabs>
+
+      {/*리뷰 작성 모달 */}
+      <ReviewWriteModal
+        show={showWriteModal}
+        onHide={() => setShowWriteModal(false)}
+        prdNo={productInfo.prdNo}
+        odNo={0} // 상세페이지이므로 0 (구매인증 X)
+        userInfo={userInfo}
+        onReviewSubmitted={handleReviewSubmitted}
+      />
     </div>
   );
 }
