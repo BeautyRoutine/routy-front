@@ -32,7 +32,12 @@ export function CartItem({ item, isSelected, onToggle, onQuantityChange, onDelet
           <input type="checkbox" className="cart-item-checkbox" checked={isSelected} onChange={onToggle} />
 
           {/* 상품 이미지 */}
-          <img src={item.imageUrl} alt={item.name} className="cart-item-image" loading="lazy" />
+          <img
+            src={`${process.env.PUBLIC_URL}/images/product/${item.imageUrl}`}
+            alt={item.name}
+            className="cart-item-image"
+            loading="lazy"
+          />
 
           <div className="cart-item-details">
             {/* 상품 정보 헤더 */}

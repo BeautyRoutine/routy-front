@@ -79,6 +79,36 @@ const OrderHistory = ({ orderList }) => {
       dispatch(fetchMyPageData(userId));
     }
   };
+
+  // 결제 취소 (바로 실행)
+  const handleCancelPayment = async order => {
+    if (!window.confirm('결제를 취소하시겠습니까?\n취소 후에는 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/payments/cancel`,
+        {
+          odNo: order.orderNo,
+          cancelReason: '상품 단순 변심',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        },
+      );
+
+      alert('결제가 취소되었습니다.');
+      dispatch(fetchMyPageData(userId));
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data || '결제 취소 중 오류가 발생했습니다.');
+    }
+  };
+
   // ==============================================
   // 날짜 상태
   const [startDate, setStartDate] = useState('');
@@ -205,21 +235,33 @@ const OrderHistory = ({ orderList }) => {
                       <p>{order.productName}</p>
                     </div>
                     <div className="action-button-group p-1">
-                      {order.orderStatus >= 5 && order.reviewCnt === 0 && (
+                      {order.orderStatus >= 5 && order.reviewCnt === 0 && order.orderStatus !== 6 && (
                         <button className="action-button confirm">리뷰쓰기</button>
                       )}
 
-                      {order.orderStatus >= 5 && order.returnCnt === 0 && order.swapCnt === 0 && (
-                        <button className="action-button return" onClick={() => openModal(order, 'return')}>
-                          반품요청
+                      {order.orderStatus >= 2 && order.orderStatus < 5 && order.orderStatus !== 6 && (
+                        <button className="action-button cancel" onClick={() => handleCancelPayment(order)}>
+                          결제취소
                         </button>
                       )}
 
-                      {order.orderStatus >= 5 && order.returnCnt === 0 && order.swapCnt === 0 && (
-                        <button className="action-button exchange" onClick={() => openModal(order, 'exchange')}>
-                          교환요청
-                        </button>
-                      )}
+                      {order.orderStatus >= 5 &&
+                        order.returnCnt === 0 &&
+                        order.swapCnt === 0 &&
+                        order.orderStatus !== 6 && (
+                          <button className="action-button return" onClick={() => openModal(order, 'return')}>
+                            반품요청
+                          </button>
+                        )}
+
+                      {order.orderStatus >= 5 &&
+                        order.returnCnt === 0 &&
+                        order.swapCnt === 0 &&
+                        order.orderStatus !== 6 && (
+                          <button className="action-button exchange" onClick={() => openModal(order, 'exchange')}>
+                            교환요청
+                          </button>
+                        )}
                     </div>
                   </td>
                   <td style={{ borderLeft: '1px solid #C6C7C8' }}>{order.prodcutStock}</td>

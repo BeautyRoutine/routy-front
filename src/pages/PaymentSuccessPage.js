@@ -73,8 +73,8 @@ function PaymentSuccessPage() {
       {result.type === 'SUCCESS' ? (
         <>
           <div style={{ fontSize: '50px' }}>🎉</div>
-          <h1 style={{ color: 'blue' }}>인증 성공!</h1>
-          <p>{result.message}</p>
+          <h1 style={{ color: 'blue' }}>결제 완료!</h1>
+          <p>주문이 정상적으로 완료되었습니다.</p>
           <div
             style={{
               background: '#f8f9fa',
@@ -84,12 +84,40 @@ function PaymentSuccessPage() {
               marginTop: '20px',
             }}
           >
-            <p>주문번호: {orderId}</p>
             <p>결제금액: {Number(amount).toLocaleString()}원</p>
           </div>
           <br />
           <br />
-          <button onClick={() => navigate('/')}>홈으로</button>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <button
+              onClick={() => navigate('/mypage')}
+              style={{
+                padding: '12px 30px',
+                fontSize: '16px',
+                backgroundColor: '#0d6efd',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              마이 페이지
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                padding: '12px 30px',
+                fontSize: '16px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              홈으로
+            </button>
+          </div>
         </>
       ) : (
         <>

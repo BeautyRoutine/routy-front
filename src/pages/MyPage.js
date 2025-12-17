@@ -300,7 +300,7 @@ const MyPage = () => {
                         }}
                       >
                         <img
-                          src={item.image}
+                          src={`${process.env.PUBLIC_URL}/images/product/${item.image}`}
                           alt={item.name}
                           style={{
                             width: '100%',
