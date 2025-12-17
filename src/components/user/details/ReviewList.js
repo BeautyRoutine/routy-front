@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pagination } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
+import { Pagination, Form } from 'react-bootstrap'; // 부트스트랩 페이지네이션 사용
 import ReviewDetailModal from './ReviewDetailModal';
 import './ReviewList.css';
 import { formatUserInfo } from '../../common/reviewUtils';
@@ -8,6 +8,9 @@ import ReviewTagList from 'components/user/review/ReviewTagList';
 const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
   // 정렬 상태 (추천순, new: 최신순, rating: 평점순, like: 좋아요순)
   const [sortOption, setSortOption] = useState('recommended');
+  //필터링기능
+  const [skinFilter, setSkinFilter] = useState(''); // 빈값이면 전체
+  const [colorFilter, setColorFilter] = useState('');
 
   //  모달 상태 on off, 모달 담을 state
   const [showModal, setShowModal] = useState(false);
@@ -34,11 +37,19 @@ const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
   // 데이터가 없으면 아무것도 안 그림
   if (!reviewInfo || !reviewInfo.reviews) return null;
 
+  //필터 함수
+  const applyFilters = (page, sort, skin, color) => {
+    // 부모(ProductDetailTabs)에게 요청
+    if (onFilterChange) {
+      onFilterChange(page, sort, skin, color);
+    }
+  };
+
   //페이지 변경
   const handlePageChange = pageNumber => {
     setActivePage(pageNumber);
     if (onFilterChange) {
-      onFilterChange(pageNumber, sortOption);
+      onFilterChange(pageNumber, sortOption, skinFilter, colorFilter);
     }
   };
 
@@ -46,11 +57,25 @@ const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
   const handleSortClick = newSort => {
     setSortOption(newSort);
     setActivePage(1); // 정렬 바꾸면 1페이지로 초기화
+    applyFilters(1, newSort, skinFilter, colorFilter);
 
     // 부모에게 데이터 다시 달라고 요청
-    if (onFilterChange) {
-      onFilterChange(1, newSort);
-    }
+    applyFilters(1, newSort, skinFilter, colorFilter);
+  };
+
+  //피부 컬러 타입 변경 핸들러
+  const handleSkinChange = e => {
+    const val = e.target.value;
+    setSkinFilter(val);
+    setActivePage(1); // 필터 바꾸면 1페이지로
+    applyFilters(1, sortOption, val, colorFilter);
+  };
+
+  const handleColorChange = e => {
+    const val = e.target.value;
+    setColorFilter(val);
+    setActivePage(1);
+    applyFilters(1, sortOption, skinFilter, val);
   };
 
   //페이지수
@@ -121,7 +146,25 @@ const ReviewList = ({ reviewInfo, onLikeToggle, onFilterChange }) => {
           })}
         </div>
       </div>
+      {/*필터링 기능 */}
+      <div className="d-flex gap-2 mb-3 justify-content-end">
+        <Form.Select size="sm" style={{ width: '120px' }} value={skinFilter} onChange={handleSkinChange}>
+          <option value="">모든 피부</option>
+          <option value="1">건성</option>
+          <option value="2">중성</option>
+          <option value="3">지성</option>
+          <option value="4">복합성</option>
+          <option value="5">수부지</option>
+        </Form.Select>
 
+        <Form.Select size="sm" style={{ width: '120px' }} value={colorFilter} onChange={handleColorChange}>
+          <option value="">모든 톤</option>
+          <option value="1">봄웜톤</option>
+          <option value="2">여름쿨톤</option>
+          <option value="3">가을웜톤</option>
+          <option value="4">겨울쿨톤</option>
+        </Form.Select>
+      </div>
       {/* 정렬 옵션 */}
       <div className="sort-tab-area">
         <span

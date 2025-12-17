@@ -38,14 +38,17 @@ function ProductDetailTabs({
   };
 
   //리뷰 정렬
-  const handleReviewFilterChange = async (page, sort) => {
+  const handleReviewFilterChange = async (page, sort, skin, color) => {
     try {
       const userNoParam = userInfo ? `&userNo=${userInfo.userNo}` : '';
 
       // sort 값이 이미 'new', 'recommended', 'rating', 'like' 중 하나이므로 그대로 전송
-      const response = await api.get(
-        `/api/products/${productInfo.prdNo}/reviews?page=${page}&limit=10&sort=${sort}${userNoParam}`,
-      );
+      //쿼리 분리
+      let query = `/api/products/${productInfo.prdNo}/reviews?page=${page}&limit=10&sort=${sort}${userNoParam}`;
+      if (skin) query += `&userSkin=${skin}`;
+      if (color) query += `&userColor=${color}`;
+
+      const response = await api.get(query);
 
       if (response.data && response.data.resultMsg === 'SUCCESS') {
         // 부모 컴포넌트(ProductDetail)의 상태 업데이트 함수 호출
