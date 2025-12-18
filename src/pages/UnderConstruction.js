@@ -47,11 +47,7 @@ const UnderConstruction = () => {
         <h1>해당 기능은 현재 준비 중입니다.</h1>
         <p className="sub-text">더 나은 서비스로 곧 찾아뵙겠습니다.</p>
 
-        <h2>
-          {count > 0
-            ? `${count}초 후 홈으로 이동합니다`
-            : '이동 중...'}
-        </h2>
+        <h2>{count > 0 ? `${count}초 후 홈으로 이동합니다` : '이동 중...'}</h2>
 
         <h1 className="en-title">Under Construction</h1>
         <p className="en-text">This page is currently under construction.</p>

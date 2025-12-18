@@ -1,5 +1,5 @@
 .under-overlay {
-  position: fixed;        /* 화면 전체 덮기 */
+  position: fixed; /* 화면 전체 덮기 */
   top: 0;
   left: 0;
   width: 100vw;
