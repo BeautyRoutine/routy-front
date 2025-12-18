@@ -140,6 +140,7 @@ export function Header({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState(FALLBACK_RECENT_SEARCHES);
+  // eslint-disable-next-line no-unused-vars
   const [similarSkinSearches, setSimilarSkinSearches] = useState(FALLBACK_SIMILAR_SKIN);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [searchSavingEnabled, setSearchSavingEnabled] = useState(true);
@@ -704,7 +705,7 @@ export function Header({
   };
 
   const hasRecentSearches = recentSearches.length > 0;
-  const hasSimilarSearches = similarSkinSearches.length > 0;
+  // const hasSimilarSearches = similarSkinSearches.length > 0; // 미사용 변수 제거
   const hasSuggestions = searchQuery.trim().length > 0 && searchSuggestions.length > 0;
 
   const notificationTypeMeta = type => {
