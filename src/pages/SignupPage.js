@@ -149,7 +149,7 @@ const SignupPage = () => {
         userRoadAddr: formData.userRoadAddr,
         userDetailAddr: formData.userDetailAddr,
         userBirth: formData.userBirth || null,
-        phoneVerified: isPhoneVerified,
+        phoneVerified: true, // DEMO: SMS 인증 임시 비활성화
       };
 
       const response = await api.post('/api/auth/signup', signupData);
