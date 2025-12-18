@@ -20,9 +20,11 @@ const ProductEdit = () => {
     prdDesc: '',
     prdStock: '',
     prdStatus: '',
+    prdIngredients: '',
   });
 
   const [previewImg, setPreviewImg] = useState('');
+  const [showIngredients, setShowIngredients] = useState(false);
 
   // 기존 상품 정보 로딩
   useEffect(() => {
@@ -53,19 +55,44 @@ const ProductEdit = () => {
     reader.readAsDataURL(file);
   };
 
+  // 체크박스 토글 핸들러
+  const handleIngredientsToggle = e => {
+    const checked = e.target.checked;
+    setShowIngredients(checked);
+
+    // 체크 해제 시 입력값 초기화
+    if (!checked) {
+      setProduct({ ...product, prdIngredients: '' });
+    }
+  };
+
   // 수정 요청
   const handleSave = async () => {
     try {
       // 이미지 파일 포함하면 multipart/form-data
       const formData = new FormData();
       Object.keys(product).forEach(key => {
+        // prdIngredients는 체크박스가 체크되어 있을 때만 전송
+        if (key === 'prdIngredients') {
+          if (showIngredients) {
+            formData.append(key, product[key]);
+          }
+          return;
+        }
+
         if (key !== 'prdRegdate' && key !== 'prdUpdate') {
           formData.append(key, product[key]);
         }
       });
+      console.log(`${apiBaseUrl}/products/${prdNo}`);
+      console.log('=== FormData 내용 ===');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      // return;
 
       await axios.put(`${apiBaseUrl}/products/${prdNo}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       alert('상품이 성공적으로 수정되었습니다!');
@@ -215,6 +242,40 @@ const ProductEdit = () => {
                     value={product.prdDesc}
                     onChange={handleChange}
                   ></textarea>
+                </td>
+              </tr>
+
+              {/* 주요 성분 체크박스 */}
+              <tr>
+                <th className="bg-light">
+                  <div className="form-check">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="showIngredientsCheck"
+                      checked={showIngredients}
+                      onChange={handleIngredientsToggle}
+                    />
+                    <label className="form-check-label" htmlFor="showIngredientsCheck">
+                      주요 성분
+                    </label>
+                  </div>
+                </th>
+                <td colSpan="3">
+                  {showIngredients ? (
+                    <textarea
+                      name="prdIngredients"
+                      className="form-control"
+                      rows="3"
+                      value={product.prdIngredients}
+                      onChange={handleChange}
+                      placeholder=";를 기준으로 성분을 파싱합니다."
+                    />
+                  ) : (
+                    <div className="text-muted" style={{ padding: '10px', fontStyle: 'italic' }}>
+                      주요 성분을 매핑하려면 체크박스를 선택하세요
+                    </div>
+                  )}
                 </td>
               </tr>
             </tbody>
