@@ -500,12 +500,6 @@ const SignupPage = () => {
   )}
 */}
 
-<<<<<<< HEAD
-          {/* SMS 인증 */}
-          {formData.userHp && <SmsVerification phoneNumber={formData.userHp} onVerified={setIsPhoneVerified} />}
-=======
->>>>>>> a38ec90 (chore(front): temporarily disable SMS verification on signup (demo only))
-
           {/* 생년월일 (선택) */}
           <div style={{ marginBottom: '20px' }}>
             <label
