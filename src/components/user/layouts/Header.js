@@ -800,7 +800,7 @@ export function Header({
                     </>
                   )}
 
-                  {hasSimilarSearches && (
+                  {/* {hasSimilarSearches && (
                     <>
                       <div className="search-panel__divider" />
                       <div className="search-panel__section search-panel__section--similar">
@@ -829,7 +829,7 @@ export function Header({
                         </ol>
                       </div>
                     </>
-                  )}
+                  )} */}
                 </div>
               )}
             </div>
