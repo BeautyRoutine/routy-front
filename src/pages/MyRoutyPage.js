@@ -413,14 +413,6 @@ const MyRoutyPage = () => {
     return reactionMap[reactionValue] || reactionValue;
   };
 
-  const formatNotificationDate = dateString => {
-    if (!dateString) return '';
-    if (dateString.includes('후')) return dateString;
-    const m = moment(dateString);
-    if (!m.isValid()) return dateString;
-    return m.format('M월 D일') + '에 재사용 알림';
-  };
-
   return (
     <div className="my-routy-container">
       {/* Unified Dashboard Card (Calendar + Record) */}
@@ -548,12 +540,7 @@ const MyRoutyPage = () => {
                             <span className="memo-label">메모:</span> {p.memo}
                           </div>
                         )}
-                        {p.alertDate && (
-                          <div className="record-alarm-badge">
-                            <Bell size={12} />
-                            <span>{formatNotificationDate(p.alertDate)}</span>
-                          </div>
-                        )}
+                        {/* 알림 표시는 제거 */}
                       </div>
                     ))}
                   </div>
@@ -573,15 +560,6 @@ const MyRoutyPage = () => {
                     <div className="summary-title">오늘의 총평</div>
                     <div className="summary-content">{routine.summary || routine.dailyReview}</div>
                   </div>
-                  {/* 알림 설정 */}
-                  {routine.products?.some(p => p.alertDate) && (
-                    <div className="record-alarm-section">
-                      <div className="alarm-title">재사용 알림</div>
-                      <div className="alarm-content">
-                        <span>제품별 재사용 알림이 설정되어 있습니다.</span>
-                      </div>
-                    </div>
-                  )}
                 </>
               );
             })()}

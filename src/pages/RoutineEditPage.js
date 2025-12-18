@@ -3,7 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import 'moment/locale/ko';
-import { X, ChevronLeft, ChevronRight, ClipboardCheck, Check, Clock, Plus, Save } from 'lucide-react';
+import { ChevronLeft, ClipboardCheck, Check, Plus, Save } from 'lucide-react';
 import api from 'app/api';
 import './MyRoutyPage.css';
 
@@ -62,96 +62,6 @@ const getCategoryName = mainCategory => {
   return categoryMap[mainCategory] || '기타';
 };
 
-// Simple Calendar Modal Component
-const CalendarModal = ({ isOpen, onClose, onSelectDate, selectedDate }) => {
-  const [currentDate, setCurrentDate] = useState(moment());
-
-  useEffect(() => {
-    if (isOpen && selectedDate) {
-      setCurrentDate(moment(selectedDate));
-    } else if (isOpen) {
-      setCurrentDate(moment());
-    }
-  }, [isOpen, selectedDate]);
-
-  if (!isOpen) return null;
-
-  const startOfMonth = currentDate.clone().startOf('month');
-  const startDate = startOfMonth.clone().startOf('week');
-  const endDate = startDate.clone().add(41, 'days');
-
-  const calendarDays = [];
-  let day = startDate.clone();
-  while (day.isSameOrBefore(endDate, 'day')) {
-    calendarDays.push(day.clone());
-    day.add(1, 'day');
-  }
-
-  const handlePrevMonth = () => setCurrentDate(currentDate.clone().subtract(1, 'month'));
-  const handleNextMonth = () => setCurrentDate(currentDate.clone().add(1, 'month'));
-
-  return (
-    <div className="calendar-modal-overlay" onClick={onClose}>
-      <div className="calendar-popup" onClick={e => e.stopPropagation()}>
-        <div className="calendar-popup-header">
-          <div className="calendar-popup-title">
-            <Clock size={20} color="#007bff" />
-            <span>알림 날짜 설정</span>
-            <span className="calendar-popup-subtitle">재사용알림 받기</span>
-          </div>
-          <button className="calendar-popup-close" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="calendar-nav">
-          <button onClick={handlePrevMonth}>
-            <ChevronLeft size={24} />
-          </button>
-          <span className="calendar-title">{currentDate.format('YYYY년 M월')}</span>
-          <button onClick={handleNextMonth}>
-            <ChevronRight size={24} />
-          </button>
-        </div>
-
-        <div className="calendar-grid">
-          {['일', '월', '화', '수', '목', '금', '토'].map((dayName, index) => (
-            <div
-              key={dayName}
-              className={`calendar-day-name ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}`}
-            >
-              {dayName}
-            </div>
-          ))}
-          {calendarDays.map((date, index) => {
-            const isSelected = selectedDate && date.isSame(selectedDate, 'day');
-            const isToday = date.isSame(moment(), 'day');
-            const isCurrentMonth = date.isSame(currentDate, 'month');
-
-            return (
-              <div
-                key={index}
-                className={`calendar-day 
-                  ${!isCurrentMonth ? 'other-month' : ''}
-                  ${isSelected ? 'selected' : ''}
-                  ${isToday ? 'today' : ''}
-                  ${date.day() === 0 ? 'sunday' : date.day() === 6 ? 'saturday' : ''}
-                `}
-                onClick={() => {
-                  onSelectDate(date.format('YYYY-MM-DD'));
-                  onClose();
-                }}
-              >
-                {date.format('D')}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const RoutineEditPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -172,10 +82,6 @@ const RoutineEditPage = () => {
   const [dailyMemo, setDailyMemo] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  // Calendar Modal State
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [currentAlarmProduct, setCurrentAlarmProduct] = useState(null);
 
   // 내 제품 목록 조회
   useEffect(() => {
@@ -233,7 +139,6 @@ const RoutineEditPage = () => {
             reactions[p.prdNo] = {
               reactions: getReactionsFromAPI(p.reaction),
               memo: p.memo || '',
-              notificationTime: p.alertDate || '',
             };
           });
           setProductReactions(reactions);
@@ -293,7 +198,7 @@ const RoutineEditPage = () => {
 
   const updateReaction = (productId, reactionType) => {
     setProductReactions(prev => {
-      const current = prev[productId] || { reactions: [], memo: '', notificationTime: '' };
+      const current = prev[productId] || { reactions: [], memo: '' };
       const hasReaction = current.reactions.includes(reactionType);
       const newReactionsList = hasReaction
         ? current.reactions.filter(r => r !== reactionType)
@@ -310,34 +215,6 @@ const RoutineEditPage = () => {
     setProductReactions(prev => ({
       ...prev,
       [productId]: { ...(prev[productId] || { reactions: [] }), memo: text },
-    }));
-  };
-
-  const openCalendar = productId => {
-    setCurrentAlarmProduct(productId);
-    setIsCalendarOpen(true);
-  };
-
-  const handleDateSelect = dateString => {
-    if (currentAlarmProduct) {
-      setProductReactions(prev => ({
-        ...prev,
-        [currentAlarmProduct]: {
-          ...(prev[currentAlarmProduct] || { reactions: [] }),
-          notificationTime: dateString,
-        },
-      }));
-    }
-  };
-
-  const clearNotification = (e, productId) => {
-    e.stopPropagation();
-    setProductReactions(prev => ({
-      ...prev,
-      [productId]: {
-        ...(prev[productId] || { reactions: [] }),
-        notificationTime: '',
-      },
     }));
   };
 
@@ -380,14 +257,14 @@ const RoutineEditPage = () => {
       // API 명세에 맞는 형식으로 변환 (DB에 영어 대문자로 전송)
       const payload = {
         products: selectedProductIds.map(prdNo => {
-          const reactionData = productReactions[prdNo] || { reactions: [], memo: '', notificationTime: '' };
+          const reactionData = productReactions[prdNo] || { reactions: [], memo: '' };
           // getReactionForAPI는 항상 영어 대문자 값 반환 (NORMAL, OILY, DRY, REDNESS, STINGING, TROUBLE)
           const dbReaction = getReactionForAPI(reactionData.reactions);
           return {
             prdNo: prdNo,
             reaction: dbReaction, // DB에 영어 대문자로 통일된 값 전송
             memo: reactionData.memo || '',
-            alertDate: reactionData.notificationTime || null,
+            alertDate: null,
           };
         }),
         extraActivities: activities,
@@ -424,15 +301,6 @@ const RoutineEditPage = () => {
 
   const handleBack = () => {
     navigate('/myrouty');
-  };
-
-  const formatNotificationDate = dateString => {
-    if (!dateString) return '';
-    if (dateString.includes('후')) return dateString;
-
-    const m = moment(dateString);
-    if (!m.isValid()) return dateString;
-    return m.format('M월 D일');
   };
 
   return (
@@ -516,28 +384,12 @@ const RoutineEditPage = () => {
               <div className="reaction-list">
                 {selectedProductIds.map(id => {
                   const product = myProducts.find(p => (p.prdNo || p.id) === id);
-                  const reactionData = productReactions[id] || { reactions: [], memo: '', notificationTime: '' };
+                  const reactionData = productReactions[id] || { reactions: [], memo: '' };
 
                   return (
                     <div key={id} className="reaction-card">
                       <div className="reaction-card-header">
                         <span className="reaction-product-name">{product?.prdName || product?.name}</span>
-                        <div className="alarm-wrapper">
-                          <button
-                            className={`alarm-btn ${reactionData.notificationTime ? 'active' : ''}`}
-                            onClick={() => openCalendar(id)}
-                          >
-                            <Clock size={14} />
-                            {reactionData.notificationTime
-                              ? `${formatNotificationDate(reactionData.notificationTime)} 알림`
-                              : '알림 설정'}
-                            {reactionData.notificationTime && (
-                              <div className="alarm-clear-btn" onClick={e => clearNotification(e, id)}>
-                                <X size={12} />
-                              </div>
-                            )}
-                          </button>
-                        </div>
                       </div>
 
                       <div className="reaction-tags">
@@ -613,17 +465,6 @@ const RoutineEditPage = () => {
           </div>
         </div>
       </div>
-
-      <CalendarModal
-        isOpen={isCalendarOpen}
-        onClose={() => setIsCalendarOpen(false)}
-        onSelectDate={handleDateSelect}
-        selectedDate={
-          currentAlarmProduct && productReactions[currentAlarmProduct]?.notificationTime
-            ? productReactions[currentAlarmProduct].notificationTime
-            : null
-        }
-      />
     </div>
   );
 };

@@ -19,17 +19,17 @@ const MemberWithdrawal = ({ onCancel }) => {
       return;
     }
 
-    // userNo 결정 로직: profile.userNo가 유효하지 않으면 currentUser.userNo 사용
-    let targetUserNo = profile?.userNo;
+    // userId 결정 로직: profile.userId가 유효하지 않으면 currentUser.userId 사용
+    let targetUserId = profile?.userId;
 
     // "me" 문자열이거나 숫자가 아닌 경우 처리
-    if (!targetUserNo || isNaN(Number(targetUserNo))) {
-      if (currentUser?.userNo && !isNaN(Number(currentUser.userNo))) {
-        targetUserNo = currentUser.userNo;
+    if (!targetUserId || isNaN(Number(targetUserId))) {
+      if (currentUser?.userId && !isNaN(Number(currentUser.userId))) {
+        targetUserId = currentUser.userId;
       }
     }
 
-    if (!targetUserNo) {
+    if (!targetUserId) {
       alert('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
       return;
     }
@@ -37,7 +37,7 @@ const MemberWithdrawal = ({ onCancel }) => {
     if (window.confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       try {
         // API 스펙 변경: 비밀번호 검증을 위해 password 함께 전송
-        await dispatch(withdrawUser({ userNo: targetUserNo, password })).unwrap();
+        await dispatch(withdrawUser({ userId: targetUserId, password })).unwrap();
         alert('회원 탈퇴가 완료되었습니다.');
         navigate('/'); // 홈으로 이동
       } catch (error) {
