@@ -12,28 +12,53 @@ const ProductListPage = () => {
   const { currentUser } = useSelector(state => state.user);
 
   const [products, setProducts] = useState([]);
-
   const [searchParams] = useSearchParams();
 
-  // 필터 값
-  const min_price = searchParams.get('min_price') || null;
-  const max_price = searchParams.get('max_price') || null;
-  const brand = searchParams.get('brand') || null;
-  const skin = searchParams.get('skin') || null;
-  const maincate = searchParams.get('maincate') || null;
-  const subcate = searchParams.get('subcate') || null;
-  const limit = searchParams.get('limit') || 20;
-  const searchKeyword = searchParams.get('search') || null;
+  /* ===============================
+     query param 정규화 (핵심)
+  =============================== */
+  const from = searchParams.get('from') || '';
 
+  const rawSkin = searchParams.get('skin');
+  const skin =
+    rawSkin === null || rawSkin === '' || rawSkin === 'undefined'
+      ? null
+      : Number(rawSkin);
+
+  const maincate = searchParams.get('maincate') || '';
+  const subcate = searchParams.get('subcate') || '';
+  const min_price = searchParams.get('min_price') || '';
+  const max_price = searchParams.get('max_price') || '';
+  const brand = searchParams.get('brand') || '';
+  const limit = Number(searchParams.get('limit')) || 20;
+  const searchKeyword = searchParams.get('search') || '';
+
+  /* ===============================
+     상품 목록 로드
+  =============================== */
   useEffect(() => {
     const loadProducts = async () => {
       try {
         let res;
 
+        // 🔍 검색
         if (searchKeyword) {
           res = await api.get('/api/search', {
             params: { keyword: searchKeyword },
           });
+
+        // ⭐ 피부타입 추천 진입
+        } else if (from === 'skin') {
+          res = await api.get('/api/products/list/skin_cate', {
+            params: {
+              limit,
+              maincate,
+              subcate,
+              skin, // ← null or number (절대 'undefined' 아님)
+            },
+          });
+
+        // 📦 일반 전체 상품
         } else {
           res = await api.get('/api/products/list', {
             params: {
@@ -48,14 +73,15 @@ const ProductListPage = () => {
           });
         }
 
-        setProducts(res.data.data || []);
+        setProducts(res?.data?.data || []);
       } catch (err) {
-        console.error(err);
+        console.error('상품 목록 조회 실패:', err);
       }
     };
 
     loadProducts();
   }, [
+    from,
     limit,
     maincate,
     subcate,
@@ -66,7 +92,9 @@ const ProductListPage = () => {
     searchKeyword,
   ]);
 
-  // 좋아요 정보 로드
+  /* ===============================
+     좋아요 정보 로드
+  =============================== */
   useEffect(() => {
     if (currentUser?.userId) {
       dispatch(fetchMyPageData(currentUser.userId));
