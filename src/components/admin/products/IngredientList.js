@@ -145,7 +145,6 @@ const IngredientList = () => {
       {/* 페이징 */}
       <div className="d-flex justify-content-center align-items-center mt-3 flex-wrap">
         <div>
-          {/* 이전 */}
           <button
             className="btn btn-outline-secondary mx-3"
             disabled={page <= 1}
@@ -160,24 +159,55 @@ const IngredientList = () => {
             ← 이전
           </button>
 
-          {/* 페이지 번호 */}
-          {Array.from({ length: Math.ceil(rowTotal / pageGap) }, (_, i) => i + 1).map(p => (
-            <button
-              key={p}
-              className={`btn ${p === page ? 'btn-primary' : 'btn-outline-secondary'} mx-1`}
-              onClick={() =>
-                setSearchParams({
-                  page: p,
-                  ing_name: ingName,
-                  ing_allergen: ingAllergen,
-                })
-              }
-            >
-              {p}
-            </button>
-          ))}
+          {/* Condensed page buttons with ellipsis */}
+          {(() => {
+            const totalPages = Math.max(1, Math.ceil(rowTotal / pageGap));
+            const pages = [];
 
-          {/* 다음 */}
+            if (totalPages <= 11) {
+              for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+              const start = Math.max(2, page - 2);
+              const end = Math.min(totalPages - 1, page + 2);
+
+              pages.push(1);
+
+              if (start > 2) pages.push('left-ellipsis');
+
+              for (let i = start; i <= end; i++) pages.push(i);
+
+              if (end < totalPages - 1) pages.push('right-ellipsis');
+
+              pages.push(totalPages);
+            }
+
+            return pages.map((p, idx) => {
+              if (p === 'left-ellipsis' || p === 'right-ellipsis') {
+                return (
+                  <button key={p + idx} className="btn btn-outline-secondary mx-1" disabled>
+                    ...
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  key={p}
+                  className={`btn ${p === page ? 'btn-primary' : 'btn-outline-secondary'} mx-1`}
+                  onClick={() =>
+                    setSearchParams({
+                      page: p,
+                      ing_name: ingName,
+                      ing_allergen: ingAllergen,
+                    })
+                  }
+                >
+                  {p}
+                </button>
+              );
+            });
+          })()}
+
           <button
             className="btn btn-outline-secondary mx-3"
             disabled={page >= Math.ceil(rowTotal / pageGap)}
