@@ -70,7 +70,7 @@ const SimilarSkinProducts = ({ userSkin }) => {
       }
     };
 
-    if (!isLoggedIn || !userSkin) {
+    if (!isLoggedIn || userSkin == null) {
       loadFallback();
       return;
     }
@@ -81,6 +81,13 @@ const SimilarSkinProducts = ({ userSkin }) => {
   return (
     <div className="container my-5 text-center similar-skin-section">
       <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
+
+      {/* 안내 문구 */}
+      {!isLoggedIn && (
+        <p className="text-muted small mb-4">
+          로그인하면 피부 타입에 맞는 맞춤 추천을 받을 수 있어요!
+        </p>
+      )}
 
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
         {products.map(p => {
@@ -118,9 +125,38 @@ const SimilarSkinProducts = ({ userSkin }) => {
           );
         })}
       </div>
+
+      {/* 더보기 버튼 */}
+      {isLoggedIn && (
+        <div className="mt-3">
+          <button
+            className="btn btn-outline-primary rounded-pill px-4"
+            onClick={() => navigate('/recommend/more')}
+          >
+            더 많은 추천 상품 보기
+          </button>
+        </div>
+      )}
+
+      {/* 로그인 / 회원가입 CTA */}
+      {!isLoggedIn && (
+        <div className="mt-3">
+          <button
+            className="btn btn-primary rounded-pill px-4 me-2"
+            onClick={() => navigate('/login')}
+          >
+            로그인
+          </button>
+          <button
+            className="btn btn-outline-primary rounded-pill px-4"
+            onClick={() => navigate('/signup')}
+          >
+            회원가입
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 export default SimilarSkinProducts;
-
