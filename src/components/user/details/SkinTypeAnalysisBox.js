@@ -12,8 +12,9 @@ const SkinTypeAnalysisBox = ({ prdNo }) => {
   const apiBaseUrl = useSelector(state => state.userConfig.apiBaseUrl);
 
   // 유저 아이디/피부타입
+  const { profile: userProfile } = useSelector(state => state.user);
   const userId = useSelector(state => state.user.currentUser?.userId);
-  const userSkin = useSelector(state => state.user.currentUser?.userSkin);
+  const userSkin = userProfile.skinType;
 
   const [effects, setEffects] = useState({ good: [], bad: [] });
   const [loading, setLoading] = useState(false);

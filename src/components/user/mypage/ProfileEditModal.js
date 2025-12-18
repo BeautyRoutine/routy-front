@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'; // React hooks 복구
-import { useDispatch } from 'react-redux';
-import { checkNickname } from '../../../features/user/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { checkNickname, fetchMyPageData } from '../../../features/user/userSlice';
 import { X, Camera, Edit2, Check } from 'lucide-react';
 import './ProfileEditModal.css';
 
@@ -11,6 +11,7 @@ const SKIN_TYPES = ['지성', '건성', '민감성', '선택안함'];
 
 const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
   const dispatch = useDispatch(); // dispatch 훅 사용
+  const userId = useSelector(state => state.user.currentUser?.userId);
   const [formData, setFormData] = useState({
     name: '',
     nickname: '',
@@ -103,6 +104,8 @@ const ProfileEditModal = ({ isOpen, onClose, userProfile, onSave }) => {
   const handleSubmit = () => {
     onSave(formData);
     onClose();
+    // 유저 정보 갱신
+    dispatch(fetchMyPageData(userId));
   };
 
   return (
