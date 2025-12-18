@@ -1,4 +1,3 @@
-import UnderConstruction from 'pages/UnderConstruction';
 import './footer.css';
 
 function Footer() {
@@ -29,8 +28,6 @@ function Footer() {
         </div>
       </footer>
 
-      {/* 🔽 앵커 타겟: 실제 DOM에 존재해야 함 */}
-      <UnderConstruction />
     </>
   );
 }

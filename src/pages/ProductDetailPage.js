@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import api from 'lib/apiClient';
 import { saveRecentProduct, fetchMyPageData } from 'features/user/userSlice';
@@ -15,7 +15,7 @@ const ProductDetailPage = () => {
   const dispatch = useDispatch();
   const { currentUser } = useSelector(state => state.user);
 
-  const [productData, setProductData] = useState(null); //  데이터를 담을 state
+  const [productData, setProductData] = useState(undefined); //  데이터를 담을 state
   const [loading, setLoading] = useState(true); // 로딩 중인지 체크
 
   // 탭 이동용 ref
@@ -27,6 +27,8 @@ const ProductDetailPage = () => {
     setActiveTab('review'); // 탭을 리뷰로 변경
     tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const navigate = useNavigate();
 
   // 좋아요 핸들러
   const handleLikeToggle = async revNo => {
@@ -107,6 +109,12 @@ const ProductDetailPage = () => {
         const ingredientRes = await api.get(`/api/products/${prdNo}/analysis`, { params: analysisParams });
         const productObj = productRes.data.data;
 
+        // ❗ 상품이 DB에 없음
+        if (!productObj) {
+          navigate('/underconstruction?from=invalid-product', { replace: true });
+          return; // ❗ 여기서 반드시 종료
+        }
+
         // 최근 본 상품 저장 로직 추가
         if (currentUser?.userId && prdNo && productObj?.prdSubCate) {
           // UI 즉시 업데이트를 위한 상세 정보 구성
@@ -154,7 +162,7 @@ const ProductDetailPage = () => {
       //상품번호가 있을때만 서버요청
       fetchData();
     }
-  }, [prdNo, currentUser, dispatch]);
+  }, [prdNo, currentUser, dispatch, navigate]);
 
   // 좋아요 목록 로드
   useEffect(() => {
@@ -173,7 +181,19 @@ const ProductDetailPage = () => {
   }
 
   // 데이터가 없으면 에러
-  if (!productData) return <div className="text-center py-5">상품 정보를 찾을 수 없습니다.</div>;
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
+
+  // ❗ 없는 상품 → 아무것도 렌더하지 않음
+  if (productData === null) {
+    return null;
+  }
 
   // 데이터 꺼내기
   const { productInfo, reviewInfo, ingredientInfo, purchaseInfo } = productData;

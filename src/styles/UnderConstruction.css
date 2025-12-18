@@ -11,18 +11,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* 기본 상태: 안 보이게 */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
 }
 
-/* hash가 #underconstruction 일 때만 표시 */
-:target.under-overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
+/* ❌ :target 방식 전부 제거 */
 
 .under-content {
   text-align: center;
