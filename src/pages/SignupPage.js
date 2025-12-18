@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
 import api from '../lib/apiClient';
-import SmsVerification from '../components/user/auth/SmsVerification';
+//import SmsVerification from '../components/user/auth/SmsVerification';
 import { LoadingOverlay } from 'components/common/commonUtils';
 
 import PostcodeLayer from 'components/common/PostcodeLayer';
@@ -13,7 +13,7 @@ const SignupPage = () => {
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  //const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
   const [formData, setFormData] = useState({
     userId: '',
