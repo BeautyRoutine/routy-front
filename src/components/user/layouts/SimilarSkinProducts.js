@@ -51,26 +51,24 @@ const SimilarSkinProducts = ({ userSkin }) => {
 
   useEffect(() => {
     const loadFallback = async () => {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/products/list/fallback`,
-        { params: { limit: 4 } }
-      );
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/products/list/fallback`, {
+        params: { limit: 4 },
+      });
       setProducts(convertToCard(res.data.data || []));
     };
 
     const loadSkinRecommend = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/products/list/skin_type`,
-          { params: { limit: 4, skin: Number(userSkin) } }
-        );
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/products/list/skin_type`, {
+          params: { limit: 4, skin: Number(userSkin) },
+        });
         setProducts(convertToCard(res.data.data || []));
       } catch {
         loadFallback();
       }
     };
 
-    if (!isLoggedIn || !userSkin) {
+    if (!isLoggedIn || userSkin == null) {
       loadFallback();
       return;
     }
@@ -81,6 +79,9 @@ const SimilarSkinProducts = ({ userSkin }) => {
   return (
     <div className="container my-5 text-center similar-skin-section">
       <h5 className="fw-bold text-primary mb-2">내 피부 타입 맞춤 추천</h5>
+
+      {/* 안내 문구 */}
+      {!isLoggedIn && <p className="text-muted small mb-4">로그인하면 피부 타입에 맞는 맞춤 추천을 받을 수 있어요!</p>}
 
       <div className="row row-cols-1 row-cols-md-4 g-4 mb-4">
         {products.map(p => {
@@ -109,18 +110,40 @@ const SimilarSkinProducts = ({ userSkin }) => {
                   <h6 className="fw-bold mb-1">{p.name}</h6>
                   <p className="text-muted small mb-1">{p.brand}</p>
                   <p className="small mb-2">⭐ {p.rating.toFixed(1)}</p>
-                  <h6 className="fw-bold text-dark mb-3">
-                    {p.price.toLocaleString()}원
-                  </h6>
+                  <h6 className="fw-bold text-dark mb-3">{p.price.toLocaleString()}원</h6>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* 더보기 버튼 */}
+      {isLoggedIn && (
+        <div className="mt-3 d-flex justify-content-center">
+          <button
+            className="btn btn-primary rounded-pill px-4 auth-btn"
+            onClick={() => navigate(`/products?from=skin&skin=${userSkin}`)}
+          >
+            더 많은 추천 상품 보기
+          </button>
+        </div>
+      )}
+
+      {/* 로그인 / 회원가입 CTA */}
+      {!isLoggedIn && (
+        <div className="mt-3 d-flex justify-content-center gap-4">
+          <button className="btn btn-primary rounded-pill px-4 auth-btn" onClick={() => navigate('/login')}>
+            로그인
+          </button>
+
+          <button className="btn btn-outline-primary rounded-pill px-4 auth-btn" onClick={() => navigate('/signup')}>
+            회원가입
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 export default SimilarSkinProducts;
-

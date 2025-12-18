@@ -26,6 +26,7 @@ import AdminHome from 'pages/admin/AdminHome';
 import UserGlobalLayout from './components/user/layouts/UserGlobalLayout';
 import Footer from 'components/user/layouts/footer';
 import ScrollToTop from 'components/common/ScrollToTop';
+import UnderConstruction from 'pages/UnderConstruction';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -204,6 +205,7 @@ function App() {
 
           {/* 예외 처리 */}
           <Route path="*" element={<div>페이지를 찾을 수 없습니다.</div>} />
+          <Route path="/underconstruction" element={<UnderConstruction />} />
         </Routes>
       </main>
 

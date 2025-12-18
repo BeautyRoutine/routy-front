@@ -52,3 +52,9 @@
   font-size: 14px;
   border-width: 2px;
 }
+/* 로그인 / 회원가입 CTA 버튼 */
+.auth-btn {
+  min-width: 128px;        /* 버튼 가로 통일 */
+  padding: 10px 0;        /* 카드/섹션 스케일과 맞춤 */
+  font-size: 14px;        /* more-btn과 톤 통일 */
+}
