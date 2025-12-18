@@ -83,9 +83,9 @@ const MyReviewList = () => {
                 {/* API 응답에 이미지가 없으면 플레이스홀더 사용 */}
                 <img
                   src={
-                    review.imageUrl
-                      ? `${process.env.PUBLIC_URL}/images/review/${review.imageUrl}`
-                      : 'https://via.placeholder.com/80'
+                    review.revMainImg
+                      ? `${process.env.PUBLIC_URL}${review.revMainImg}`
+                      : `${process.env.PUBLIC_URL}/images/product/no-image.png`
                   }
                   alt={review.productName}
                   style={{ width: '100%', borderRadius: '4px', border: '1px solid #eee' }}
