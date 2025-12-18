@@ -1,7 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../features/user/userSlice';
 import api from '../lib/apiClient';
 //import SmsVerification from '../components/user/auth/SmsVerification';
 import { LoadingOverlay } from 'components/common/commonUtils';
@@ -10,8 +8,6 @@ import PostcodeLayer from 'components/common/PostcodeLayer';
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
   const [loading, setLoading] = useState(false);
   //const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
@@ -152,32 +148,10 @@ const SignupPage = () => {
         phoneVerified: true, // DEMO: SMS 인증 임시 비활성화
       };
 
-      const response = await api.post('/api/auth/signup', signupData);
+      await api.post('/api/auth/signup', signupData);
 
-      if (response.data.token) {
-        // localStorage에 저장
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userId', response.data.userId);
-        localStorage.setItem('userName', response.data.userName);
-        localStorage.setItem('userLevel', response.data.userLevel || '1');
-
-        // user 객체 생성
-        const user = {
-          userId: response.data.userId,
-          userName: response.data.userName,
-          userLevel: response.data.userLevel || 1,
-          userSkin: response.data.userSkin || 0,
-        };
-
-        // localStorage에 user 객체도 저장
-        localStorage.setItem('user', JSON.stringify(user));
-
-        // Redux 상태 업데이트
-        dispatch(setUser(user));
-
-        alert('회원가입이 완료되었습니다!');
-        navigate('/skin-profile');
-      }
+      alert('회원가입이 완료되었습니다! 로그인 후 이용해주세요.');
+      navigate('/login');
     } catch (error) {
       if (error.message) {
         alert(error.message);
