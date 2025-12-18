@@ -488,9 +488,23 @@ const SignupPage = () => {
               </p>
             )}
           </div>
+{/*
+  DEMO ONLY: 배포 환경 SMS 인증 이슈로 임시 비활성화 (로컬 정상, 이후 복구 예정)
 
+  sms 인증
+  {formData.userHp && (
+    <SmsVerification
+      phoneNumber={formData.userHp}
+      onVerified={setIsPhoneVerified}
+    />
+  )}
+*/}
+
+<<<<<<< HEAD
           {/* SMS 인증 */}
           {formData.userHp && <SmsVerification phoneNumber={formData.userHp} onVerified={setIsPhoneVerified} />}
+=======
+>>>>>>> a38ec90 (chore(front): temporarily disable SMS verification on signup (demo only))
 
           {/* 생년월일 (선택) */}
           <div style={{ marginBottom: '20px' }}>
@@ -625,35 +639,36 @@ const SignupPage = () => {
           {/* 가입하기 버튼 */}
           <button
             type="submit"
-            disabled={loading || !isPhoneVerified}
+            disabled={loading}
             style={{
               width: '100%',
               padding: '18px',
-              background: loading || !isPhoneVerified ? '#ccc' : 'linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%)',
+              background: loading ? '#ccc' : 'linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '50px',
               fontSize: '16px',
               fontWeight: '700',
-              cursor: loading || !isPhoneVerified ? 'not-allowed' : 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s',
               marginTop: '30px',
-              boxShadow: loading || !isPhoneVerified ? 'none' : '0 4px 15px rgba(66, 165, 245, 0.3)',
+              boxShadow: loading ? 'none' : '0 4px 15px rgba(66, 165, 245, 0.3)',
             }}
             onMouseEnter={e => {
-              if (!loading && isPhoneVerified) {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 6px 20px rgba(66, 165, 245, 0.4)';
-              }
-            }}
-            onMouseLeave={e => {
-              if (!loading && isPhoneVerified) {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 15px rgba(66, 165, 245, 0.3)';
-              }
-            }}
+  if (!loading) {
+    e.target.style.transform = 'translateY(-2px)';
+    e.target.style.boxShadow = '0 6px 20px rgba(66, 165, 245, 0.4)';
+  }
+}}
+onMouseLeave={e => {
+  if (!loading) {
+    e.target.style.transform = 'translateY(0)';
+    e.target.style.boxShadow = '0 4px 15px rgba(66, 165, 245, 0.3)';
+  }
+}}
+
           >
-            {loading ? '가입 중...' : !isPhoneVerified ? '휴대폰 인증을 완료해주세요' : '가입하기'}
+            {loading ? '가입 중...' : '가입하기'}
           </button>
         </form>
 
