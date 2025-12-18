@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../features/user/userSlice';
@@ -6,13 +6,15 @@ import api from '../lib/apiClient';
 import SmsVerification from '../components/user/auth/SmsVerification';
 import { LoadingOverlay } from 'components/common/commonUtils';
 
+import PostcodeLayer from 'components/common/PostcodeLayer';
+
 const SignupPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     userId: '',
     userPw: '',
@@ -44,18 +46,34 @@ const SignupPage = () => {
     }
   };
 
-  const handlePostcode = () => {
-    new window.daum.Postcode({
-      oncomplete: function (data) {
-        setFormData(prev => ({
-          ...prev,
-          userZip: data.zonecode,
-          userJibunAddr: data.jibunAddress || data.autoJibunAddress,
-          userRoadAddr: data.roadAddress,
-        }));
-      },
-    }).open();
-  };
+  const [showPostcode, setShowPostcode] = useState(false);
+  const handleSelect = useCallback(
+    data => {
+      setFormData(prev => ({
+        ...prev,
+        userZip: data.zonecode,
+        userJibunAddr: data.jibunAddress || data.autoJibunAddress,
+        userRoadAddr: data.roadAddress,
+      }));
+    },
+    [setFormData],
+  );
+  const handleClose = useCallback(() => {
+    setShowPostcode(false);
+  }, []);
+
+  // const handlePostcode = () => {
+  //   new window.daum.Postcode({
+  //     oncomplete: function (data) {
+  //       setFormData(prev => ({
+  //         ...prev,
+  //         userZip: data.zonecode,
+  //         userJibunAddr: data.jibunAddress || data.autoJibunAddress,
+  //         userRoadAddr: data.roadAddress,
+  //       }));
+  //     },
+  //   }).open();
+  // };
 
   const validateForm = () => {
     const newErrors = {};
@@ -187,6 +205,9 @@ const SignupPage = () => {
         padding: '40px 20px',
       }}
     >
+      {/* 주소 검색 레이어 */}
+      <PostcodeLayer visible={showPostcode} onClose={handleClose} onSelect={handleSelect} />
+
       <LoadingOverlay show={loading} />
 
       <div
@@ -469,12 +490,7 @@ const SignupPage = () => {
           </div>
 
           {/* SMS 인증 */}
-          {formData.userHp && (
-            <SmsVerification
-              phoneNumber={formData.userHp}
-              onVerified={setIsPhoneVerified}
-            />
-          )}
+          {formData.userHp && <SmsVerification phoneNumber={formData.userHp} onVerified={setIsPhoneVerified} />}
 
           {/* 생년월일 (선택) */}
           <div style={{ marginBottom: '20px' }}>
@@ -541,7 +557,7 @@ const SignupPage = () => {
               />
               <button
                 type="button"
-                onClick={handlePostcode}
+                onClick={() => setShowPostcode(true)}
                 style={{
                   padding: '16px 32px',
                   background: '#263238',
