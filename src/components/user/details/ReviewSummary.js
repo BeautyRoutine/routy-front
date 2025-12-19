@@ -162,16 +162,26 @@ const ReviewSummary = ({ reviewInfo, onLikeToggle }) => {
                           {'★'.repeat(review.revStar)}
                           {'☆'.repeat(5 - review.revStar)}
                         </div>
-                        <div className="review-content-compact" style={{ fontSize: '13px' }}>
-                          {review.revGood || review.revContent}
+                        <div
+                          className="review-content-compact"
+                          style={{
+                            fontSize: '13px',
+                            display: '-webkit-box',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {review.content}
                         </div>
                       </div>
 
                       {/* 오른쪽: 썸네일 */}
-                      {review.revImg && (
+                      {(review.revImg || (review.images && review.images.length > 0)) && (
                         <div style={{ width: '80px', height: '80px', flexShrink: 0 }}>
                           <img
-                            src={review.revImg}
+                            src={`${process.env.PUBLIC_URL}${review.revImg || review.images[0]}`}
                             alt="리뷰"
                             style={{
                               width: '100%',
